@@ -1,0 +1,6 @@
+@MBA.Auth.Api_HostAddress = http://localhost:5020
+
+GET {{MBA.Auth.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

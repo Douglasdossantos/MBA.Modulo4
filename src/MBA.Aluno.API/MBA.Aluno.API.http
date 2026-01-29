@@ -1,0 +1,6 @@
+@MBA.Aluno.API_HostAddress = http://localhost:5236
+
+GET {{MBA.Aluno.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,6 @@
+@MBA.Conteudo.Api_HostAddress = http://localhost:5137
+
+GET {{MBA.Conteudo.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
