@@ -1,0 +1,53 @@
+﻿@model MBA.WebApp.MVC.Models.UsuarioRegistroViewModel
+
+@{
+    ViewData["Title"] = "Registro";
+}
+
+<h1>@ViewData["Title"]</h1>
+<div class="row">
+    <div class="col-md-12">
+        <section class="section-conten padding-y container" style="min-height: 35vh">
+            <div class="card mx-auto" style="max-width: 380px; margin-top: 100px;">
+
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Seja Bem Vindo!</h4>
+
+                    <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+
+                        <div class="form-group">
+                            <label asp-for="Email"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Senha"></label>
+                            <input type="password" asp-for="Senha" class="form-control" />
+                            <span asp-validation-for="SenhaConfirmacao" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="SenhaConfirmacao"></label>
+                            <input type="password" asp-for="SenhaConfirmacao" class="form-control" />
+                            <span asp-validation-for="SenhaConfirmacao" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    Já possui uma conta?<a asp-controller="Identity" asp-action="Login">
+                        Login
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

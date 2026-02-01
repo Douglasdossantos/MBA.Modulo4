@@ -14,7 +14,7 @@ namespace MBA.WebApp.MVC.Configuration
                 });
         }
 
-        public static void UserIentityConfiguration(this IApplicationBuilder app)
+        public static void UserIdentityConfiguration(this IApplicationBuilder app)
         {
             app.UseAuthentication();
             app.UseAuthorization();
