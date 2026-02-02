@@ -31,6 +31,8 @@ namespace MBA.Auth.Api.Controllers
         [HttpPost("nova-conta")]
         public async Task<ActionResult> Registrar(UsuarioRegistro usuarioRegistro)
         {
+            return new StatusCodeResult(404);
+
             if (!ModelState.IsValid)
             {
                 return CustomResponse(ModelState);
@@ -57,7 +59,6 @@ namespace MBA.Auth.Api.Controllers
 
             return CustomResponse();
         }
-
         [HttpPost("autenticar")]
         public async Task<ActionResult> login(UsuarioLogin usuarioLogin)
         {

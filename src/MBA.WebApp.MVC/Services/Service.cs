@@ -1,9 +1,28 @@
 ﻿using MBA.WebApp.MVC.Extensions;
+using System.Text;
+using System.Text.Json;
 
 namespace MBA.WebApp.MVC.Services
 {
     public abstract class Service
-    {
+    {  
+        protected StringContent ObterConteudo(object dado)
+        {
+            return new StringContent(
+                    JsonSerializer.Serialize(dado),
+                    Encoding.UTF8,
+                    "Application/Json");
+        }
+        protected async Task<T> DeserializarObjetoResponse<T>(HttpResponseMessage responseMessage)
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            return JsonSerializer.Deserialize<T>(await responseMessage.Content.ReadAsStringAsync(), options);
+        }
+
         protected bool TratarErrrosResponse(HttpResponseMessage response)
         {
            

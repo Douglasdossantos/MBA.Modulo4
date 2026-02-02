@@ -3,6 +3,7 @@ using MBA.WebApp.MVC.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -28,7 +29,7 @@ namespace MBA.WebApp.MVC.Controllers
         [Route("nova-conta")]
         public async Task<IActionResult> Registro(UsuarioRegistroViewModel usuarioRegistro)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View(usuarioRegistro);
             }
@@ -49,15 +50,17 @@ namespace MBA.WebApp.MVC.Controllers
         [HttpGet]
         [Route("login")]
 
-        public IActionResult login()
+        public IActionResult login(string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> login(UsuarioLoginViewModel usuarioLogin)
+        public async Task<IActionResult> login(UsuarioLoginViewModel usuarioLogin, string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
             {
                 return View(usuarioLogin);
@@ -71,7 +74,12 @@ namespace MBA.WebApp.MVC.Controllers
 
             await Realizarlogin(resposta);
 
-            return RedirectToAction("Index", "Home");
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return LocalRedirect(returnUrl);
 
         }
 
