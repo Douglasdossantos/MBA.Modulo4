@@ -1,4 +1,6 @@
-﻿namespace MBA.Auth.Api.Configuration
+﻿using MBA.Auth.Api.MigrationHelp;
+
+namespace MBA.Auth.Api.Configuration
 {
     public static class ApiConfig
     {
@@ -16,6 +18,8 @@
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"); });
+
+                DbMigrationHelper.AutocarregamentoDadosAsync(app).Wait();
             }
 
             app.UseHttpsRedirection();
