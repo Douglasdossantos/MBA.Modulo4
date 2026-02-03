@@ -7,25 +7,21 @@ namespace MBA.Auth.Api.Configuration
     {
         public static void AddDatabaseSelector(this WebApplicationBuilder builder)
         {
-            var provider = builder.Configuration["Database:Provider"];
+            var provider = builder.Environment.EnvironmentName;
 
             switch (provider)
             {
-                case "Sqlite":
+                case "Development":
                         builder.Services.AddDbContext<ApplicationDbContext>(options =>
                         options.UseSqlite(builder.Configuration.GetConnectionString("SQLITEConnection")));
                     break;
 
-                case "SqlServer":
-                    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-                        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                        options.UseSqlServer(connectionString));
-                    break;
-
                 default:
-                    throw new InvalidOperationException(
-                        $"Database provider '{provider}' não configurado.");
+                    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(connectionString));
+                    break;
             }
         }
     }

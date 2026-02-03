@@ -26,6 +26,16 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7163;http://localhost:5020",
       "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "SQLite": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7163;http://localhost:5020",
+      "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Database__Provider": "Sqlite"
       }
@@ -37,7 +47,7 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7163;http://localhost:5020",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Production",
         "Database__Provider": "SqlServer"
       }
     },
