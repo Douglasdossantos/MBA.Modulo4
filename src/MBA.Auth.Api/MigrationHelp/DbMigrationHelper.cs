@@ -36,9 +36,9 @@ namespace MBA.Auth.Api.MigrationHelp
             if (_identityContext.Roles.Any()) { return; }
 
             string roleAdminId = await CriarRegraAcessoAsync(_identityContext, "Administrador");
-            string roleUsuarioId = await CriarRegraAcessoAsync(_identityContext, "Usuario");
+            string roleUsuarioId = await CriarRegraAcessoAsync(_identityContext, "Alunos");
 
-            await CriarUsuarioAsync("adm@adm.com", "Adm@2026!", "Teste filho", new DateTime(1989, 09, 08), roleAdminId, true);
+            await CriarUsuarioAsync("adm@adm.com", "Adm@2026!", "SUPER USUARIO", new DateTime(1989, 09, 08), roleAdminId, true);
             await CriarUsuarioAsync("douglas@gmail.com", "Douglas@2026", "Douglas costa", new DateTime(1998, 12, 31), roleUsuarioId, false);
             await CriarUsuarioAsync("outro@gmail.com", "Senha@2026", "outro usuario", new DateTime(2000, 06, 07), roleUsuarioId, false);
         }

@@ -1,5 +1,6 @@
-﻿using MBA.Auth.Api.Extensions;
-using MBA.Auth.Api.Models;
+﻿using MBA.Auth.Api.Entidades;
+using MBA.Auth.Api.Extensions;
+using MBA.Auth.Api.ViewModels;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -36,17 +37,38 @@ namespace MBA.Auth.Api.Controllers
                 return CustomResponse(ModelState);
             }
 
-            var user = new IdentityUser()
+            var user = new Usuarios()
             {
-                UserName = usuarioRegistro.Email,
+                UserName = usuarioRegistro.NomeUsuario,
                 Email = usuarioRegistro.Email,
-                EmailConfirmed = true   
+                EmailConfirmed = true,
+                Administrador = usuarioRegistro.Administrador
             };
+
+            var claimsToAdd = new List<Claim>();
+
+            if (usuarioRegistro.Administrador)
+            {
+                claimsToAdd = AdicionaClaimsAdmin();
+            }
+            else
+            {
+                claimsToAdd = AdicionaClaimsAluno();
+            }
+
 
             var result = await _userManager.CreateAsync(user,usuarioRegistro.Senha);
 
+
             if (result.Succeeded)
             {
+                var usuarioCriado = await _userManager.FindByEmailAsync(usuarioRegistro.Email);
+
+                foreach (var claim in claimsToAdd)
+                {
+                    await _userManager.AddClaimAsync(usuarioCriado, claim);
+                }
+
                 return CustomResponse(await GerarJWT(usuarioRegistro.Email));
             }
 
@@ -137,6 +159,29 @@ namespace MBA.Auth.Api.Controllers
                     Claims = claims.Select(c => new UsuarioClaim { Type = c.Type, Value = c.Value })
                 }
             };
+        }
+
+        private List<Claim> AdicionaClaimsAdmin()
+        {
+            var claims = new List<Claim>();
+            claims.Add(new Claim("Administrador", "ADM"));// usuario com perfil de administrador
+
+            return claims;
+        }
+
+        private List<Claim> AdicionaClaimsAluno()
+        {
+            var claimsToAdd = new[]
+           {
+                new Claim("Alunos", "MT"), // matricular
+                new Claim("Alunos", "RH"), // REGISTRAR HISTORICO
+                new Claim("Alunos", "CC"), //CONCLUIR CURSO
+                new Claim("Alunos", "SC"), //SOLICITAR CERTIFICADO
+                new Claim("Alunos", "PG"), //PAGAMENTO
+                new Claim("Alunos", "GT"), //BUSCAR INFORMAÇÕES
+                
+            };
+            return claimsToAdd.ToList();
         }
 
         private static long ToUnixEpochDate(DateTime date)

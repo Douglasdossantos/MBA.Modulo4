@@ -1,4 +1,4 @@
-﻿namespace MBA.Auth.Api.Models
+﻿namespace MBA.Auth.Api.ViewModels
 {
     public class UsuarioRespostaLogin
     {
