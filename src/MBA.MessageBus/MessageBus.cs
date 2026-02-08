@@ -12,8 +12,8 @@ public sealed class MessageBus(string connectionString) : IMessageBus
     private readonly string _connectionString = !string.IsNullOrWhiteSpace(connectionString)
         ? connectionString
         : throw new ArgumentException("Connection string cannot be null or empty.", nameof(connectionString));
-
-    private readonly object _sync = new();
+    private static readonly object v = new();
+    private readonly object _sync = v;
     private ServiceProvider? _serviceProvider;
     private IBus? _bus;
     private IAdvancedBus? _advancedBus;
@@ -195,9 +195,10 @@ public sealed class MessageBus(string connectionString) : IMessageBus
 
     private void ThrowIfDisposed()
     {
-        if (_disposed)
+        if (!_disposed)
         {
-            throw new ObjectDisposedException(nameof(MessageBus));
+            return;
         }
+        throw new ObjectDisposedException(nameof(MessageBus));
     }
 }

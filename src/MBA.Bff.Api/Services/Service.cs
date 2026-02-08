@@ -7,6 +7,11 @@ namespace MBA.Bff.Api.Services
 {
     public abstract class Service
     {
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
         protected StringContent ObterConteudo(object dado)
         {
             return new StringContent(
@@ -17,18 +22,10 @@ namespace MBA.Bff.Api.Services
 
         protected async Task<T> DeserializarObjetoResponse<T>(HttpResponseMessage responseMessage)
         {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
             var jsonString = await responseMessage.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<T>(jsonString, options);
+            var result = JsonSerializer.Deserialize<T>(jsonString, _jsonOptions);
 
-            if (result is null)
-                throw new InvalidOperationException("Deserialization returned null.");
-
-            return result;
+            return result is null ? throw new InvalidOperationException("Deserialization returned null.") : result;
         }
 
         protected bool TratarErrosResponse(HttpResponseMessage response)
