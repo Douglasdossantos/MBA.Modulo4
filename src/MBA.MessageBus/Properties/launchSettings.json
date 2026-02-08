@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MBA.MessageBus": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
