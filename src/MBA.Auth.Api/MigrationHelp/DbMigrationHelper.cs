@@ -37,15 +37,17 @@ namespace MBA.Auth.Api.MigrationHelp
 
             string roleAdminId = await CriarRegraAcessoAsync(_identityContext, "Administrador");
             string roleUsuarioId = await CriarRegraAcessoAsync(_identityContext, "Alunos");
+            string AlunoLerId = await CriarRegraAcessoAsync(_identityContext);
 
             await CriarUsuarioAsync("adm@adm.com", "Adm@2026!", "SUPER USUARIO", new DateTime(1989, 09, 08), roleAdminId, true);
             await CriarUsuarioAsync("douglas@gmail.com", "Douglas@2026", "Douglas costa", new DateTime(1998, 12, 31), roleUsuarioId, false);
-            await CriarUsuarioAsync("outro@gmail.com", "Senha@2026", "outro usuario", new DateTime(2000, 06, 07), roleUsuarioId, false);
+            await CriarUsuarioAsync("outro@gmail.com", "Senha@2026", "outro usuario", new DateTime(2000, 06, 07), AlunoLerId, false);
         }
 
         private static async Task<string> CriarRegraAcessoAsync(ApplicationDbContext identityContext, string role)
         {
             string roleId = Guid.NewGuid().ToString();
+
             identityContext.Roles.Add(new IdentityRole
             {
                 Id = roleId,
@@ -57,6 +59,33 @@ namespace MBA.Auth.Api.MigrationHelp
             await identityContext.SaveChangesAsync();
 
             return roleId;
+        }
+
+        private static async Task<string> CriarRegraAcessoAsync(ApplicationDbContext identityContext)
+        {
+            if (identityContext.Roles.Any(r => r.Name == "Aluno"))
+                return identityContext.Roles.First(r => r.Name == "Aluno").Id;
+
+            var role = new IdentityRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Aluno",
+                NormalizedName = "ALUNO"
+            };
+
+            identityContext.Roles.Add(role);
+            await identityContext.SaveChangesAsync();
+
+            identityContext.RoleClaims.Add(new IdentityRoleClaim<string>
+            {
+                RoleId = role.Id,
+                ClaimType = "permission",
+                ClaimValue = "ler"
+            });
+
+            await identityContext.SaveChangesAsync();
+
+            return role.Id;
         }
 
         private static async Task CriarUsuarioAsync(string email, string senha, string nome, DateTime dataNascimento, string roleId, bool ehAdmin)

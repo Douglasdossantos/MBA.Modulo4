@@ -1,6 +1,7 @@
 ﻿using MBA.Auth.Api.Entidades;
 using MBA.Auth.Api.Extensions;
 using MBA.Auth.Api.ViewModels;
+using MBA.WebApi.Core.Identidade;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,14 +20,17 @@ namespace MBA.Auth.Api.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppSettings _appSettings;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AuthController(SignInManager<IdentityUser> signInManager, 
-                              UserManager<IdentityUser> userManager, 
-                              IOptions<AppSettings> appSettings)
+        public AuthController(SignInManager<IdentityUser> signInManager,
+                              UserManager<IdentityUser> userManager,
+                              IOptions<AppSettings> appSettings,
+                              RoleManager<IdentityRole> roleManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appSettings = appSettings.Value;
+            _roleManager = roleManager;
         }
 
         [HttpPost("nova-conta")]
@@ -124,11 +128,12 @@ namespace MBA.Auth.Api.Controllers
 
             foreach (var userRole in userRoles)
             {
-                claims.Add(new Claim("role", userRole));
+                claims.Add(new Claim("role",userRole));
             }
 
             var identityClaims = new ClaimsIdentity();
             identityClaims.AddClaims(claims);
+
             return identityClaims;
         }
         private string CodificarToken(ClaimsIdentity identityClaims)
@@ -173,7 +178,7 @@ namespace MBA.Auth.Api.Controllers
         {
             var claimsToAdd = new[]
            {
-                new Claim("Alunos", "MT"), // matricular
+                new Claim("Alunos", "Ler"), // matricular
                 new Claim("Alunos", "RH"), // REGISTRAR HISTORICO
                 new Claim("Alunos", "CC"), //CONCLUIR CURSO
                 new Claim("Alunos", "SC"), //SOLICITAR CERTIFICADO

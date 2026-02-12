@@ -1,4 +1,5 @@
 ﻿using MBA.Auth.Api.MigrationHelp;
+using MBA.WebApi.Core.Identidade;
 
 namespace MBA.Auth.Api.Configuration
 {
@@ -24,12 +25,10 @@ namespace MBA.Auth.Api.Configuration
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
-            app.UseAuthentication();
+            app.UseAuthConfiguration();
 
             app.MapControllers();
 
-            //app.UseDbMigrationHelper();
             return app;
         }
     }
