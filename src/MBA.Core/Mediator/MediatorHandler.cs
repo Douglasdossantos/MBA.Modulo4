@@ -1,11 +1,7 @@
 ﻿using FluentValidation.Results;
 using MBA.Core.Messages;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SaberOnline.Core.Messages;
 
 namespace MBA.Core.Mediator
 {
@@ -23,9 +19,30 @@ namespace MBA.Core.Mediator
             return await _mediator.Send(comando);
         }
 
+       
+
         public async Task PublicarEvento<T>(T evento) where T : Event
         {
             await _mediator.Publish(evento);
+        }
+
+
+        //VERIFICAR ESSE CASO
+
+        public async Task PublicarEventoRaiz<T>(T evento) where T : EventoRaiz
+        {
+            await _mediator.Publish(evento);
+        }
+
+        public async Task<bool> EnviarComandoRaiz<T>(T comando) where T : CommandRaiz
+        {
+            return await _mediator.Send(comando);
+        }
+
+
+        public async Task PublicarNotificacaoDominio<T>(T notificacao) where T : DomainNotificacaoRaiz
+        {
+            await _mediator.Publish(notificacao);
         }
     }
 }

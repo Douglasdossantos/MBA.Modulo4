@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.2.11415.280
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36401.2 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -47,6 +47,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{6D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.WebApi.Core", "src\MBA.WebApi.Core\MBA.WebApi.Core.csproj", "{6AF0F5CD-D154-4CDE-920C-3390782607C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.Pagamentos.Domain", "src\MBA.Pagamentos.Domain\MBA.Pagamentos.Domain.csproj", "{2A21539F-A395-4B07-945D-C4BD399FB7C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.Pagamentos.Data", "src\MBA.Pagamentos.Data\MBA.Pagamentos.Data.csproj", "{EAC824E9-9843-4AB6-A33D-A1E6C36E56A7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.Pagamentos.Application", "src\MBA.Pagamentos.Application\MBA.Pagamentos.Application.csproj", "{4B8AFB91-5ECA-4838-983D-2701F10B50F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +95,18 @@ Global
 		{6AF0F5CD-D154-4CDE-920C-3390782607C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AF0F5CD-D154-4CDE-920C-3390782607C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AF0F5CD-D154-4CDE-920C-3390782607C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A21539F-A395-4B07-945D-C4BD399FB7C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A21539F-A395-4B07-945D-C4BD399FB7C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A21539F-A395-4B07-945D-C4BD399FB7C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A21539F-A395-4B07-945D-C4BD399FB7C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAC824E9-9843-4AB6-A33D-A1E6C36E56A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAC824E9-9843-4AB6-A33D-A1E6C36E56A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAC824E9-9843-4AB6-A33D-A1E6C36E56A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAC824E9-9843-4AB6-A33D-A1E6C36E56A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B8AFB91-5ECA-4838-983D-2701F10B50F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B8AFB91-5ECA-4838-983D-2701F10B50F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B8AFB91-5ECA-4838-983D-2701F10B50F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B8AFB91-5ECA-4838-983D-2701F10B50F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -115,6 +133,9 @@ Global
 		{E7F3D0CA-26EB-40ED-874F-7ACCA72915B9} = {E2DB7979-2EE3-4C15-9664-0DB93DEDCBDB}
 		{6D02B769-81A3-498F-AD08-01F1BF79D4AC} = {7A1F27E4-94C5-4A0F-9CAA-110376FF6555}
 		{6AF0F5CD-D154-4CDE-920C-3390782607C3} = {4A357199-6FEE-49C0-80D7-C7A77FA3CE4A}
+		{2A21539F-A395-4B07-945D-C4BD399FB7C0} = {3232C043-F2AA-4083-92D9-714A5A13EB88}
+		{EAC824E9-9843-4AB6-A33D-A1E6C36E56A7} = {3232C043-F2AA-4083-92D9-714A5A13EB88}
+		{4B8AFB91-5ECA-4838-983D-2701F10B50F5} = {3232C043-F2AA-4083-92D9-714A5A13EB88}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3BE37C78-D457-4B25-9836-64A3F23621FD}
