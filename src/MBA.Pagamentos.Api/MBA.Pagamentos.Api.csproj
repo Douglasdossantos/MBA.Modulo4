@@ -7,7 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.0.0" />
+    <PackageReference Include="MediatR" Version="14.0.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.23">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MBA.Core\MBA.Core.csproj" />
+    <ProjectReference Include="..\MBA.Pagamentos.Application\MBA.Pagamentos.Application.csproj" />
+    <ProjectReference Include="..\MBA.Pagamentos.Data\MBA.Pagamentos.Data.csproj" />
+    <ProjectReference Include="..\MBA.Pagamentos.Domain\MBA.Pagamentos.Domain.csproj" />
+    <ProjectReference Include="..\MBA.WebApi.Core\MBA.WebApi.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>

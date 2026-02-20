@@ -9,7 +9,6 @@ public class RealizarPagamentoCommandValidator : AbstractValidator<RealizarPagam
     public RealizarPagamentoCommandValidator()
     {
         RuleFor(c => c.MatriculaCursoId).NotEqual(Guid.Empty).WithMessage("Id da matrícula é inválida");
-        RuleFor(c => c.MatriculaCursoDto).NotNull().WithMessage("Matricula Curso deve ser informado");
         RuleFor(c => c.Valor).GreaterThan(0).WithMessage("Valor de pagamento é inválido");
         RuleFor(c => c.NumeroCartao).NotEmpty().Length(16).WithMessage("Número do cartão não reconhecido");
         RuleFor(c => c.NomeTitularCartao).NotEmpty().Length(3, 50).WithMessage("Nome do titular é inválido");

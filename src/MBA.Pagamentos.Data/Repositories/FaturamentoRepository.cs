@@ -29,12 +29,13 @@ public class FaturamentoRepository(FaturamentoDbContext context) : IFaturamentoR
 
     public async Task<Pagamento> ObterPorMatriculaIdAsync(Guid matriculaId)
     {
-        return await _context.Pagamentos.FirstOrDefaultAsync(p => p.MatriculaId == matriculaId);
-    }
 
+        return await _context.Pagamentos.FirstOrDefaultAsync(p => p.MatriculaId == matriculaId);
+
+    }
     public void Dispose()
     {
         _context?.Dispose();
     }
-  
+
 }

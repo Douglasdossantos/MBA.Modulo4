@@ -16,51 +16,86 @@ public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoR
     private readonly IMediatorHandler _mediatorHandler = mediatorHandler;
     private Guid _raizAgregacao;
 
-    public async Task<bool> Handle(RealizarPagamentoCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(
+     RealizarPagamentoCommand request,
+     CancellationToken cancellationToken)
     {
         _raizAgregacao = request.RaizAgregacao;
 
+        // 1️⃣ Validação do command
         if (!ValidarRequisicaoAsync(request))
             return false;
 
-        if (!ObterPagamentoMatriculaCurso(request.MatriculaCursoId, out Pagamento pagamento))
-            return false;
-
-        if (!ValidarValorPagamentoMatriculaCurso(request.Valor, pagamento?.Valor ?? request.MatriculaCursoDto.Valor))
-            return false;
-
-        if (!request.MatriculaCursoDto.PagamentoPodeSerRealizado)
+        // 2️⃣ Matrícula obrigatória
+        if (request.MatriculaCursoId == Guid.Empty)
         {
             await _mediatorHandler.PublicarNotificacaoDominio(
-                new DomainNotificacaoRaiz(_raizAgregacao, nameof(Pagamento),
-                "Matricula não permite pagamento. Entre em contato com nosso SAC"));
+                new DomainNotificacaoRaiz(
+                    _raizAgregacao,
+                    nameof(Pagamento),
+                    "Matrícula inválida para realização de pagamento."));
             return false;
         }
 
-        bool ehInclusaoPagamento = pagamento == null;
+        // 3️⃣ Busca pagamento (PODE ser null)
+        var resultado = await ObterPagamentoMatriculaCurso(request.MatriculaCursoId);
 
+        if (!resultado.Sucesso)
+            return false;
+
+        var pagamento = resultado.Pagamento;
+
+        // 4️⃣ BLOQUEIO SOMENTE se já estiver APROVADO
+        if (pagamento != null && pagamento.PossuiPagamentoAprovado())
+        {
+            await _mediatorHandler.PublicarNotificacaoDominio(
+                new DomainNotificacaoRaiz(
+                    _raizAgregacao,
+                    nameof(Pagamento),
+                    "Pagamento desta matrícula já se encontra aprovado."));
+            return false;
+        }
+
+        // 5️⃣ Validação de valor
+        var valorReferencia = pagamento?.Valor ?? request.Valor;
+
+        if (!ValidarValorPagamentoMatriculaCurso(request.Valor, valorReferencia))
+            return false;
+
+        // 6️⃣ Dados do cartão
         var dadosCartao = new DadosCartao(
             request.NumeroCartao,
             request.NomeTitularCartao,
             request.ValidadeCartao,
             request.CvvCartao);
 
-       
-        if (ehInclusaoPagamento)
+        // 7️⃣ Criação ou reaproveitamento
+        if (pagamento == null)
         {
-            pagamento = new Pagamento(request.MatriculaCursoId, request.Valor, DateTime.Now.Date);
+            pagamento = new Pagamento(
+                request.MatriculaCursoId,
+                request.Valor,
+                DateTime.Now.Date);
+
             await _faturamentoRepository.AdicionarAsync(pagamento);
         }
 
-        
+        // 8️⃣ Confirma pagamento (DOMÍNIO decide)
+        pagamento.ConfirmarPagamento(
+            DateTime.Now,
+            Guid.NewGuid().ToString(),
+            dadosCartao);
+
+        // 9️⃣ Commit
         await _faturamentoRepository.UnitOfWork.Commit();
 
-        await _mediatorHandler.PublicarEventoRaiz(new PagamentoConfirmadoEvent(
-         request.MatriculaCursoId,
-         request.MatriculaCursoDto.AlunoId,
-         request.MatriculaCursoDto.CursoId,
-         true ));
-
+        // 🔟 Evento de domínio
+        await _mediatorHandler.PublicarEventoRaiz(
+            new PagamentoConfirmadoEvent(
+                request.MatriculaCursoId,
+                request.AlunoId,
+                request.CursoId,
+                true));
 
         return true;
     }
@@ -80,22 +115,27 @@ public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoR
         return true;
     }
 
-    private bool ObterPagamentoMatriculaCurso(Guid matriculaId, out Pagamento pagamento)
+    private async Task<(bool Sucesso, Pagamento? Pagamento)>
+    ObterPagamentoMatriculaCurso(Guid matriculaId)
     {
-        pagamento = _faturamentoRepository.ObterPorMatriculaIdAsync(matriculaId).Result;
+        var pagamento =
+            await _faturamentoRepository.ObterPorMatriculaIdAsync(matriculaId);
 
-        if (pagamento != null)
+        if (pagamento != null && pagamento.PossuiPagamentoAprovado())
         {
-            if (pagamento.PossuiPagamentoAprovado())
-            {
-                _mediatorHandler.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Pagamento), "Pagamento desta Matricula já se encontra paga")).GetAwaiter().GetResult();
-                return false;
-            }
+            await _mediatorHandler.PublicarNotificacaoDominio(
+                new DomainNotificacaoRaiz(
+                    _raizAgregacao,
+                    nameof(Pagamento),
+                    "Pagamento desta matrícula já se encontra paga"
+                )
+            );
+
+            return (false, pagamento);
         }
 
-        return true;
+        return (true, pagamento);
     }
-
 
     private bool ValidarValorPagamentoMatriculaCurso(decimal valorInformado, decimal valorMatricula)
     {
