@@ -14,7 +14,7 @@ using SaberOnline.Application.Commands.RealizarPagamento;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace SaberOnline.Faturamento.Application.Configurations;
+namespace MBA.Financeiro.Application.Configurations;
 
 [ExcludeFromCodeCoverage]
 public static class FaturamentoConfiguration
