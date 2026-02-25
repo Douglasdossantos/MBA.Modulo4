@@ -1,9 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+using FluentValidation.Results;
 
 namespace MBA.Core.Messages.Integration
 {
-    public class ResponseMessage(ValidationResult validationResult) : Message
+    public class ResponseMessage: Message
     {
-        public ValidationResult ValidationResult { get; set; } = validationResult;
+
+        public ValidationResult ValidationResult { get; set; }
+
+        public ResponseMessage(ValidationResult validationResult)
+        {
+            ValidationResult = validationResult;
+        }
     }
 }

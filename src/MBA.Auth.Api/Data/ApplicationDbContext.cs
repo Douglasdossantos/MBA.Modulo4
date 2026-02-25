@@ -1,4 +1,5 @@
 ﻿using MBA.Auth.Api.Entidades;
+using MBA.Core.Messages;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
@@ -15,6 +16,7 @@ namespace MBA.Auth.Api.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+
             foreach (var property in builder.Model.GetEntityTypes().SelectMany(
                           e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
                 property.SetColumnType("varchar(1000)");

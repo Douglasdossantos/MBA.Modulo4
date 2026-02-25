@@ -110,7 +110,7 @@ public sealed class MessageBus(string connectionString) : IMessageBus
         EnsureConnected();
         return _bus!.Rpc.RespondAsync(responder, cancellationToken);
     }
-
+    //equivalente ao TryConnect do treinamento 
     private void EnsureConnected()
     {
         ThrowIfDisposed();

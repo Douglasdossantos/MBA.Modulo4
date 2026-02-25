@@ -1,6 +1,9 @@
-﻿using MBA.Auth.Api.Entidades;
+﻿using EasyNetQ;
+using MBA.Auth.Api.Entidades;
 using MBA.Auth.Api.Extensions;
 using MBA.Auth.Api.ViewModels;
+using MBA.Core.Messages.Integration;
+using MBA.WebApi.Core.Controllers;
 using MBA.WebApi.Core.Identidade;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -21,16 +24,18 @@ namespace MBA.Auth.Api.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppSettings _appSettings;
         private readonly RoleManager<IdentityRole> _roleManager;
-
+        private IBus _bus;
         public AuthController(SignInManager<IdentityUser> signInManager,
                               UserManager<IdentityUser> userManager,
                               IOptions<AppSettings> appSettings,
-                              RoleManager<IdentityRole> roleManager)
+                              RoleManager<IdentityRole> roleManager,
+                              IBus bus)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appSettings = appSettings.Value;
             _roleManager = roleManager;
+            _bus = bus;
         }
 
         [HttpPost("nova-conta")]
@@ -73,6 +78,16 @@ namespace MBA.Auth.Api.Controllers
                     await _userManager.AddClaimAsync(usuarioCriado, claim);
                 }
 
+                if (!usuarioRegistro.Administrador)
+                {
+                    var sucessoaluno = await RegistarAluno(usuarioRegistro);
+                    if (!sucessoaluno.ValidationResult.IsValid)
+                    {
+                        await _userManager.DeleteAsync(user);
+                        return CustomResponse(sucessoaluno.ValidationResult);
+                    }
+                }
+
                 return CustomResponse(await GerarJWT(usuarioRegistro.Email));
             }
 
@@ -83,6 +98,23 @@ namespace MBA.Auth.Api.Controllers
 
             return CustomResponse();
         }
+
+        private  async Task<ResponseMessage>RegistarAluno(UsuarioRegistro usuarioRegistro)
+        {
+            var aluno = await _userManager.FindByEmailAsync(usuarioRegistro.Email);
+            var alunoRegistrado = new UsuarioRegistradoIntegrationEvent(Guid.Parse(aluno.Id), DateTime.Now);
+
+            try
+            {
+                return await _bus.Rpc.RequestAsync<UsuarioRegistradoIntegrationEvent, ResponseMessage>(alunoRegistrado);
+            }
+            catch 
+            {
+                await _userManager.DeleteAsync(aluno);
+                throw;
+            }
+        }
+
         [HttpPost("autenticar")]
         public async Task<ActionResult> login(UsuarioLogin usuarioLogin)
         {
