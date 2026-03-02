@@ -7,18 +7,33 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Mapping\**" />
+    <Content Remove="Data\Mapping\**" />
+    <EmbeddedResource Remove="Data\Mapping\**" />
+    <None Remove="Data\Mapping\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.23" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.23">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.23">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\" />
-    <Folder Include="Data\Mapping\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\MBA.Aluno.Appplication\MBA.Aluno.Appplication.csproj" />
+    <ProjectReference Include="..\MBA.Aluno.Data\MBA.Aluno.Data.csproj" />
+    <ProjectReference Include="..\MBA.Aluno.Domain\MBA.Aluno.Domain.csproj" />
     <ProjectReference Include="..\MBA.Core\MBA.Core.csproj" />
+    <ProjectReference Include="..\MBA.MessageBus\MBA.MessageBus.csproj" />
+    <ProjectReference Include="..\MBA.WebApi.Core\MBA.WebApi.Core.csproj" />
   </ItemGroup>
 
 </Project>

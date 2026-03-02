@@ -1,4 +1,5 @@
 ﻿using MBA.Auth.Api.Data;
+using MBA.Auth.Api.Entidades;
 using MBA.Auth.Api.Extensions;
 using MBA.WebApi.Core.Identidade;
 using Microsoft.AspNetCore.Identity;
@@ -11,7 +12,7 @@ namespace MBA.Auth.Api.Configuration
         IConfiguration configuration)
         {
 
-            services.AddIdentity<IdentityUser, IdentityRole>(o =>
+            services.AddIdentity<Usuarios, IdentityRole>(o =>
             {
                 o.Password.RequireDigit = true;
                 o.Password.RequireLowercase = true;
@@ -19,7 +20,8 @@ namespace MBA.Auth.Api.Configuration
                 o.Password.RequireUppercase = true;
                 o.Password.RequiredUniqueChars = 0;
                 o.Password.RequiredLength = 8;
-            }).AddErrorDescriber<IdentityMensagensPortugues>()
+            })
+            .AddErrorDescriber<IdentityMensagensPortugues>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 

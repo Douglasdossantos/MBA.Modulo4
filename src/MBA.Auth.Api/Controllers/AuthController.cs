@@ -1,6 +1,9 @@
-﻿using MBA.Auth.Api.Entidades;
+﻿using EasyNetQ;
+using MBA.Auth.Api.Entidades;
 using MBA.Auth.Api.Extensions;
 using MBA.Auth.Api.ViewModels;
+using MBA.Core.Messages.Integration;
+using MBA.MessageBus;
 using MBA.WebApi.Core.Identidade;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -17,20 +20,23 @@ namespace MBA.Auth.Api.Controllers
     [Route("api/identidade")]
     public class AuthController : MainController
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<Usuarios> _signInManager;
+        private readonly UserManager<Usuarios> _userManager;
         private readonly AppSettings _appSettings;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IMessageBus _bus;
 
-        public AuthController(SignInManager<IdentityUser> signInManager,
-                              UserManager<IdentityUser> userManager,
+        public AuthController(SignInManager<Usuarios> signInManager,
+                              UserManager<Usuarios> userManager,
                               IOptions<AppSettings> appSettings,
-                              RoleManager<IdentityRole> roleManager)
+                              RoleManager<IdentityRole> roleManager,
+                              IMessageBus bus)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appSettings = appSettings.Value;
             _roleManager = roleManager;
+            _bus = bus;
         }
 
         [HttpPost("nova-conta")]
@@ -66,7 +72,14 @@ namespace MBA.Auth.Api.Controllers
 
             if (result.Succeeded)
             {
+                var clienteResult = await RegistrarCliente(usuarioRegistro);
                 var usuarioCriado = await _userManager.FindByEmailAsync(usuarioRegistro.Email);
+
+                if (!clienteResult.ValidationResult.IsValid)
+                {
+                    await _userManager.DeleteAsync(user);
+                    return CustomResponse(clienteResult.ValidationResult);
+                }
 
                 foreach (var claim in claimsToAdd)
                 {
@@ -83,6 +96,28 @@ namespace MBA.Auth.Api.Controllers
 
             return CustomResponse();
         }
+
+
+        private async Task<ResponseMessage> RegistrarCliente(UsuarioRegistro usuarioRegistro)
+        {
+            var usuario = await _userManager.FindByEmailAsync(usuarioRegistro.Email);
+
+            var usuarioRegistrado = new UsuarioRegistradoIntegrationEvent(
+                Guid.Parse(usuario.Id), usuarioRegistro.NomeUsuario, usuarioRegistro.Email, usuarioRegistro.Administrador);
+
+            try
+            {
+                return await _bus.RequestAsync<UsuarioRegistradoIntegrationEvent, ResponseMessage>(usuarioRegistrado);
+            }
+            catch
+            {
+                await _userManager.DeleteAsync(usuario);
+                throw;
+            }
+        }
+
+
+
         [HttpPost("autenticar")]
         public async Task<ActionResult> login(UsuarioLogin usuarioLogin)
         {
@@ -108,7 +143,7 @@ namespace MBA.Auth.Api.Controllers
         }
         private async Task<UsuarioRespostaLogin> GerarJWT(string email)
         {
-            var  user = await _userManager.FindByNameAsync(email);
+            var  user = await _userManager.FindByEmailAsync(email);
             var claims = await _userManager.GetClaimsAsync(user);
 
             var identityClaims = await ObterClaimsUsuario(claims, user);
@@ -116,7 +151,7 @@ namespace MBA.Auth.Api.Controllers
 
             return ObterRespostaToken(encodedToken, user, claims);
         }
-        private async Task<ClaimsIdentity> ObterClaimsUsuario(ICollection<Claim> claims, IdentityUser user)
+        private async Task<ClaimsIdentity> ObterClaimsUsuario(ICollection<Claim> claims, Usuarios user)
         {
             var userRoles = await _userManager.GetRolesAsync(user);
 
@@ -151,7 +186,7 @@ namespace MBA.Auth.Api.Controllers
             });
             return tokenHandler.WriteToken(token);
         }
-        private UsuarioRespostaLogin ObterRespostaToken(string encodedToken, IdentityUser user, IEnumerable<Claim> claims)
+        private UsuarioRespostaLogin ObterRespostaToken(string encodedToken, Usuarios user, IEnumerable<Claim> claims)
         {
             return new UsuarioRespostaLogin
             {

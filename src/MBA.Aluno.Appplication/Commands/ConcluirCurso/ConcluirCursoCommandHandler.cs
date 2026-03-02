@@ -1,0 +1,105 @@
+﻿using MBA.Aluno.Appplication.Interfaces;
+using MBA.Aluno.Domain.Entities;
+using MBA.Aluno.Domain.Interface;
+using MBA.Core.Mediator;
+using MBA.Core.Messages;
+using MBA.Core.Messages.AlunoCommands;
+using MediatR;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MBA.Aluno.Appplication.Commands.ConcluirCurso
+{
+    public class ConcluirCursoCommandHandler : IRequestHandler<ConcluirCursoCommand, bool>
+    {
+        private readonly IAlunoRepository _alunoRepository;
+        private readonly IMatriculaRepository _matriculaRepository;
+        private readonly IMediatorHandler _mediatorHandler;
+        private readonly IAlunoQuery _alunoQuery;
+        private Guid _raizAgregacao;
+        public ConcluirCursoCommandHandler(IAlunoRepository alunoRepository,
+            IMatriculaRepository matriculaRepository,
+                    IMediatorHandler mediatorHandler,
+                    IAlunoQuery alunoQuery)
+        {
+            _matriculaRepository = matriculaRepository;
+            _alunoRepository = alunoRepository;
+            _mediatorHandler = mediatorHandler;
+            _alunoQuery = alunoQuery;
+        }
+
+
+
+        public async Task<bool> Handle(ConcluirCursoCommand request, CancellationToken cancellationToken)
+        {
+            _raizAgregacao = request.RaizAgregacao;
+            if (!ValidarRequisicao(request)) { return false; }
+            if (!await ObterEvolucaoAsync(request.MatriculaId)) { return false; }
+            if (!ObterMatricula(request.MatriculaId, out Matricula matricula)) { return false; }
+
+            matricula.statuConcluido();
+            matricula.CriarDataConcluido();
+
+            var certificado = new Certificado(request.MatriculaId);
+            certificado.CriarData();
+            certificado.Path();
+            await _matriculaRepository.AtualizarAsync(matricula);
+            await _matriculaRepository.AdicionarAsync(certificado);
+
+            return await _matriculaRepository.UnitOfWork.Commit();
+        }
+
+
+        private bool ObterMatricula(Guid matriculaId, out Matricula matricula)
+        {
+            matricula = _matriculaRepository.ObterPorIdAsync(matriculaId).Result;
+            if (matricula == null)
+            {
+                _mediatorHandler.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Matricula), "Matricula não encontrado.")).GetAwaiter().GetResult();
+                return false;
+            }
+
+            return true;
+        }
+        private bool ValidarRequisicao(ConcluirCursoCommand request)
+        {
+            request.DefinirValidacao(new ConcluirCursoCommandValidator().Validate(request));
+            if (!request.EhValido())
+            {
+                foreach (var erro in request.Erros)
+                {
+                    _mediatorHandler.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Domain.Entities.Aluno), erro)).GetAwaiter().GetResult();
+                }
+                return false;
+            }
+
+            return true;
+        }
+
+
+        private async Task<bool> ObterEvolucaoAsync(Guid IdMatricula)
+        {
+            var matricula = await _alunoQuery.EvolucaoCursoPorMatriculaAsync(IdMatricula);
+            if (matricula == null)
+            {
+                _mediatorHandler.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Domain.Entities.Aluno), "Matricula não encontrado.")).GetAwaiter().GetResult();
+                return false;
+            }
+            if (matricula.AulasFaltantes != 0)
+            {
+                _mediatorHandler.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Domain.Entities.Aluno), "Voce ainda tem Aulas a serem concluidas.")).GetAwaiter().GetResult();
+                return false;
+            }
+
+            return true;
+        }
+
+
+
+
+
+    }
+}

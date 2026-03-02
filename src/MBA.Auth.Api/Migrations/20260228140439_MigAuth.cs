@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MBA.Auth.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class MigAuth : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,8 +30,7 @@ namespace MBA.Auth.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "varchar(1000)", nullable: false),
-                    Discriminator = table.Column<string>(type: "varchar(1000)", maxLength: 13, nullable: false),
-                    Administrador = table.Column<bool>(type: "INTEGER", nullable: true),
+                    Administrador = table.Column<bool>(type: "INTEGER", nullable: false),
                     UserName = table.Column<string>(type: "varchar(1000)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "varchar(1000)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "varchar(1000)", maxLength: 256, nullable: true),
