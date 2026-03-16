@@ -1,4 +1,5 @@
 ﻿using MBA.Auth.Api.Data;
+using MBA.Auth.Api.Entidades;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,7 @@ namespace MBA.Auth.Api.MigrationHelp
     {
         private static ApplicationDbContext _identityContext = null;
 
-        private static UserManager<IdentityUser> _userManager = null;
+        private static UserManager<Usuarios> _userManager = null;
 
         public static async Task AutocarregamentoDadosAsync(WebApplication serviceScope)
         {
@@ -22,7 +23,7 @@ namespace MBA.Auth.Api.MigrationHelp
             var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
 
             _identityContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            _userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            _userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuarios>>();
 
             if (env.IsDevelopment())
             {
@@ -90,7 +91,7 @@ namespace MBA.Auth.Api.MigrationHelp
 
         private static async Task CriarUsuarioAsync(string email, string senha, string nome, DateTime dataNascimento, string roleId, bool ehAdmin)
         {
-            var identityUser = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
+            var identityUser = new Usuarios { UserName = email, Email = email, EmailConfirmed = true , Administrador = ehAdmin };
             var result = await _userManager.CreateAsync(identityUser, senha);
 
             if (result.Succeeded)

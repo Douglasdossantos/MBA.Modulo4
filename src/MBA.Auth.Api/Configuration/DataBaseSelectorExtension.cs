@@ -13,7 +13,7 @@ namespace MBA.Auth.Api.Configuration
             {
                 case "Development":
                         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                        options.UseSqlite(builder.Configuration.GetConnectionString("SQLITEConnection")));
+                        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
                     break;
 
                 default:
