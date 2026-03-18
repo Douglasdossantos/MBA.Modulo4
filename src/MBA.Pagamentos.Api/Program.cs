@@ -43,7 +43,7 @@ builder.Services.AddHttpContextAccessor()
     typeof(DomainNotificacaoRaiz).Assembly
 ))
     .AddScoped<IMediatorHandler, MediatorHandler>()
-    .ConfigurarFaturamentoApplication(appSettings.DatabaseSettings.ConnectionStringFaturamento, builder.Environment.IsProduction());
+    .ConfigurarFaturamentoApplication(appSettings?.DatabaseSettings?.ConnectionStringFaturamento ?? "", builder.Environment.IsProduction());
 
 var app = builder.Build();
 

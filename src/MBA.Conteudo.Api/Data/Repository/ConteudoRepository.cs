@@ -33,7 +33,7 @@ namespace MBA.Conteudo.Api.Data.Repository
             await Task.CompletedTask;
         }
 
-        public async Task<Curso> ObterPorIdAsync(Guid id)
+        public async Task<Curso?> ObterPorIdAsync(Guid id)
         {
             return await _context.Cursos
                 .Include(c => c.ConteudoProgramatico)
@@ -72,7 +72,7 @@ namespace MBA.Conteudo.Api.Data.Repository
             await _context.Aulas.AddAsync(aula);
         }
 
-        public async Task<Aula> ObterAulaPorIdAsync(Guid aulaId)
+        public async Task<Aula?> ObterAulaPorIdAsync(Guid aulaId)
         {
             return await _context.Aulas
                 .AsNoTracking()

@@ -47,11 +47,7 @@ namespace MBA.Conteudo.Api.Services
 
         public async Task AtualizarCursoAsync(Guid cursoId, AtualizacaoCursoViewModel viewModel)
         {
-            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
+            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId) ?? throw new DomainException("Curso não encontrado.");
 
             // Verificar se já existe outro curso com mesmo nome
             var cursoMesmoNome = await _conteudoRepository.ExisteCursoComMesmoNomeAsync(viewModel.Nome);
@@ -74,12 +70,7 @@ namespace MBA.Conteudo.Api.Services
 
         public async Task DesativarCursoAsync(Guid cursoId)
         {
-            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
+            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId) ?? throw new DomainException("Curso não encontrado.");
             await _conteudoRepository.DesativarAsync(curso);
             await _conteudoRepository.UnitOfWork.Commit();
         }
@@ -87,12 +78,7 @@ namespace MBA.Conteudo.Api.Services
         public async Task<CursoViewModel> ObterPorIdAsync(Guid cursoId)
         {
             var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
-            return _mapper.Map<CursoViewModel>(curso);
+            return curso is null ? throw new DomainException("Curso não encontrado.") : _mapper.Map<CursoViewModel>(curso);
         }
 
         public async Task<IEnumerable<CursoViewModel>> ObterAtivosAsync()
@@ -110,12 +96,9 @@ namespace MBA.Conteudo.Api.Services
         public async Task<ConteudoProgramaticoViewModel> ObterConteudoProgramaticoAsync(Guid cursoId)
         {
             var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
-            return _mapper.Map<ConteudoProgramaticoViewModel>(curso.ConteudoProgramatico);
+            return curso is null
+                ? throw new DomainException("Curso não encontrado.")
+                : _mapper.Map<ConteudoProgramaticoViewModel>(curso.ConteudoProgramatico);
         }
     }
 }

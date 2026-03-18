@@ -19,12 +19,7 @@ namespace MBA.Conteudo.Api.Services
 
         public async Task<Guid> AdicionarAulaAsync(Guid cursoId, AdicionarAulaViewModel viewModel)
         {
-            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
+            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId) ?? throw new DomainException("Curso não encontrado.");
             if (!curso.Ativo)
             {
                 throw new DomainException("Não é possível adicionar aulas a um curso inativo.");
@@ -44,13 +39,13 @@ namespace MBA.Conteudo.Api.Services
         public async Task AtualizarAulaAsync(Guid cursoId, AtualizarAulaViewModel viewModel)
         {
             var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
+            if (curso is null)
             {
                 throw new DomainException("Curso não encontrado.");
             }
 
             var aula = curso.Aulas.FirstOrDefault(a => a.Id == viewModel.Id);
-            if (aula == null)
+            if (aula is null)
             {
                 throw new DomainException("Aula não encontrada neste curso.");
             }
@@ -67,14 +62,9 @@ namespace MBA.Conteudo.Api.Services
 
         public async Task RemoverAulaAsync(Guid cursoId, Guid aulaId)
         {
-            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
+            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId) ?? throw new DomainException("Curso não encontrado.");
             var aula = curso.Aulas.FirstOrDefault(a => a.Id == aulaId);
-            if (aula == null)
+            if (aula is null)
             {
                 throw new DomainException("Aula não encontrada neste curso.");
             }
@@ -88,7 +78,7 @@ namespace MBA.Conteudo.Api.Services
         public async Task<IEnumerable<AulaResultViewModel>> ObterAulasPorCursoAsync(Guid cursoId)
         {
             var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
+            if (ReferenceEquals(curso, null))
             {
                 throw new DomainException("Curso não encontrado.");
             }
@@ -99,12 +89,7 @@ namespace MBA.Conteudo.Api.Services
 
         public async Task<AulaResultViewModel> ObterAulaPorIdAsync(Guid aulaId)
         {
-            var aula = await _conteudoRepository.ObterAulaPorIdAsync(aulaId);
-            if (aula == null)
-            {
-                throw new DomainException("Aula não encontrada.");
-            }
-
+            var aula = await _conteudoRepository.ObterAulaPorIdAsync(aulaId) ?? throw new DomainException("Aula não encontrada.");
             if (!aula.Ativo)
             {
                 throw new DomainException("Esta aula não está disponível.");

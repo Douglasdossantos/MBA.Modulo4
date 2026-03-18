@@ -6,7 +6,7 @@ namespace MBA.Conteudo.Api.MigrationHelp
 {
     public static class DbMigrationHelper
     {
-        private static ConteudoContext _conteudoContext = null;
+        private static ConteudoContext? _conteudoContext;
 
         public static async Task AutocarregamentoDadosAsync(WebApplication app)
         {

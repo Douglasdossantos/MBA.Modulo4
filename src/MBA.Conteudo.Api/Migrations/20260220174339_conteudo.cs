@@ -5,7 +5,7 @@
 namespace MBA.Conteudo.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class conteudo : Migration
+    public partial class Conteudo : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
