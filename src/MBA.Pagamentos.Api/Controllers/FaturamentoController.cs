@@ -28,7 +28,7 @@ public class FaturamentoController(IAppIdentityUser appIdentityUser,
         try
         {
            
-            if (pagamentoViewModel.MatriculaCursoId == null) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.NotFound, ["Matrícula do curso não encontrada"]); }
+            if (pagamentoViewModel.MatriculaCursoId == default) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.NotFound, ["Matrícula do curso não encontrada"]); }
 
             var comando = new RealizarPagamentoCommand(
                 pagamentoViewModel.MatriculaCursoId,

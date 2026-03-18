@@ -5,8 +5,8 @@ namespace MBA.Conteudo.Api.Models.ValueObjects
     public class ConteudoProgramatico
     {
 
-        public string Finalidade { get; }
-        public string Ementa { get; }
+        public string Finalidade { get; } = string.Empty;
+        public string Ementa { get; } = string.Empty;
 
         // EF Constructor
         protected ConteudoProgramatico() { }
@@ -36,13 +36,13 @@ namespace MBA.Conteudo.Api.Models.ValueObjects
             return HashCode.Combine(Finalidade, Ementa);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is not ConteudoProgramatico other) return false;
             return Finalidade == other.Finalidade && Ementa == other.Ementa;
         }
 
-        private void ValidarIntegridadeConteudoProgramatico(string novaFinalidade = null, string novaEmenta = null)
+        private void ValidarIntegridadeConteudoProgramatico(string novaFinalidade = "", string novaEmenta = "")
         {
             var finalidade = novaFinalidade ?? Finalidade;
             var ementa = novaEmenta ?? Ementa;

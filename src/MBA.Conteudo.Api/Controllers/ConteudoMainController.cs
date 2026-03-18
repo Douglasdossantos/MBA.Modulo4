@@ -23,7 +23,7 @@ namespace MBA.Conteudo.Api.Controllers
         {
         }
 
-        protected IActionResult GenerateResponse(object? data, ResponseTypeEnum responseType, HttpStatusCode statusCode, List<string>? errors = null)
+        protected IActionResult GenerateResponse(object data, ResponseTypeEnum responseType, HttpStatusCode statusCode, List<string>? errors = null)
         {
             var response = new ApiResponse<object>
             {
@@ -43,7 +43,7 @@ namespace MBA.Conteudo.Api.Controllers
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            return GenerateResponse(null, responseType, statusCode, errors);
+            return GenerateResponse(new object(), responseType, statusCode, errors);
         }
 
         protected IActionResult GenerateDomainExceptionResponse(object data, ResponseTypeEnum responseType, HttpStatusCode statusCode, DomainException exception)

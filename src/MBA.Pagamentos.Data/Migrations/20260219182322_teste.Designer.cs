@@ -12,7 +12,7 @@ namespace MBA.Pagamentos.Data.Migrations
 {
     [DbContext(typeof(FaturamentoDbContext))]
     [Migration("20260219182322_teste")]
-    partial class teste
+    partial class Teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
