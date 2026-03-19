@@ -11,13 +11,13 @@ namespace MBA.Bff.Api.Controllers
 {
     [Authorize]
     public class AlunoController(
-    IAlunoService alunoService,
+    IAlunoExternalService alunoService,
     IAppIdentityUser appIdentityUser,
     INotificationHandler<DomainNotificacaoRaiz> notifications,
     IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
     {
         
-        private readonly IAlunoService _alunoService = alunoService;
+        private readonly IAlunoExternalService _alunoService = alunoService;
 
         [HttpGet]
         [Route("Aluno/Exemple")]

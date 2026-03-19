@@ -6,29 +6,25 @@ using MBA.Core.DomainObjects;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace MBA.Conteudo.Api.Controllers
 {
-	//[Authorize]
+	[Authorize]
 	[ApiController]
 	[Route("api/[controller]")]
-	public class AulaController : ConteudoMainController
+	public class AulaController(
+        IAulaAppService aulaAppService,
+        IAppIdentityUser aspNetUser,
+        INotificationHandler<DomainNotificacaoRaiz> notifications,
+        IMediatorHandler mediatorHandler) : ConteudoMainController(aspNetUser, notifications, mediatorHandler)
 	{
-		private readonly IAulaAppService _aulaAppService;
+		private readonly IAulaAppService _aulaAppService = aulaAppService;
 
-		public AulaController(
-			IAulaAppService aulaAppService,
-			IAppIdentityUser aspNetUser,
-			INotificationHandler<DomainNotificacaoRaiz> notifications,
-			IMediatorHandler mediatorHandler) : base(aspNetUser, notifications, mediatorHandler)
-		{
-			_aulaAppService = aulaAppService;
-		}
-
-		//[ClaimsAuthorize("Aulas", "AD")]
-		[HttpPost("{cursoId}")]
+        //[ClaimsAuthorize("Aulas", "AD")]
+        [HttpPost("{cursoId}")]
 		public async Task<IActionResult> AdicionarAula(Guid cursoId, [FromBody] AdicionarAulaViewModel aulaViewModel)
 		{
 			if (!ModelState.IsValid)
@@ -106,7 +102,6 @@ namespace MBA.Conteudo.Api.Controllers
 			}
 		}
 
-		//[Authorize]
 		[HttpGet("curso/{cursoId}/aulas")]
 		public async Task<IActionResult> ObterAulasPorCurso(Guid cursoId)
 		{
@@ -125,7 +120,6 @@ namespace MBA.Conteudo.Api.Controllers
 			}
 		}
 
-		// [Authorize]
 		[HttpGet("/api/Aulas")]
 		public async Task<IActionResult> ObterTodasAulas()
 		{
@@ -144,7 +138,6 @@ namespace MBA.Conteudo.Api.Controllers
 			}
 		}
 
-		//[Authorize]
 		[HttpGet("{aulaId}")]
 		public async Task<IActionResult> ObterAulaPorId(Guid aulaId)
 		{

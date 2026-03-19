@@ -13,7 +13,10 @@ using System.Net;
 
 namespace MBA.Conteudo.Api.Controllers
 {
-    public abstract class ConteudoMainController : MainController
+    public abstract class ConteudoMainController(
+        IAppIdentityUser appIdentityUser,
+        INotificationHandler<DomainNotificacaoRaiz> notifications,
+        IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
     {
         protected ConteudoMainController(
             IAppIdentityUser appIdentityUser,
@@ -29,7 +32,7 @@ namespace MBA.Conteudo.Api.Controllers
             {
                 Success = responseType == ResponseTypeEnum.Success,
                 Data = data,
-                Errors = errors ?? new List<string>(),
+                Errors = errors ?? [],
                 StatusCode = (int)statusCode
             };
 

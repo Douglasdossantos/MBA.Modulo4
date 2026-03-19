@@ -14,21 +14,16 @@ namespace MBA.Conteudo.Api.Controllers
 	//[Authorize]
 	[Route("api/[controller]")]
 	[ApiController]
-	public class CursoController : ConteudoMainController
+	public class CursoController(
+        ICursoAppService cursoAppService,
+        IAppIdentityUser aspNetUser,
+        INotificationHandler<DomainNotificacaoRaiz> notifications,
+        IMediatorHandler mediatorHandler) : ConteudoMainController(aspNetUser, notifications, mediatorHandler)
 	{
-		private readonly ICursoAppService _cursoAppService;
+		private readonly ICursoAppService _cursoAppService = cursoAppService;
 
-		public CursoController(
-			ICursoAppService cursoAppService,
-			IAppIdentityUser aspNetUser,
-			INotificationHandler<DomainNotificacaoRaiz> notifications,
-			IMediatorHandler mediatorHandler) : base(aspNetUser, notifications, mediatorHandler)
-		{
-			_cursoAppService = cursoAppService;
-		}
-
-		//[ClaimsAuthorize("Cursos", "AD")]
-		[HttpPost]
+        //[ClaimsAuthorize("Cursos", "AD")]
+        [HttpPost]
 		public async Task<IActionResult> CadastrarCurso([FromBody] CadastroCursoViewModel cadastroCursoViewModel)
 		{
 			if (!ModelState.IsValid)

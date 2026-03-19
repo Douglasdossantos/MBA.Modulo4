@@ -1,5 +1,5 @@
-﻿using MBA.Core.SharedDto;
-using SaberOnline.Core.Messages;
+﻿using MBA.Core.Messages;
+using MBA.Core.SharedDto;
 
 
 namespace MBA.Messages.FaturamentoCommands;

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SaberOnline.Faturamento.Data.Configurations;
+namespace MBA.Pagamentos.Data.Configurations;
 
 [ExcludeFromCodeCoverage]
 public class FaturamentoConfiguration : IEntityTypeConfiguration<Pagamento>

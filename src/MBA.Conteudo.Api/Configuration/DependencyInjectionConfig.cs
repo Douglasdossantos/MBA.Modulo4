@@ -3,6 +3,7 @@ using MBA.Conteudo.Api.Data.Repository;
 using MBA.Conteudo.Api.Models.Interfaces;
 using MBA.Conteudo.Api.Services;
 using MBA.Conteudo.Api.Services.Interfaces;
+using MBA.Core.Autentications;
 using MBA.Core.DomainHadlers;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
@@ -30,8 +31,10 @@ namespace MBA.Conteudo.Api.Configuration
             // AutoMapper
                 services.AddAutoMapper(typeof(DependencyInjectionConfig).Assembly);
 
+            services.AddScoped<IAppIdentityUser, AppIdentityUser>();
+
             // Mediator (core notifications/comandos/eventos de domínio)
-                services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MediatorHandler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MediatorHandler).Assembly));
                 services.AddScoped<IMediatorHandler, MediatorHandler>();
                 services.AddScoped<INotificationHandler<DomainNotificacaoRaiz>, DomainNotificacaoHandler>();
         }

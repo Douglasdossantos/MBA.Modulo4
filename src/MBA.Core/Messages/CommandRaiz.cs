@@ -1,7 +1,7 @@
 ﻿using MediatR;
-
 using FluentValidation.Results;
-namespace SaberOnline.Core.Messages
+
+namespace MBA.Core.Messages
 {
     public abstract class CommandRaiz : IRequest<bool>
     {

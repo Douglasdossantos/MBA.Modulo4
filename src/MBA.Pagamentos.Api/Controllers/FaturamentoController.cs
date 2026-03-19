@@ -10,7 +10,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace SaberOnline.Api.Controllers.Faturamento;
+namespace MBA.Pagamentos.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

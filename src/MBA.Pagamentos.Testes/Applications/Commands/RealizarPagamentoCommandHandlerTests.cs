@@ -6,10 +6,10 @@ using MBA.Core.Messages;
 using MBA.Core.Messages.FaturamentoEvents;
 using MBA.Core.SharedDto;
 using MBA.Messages.FaturamentoCommands;
+using MBA.Pagamentos.Application.Commands.RealizarPagamento;
 using MBA.Pagamentos.Domain.Entities;
 using MBA.Pagamentos.Domain.ValueObjects;
 using Moq;
-using SaberOnline.Application.Commands.RealizarPagamento;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MBA.Pagamentos.Testes.Applications.Commands;

@@ -6,16 +6,10 @@ using MBA.Core.DomainObjects;
 
 namespace MBA.Conteudo.Api.Services
 {
-    public class AulaAppService : IAulaAppService
+    public class AulaAppService(IConteudoRepository conteudoRepository, IMapper mapper) : IAulaAppService
     {
-        private readonly IConteudoRepository _conteudoRepository;
-        private readonly IMapper _mapper;
-
-        public AulaAppService(IConteudoRepository conteudoRepository, IMapper mapper)
-        {
-            _conteudoRepository = conteudoRepository;
-            _mapper = mapper;
-        }
+        private readonly IConteudoRepository _conteudoRepository = conteudoRepository;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<Guid> AdicionarAulaAsync(Guid cursoId, AdicionarAulaViewModel viewModel)
         {

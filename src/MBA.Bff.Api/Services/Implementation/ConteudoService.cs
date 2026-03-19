@@ -1,27 +1,28 @@
-﻿using MBA.Bff.Api.Extensions;
-using MBA.Bff.Api.Services.Interface;
-using Microsoft.Extensions.Options;
+﻿using MBA.Bff.Api.Services.Interface;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MBA.Bff.Api.Services.Implementation
 {
-    public class ConteudoService : Service, IConteudoService
+    public class ConteudoService(IConteudoExternalServiceService conteudoService): IConteudoService
     {
-        private readonly HttpClient _httpClient;
-
-        public ConteudoService(HttpClient httpClient, IOptions<AppServicesSettings> settings)
+        private readonly IConteudoExternalServiceService _conteudoService = conteudoService;
+        
+        
+        public async Task<IActionResult> ObterAulaPorId(Guid aulaId)
         {
-            _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri(settings.Value.AlunoUrl);
+            var response = await _conteudoService.ObterAulaPorId(aulaId);
+
+            if (response == null)
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            return new ContentResult
+            {
+                Content = content,
+                StatusCode = (int)response.StatusCode,
+                ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json"
+            };
         }
-
-
-        //public async Task<ExemploDTO> Obter()
-        //{
-        //    var response = await _httpClient.GetAsync("/Exemplo/");
-
-        //    TratarErrosResponse(response);
-
-        //    return await DeserializarObjetoResponse<ExemploDTO>(response);
-        //}
     }
 }

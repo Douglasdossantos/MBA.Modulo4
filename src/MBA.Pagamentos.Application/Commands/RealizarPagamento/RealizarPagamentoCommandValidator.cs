@@ -3,7 +3,7 @@ using MBA.Messages.FaturamentoCommands;
 
 
 
-namespace SaberOnline.Application.Application.Commands.RealizarPagamento;
+namespace MBA.Pagamentos.Application.Commands.RealizarPagamento;
 public class RealizarPagamentoCommandValidator : AbstractValidator<RealizarPagamentoCommand>
 {
     public RealizarPagamentoCommandValidator()
