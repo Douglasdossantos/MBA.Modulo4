@@ -10,12 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace MBA.Bff.Api.Controllers
 {
     [Authorize]
-    public class PagamentoController(IPagamentoService pagamentoService,
+    public class PagamentoController(IPagamentoExternalService pagamentoService,
     IAppIdentityUser appIdentityUser,
     INotificationHandler<DomainNotificacaoRaiz> notifications,
     IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
     {
-        private readonly IPagamentoService _pagamentoService = pagamentoService;
+        private readonly IPagamentoExternalService _pagamentoService = pagamentoService;
 
         [HttpGet]
         [Route("Pagamento/Exemple")]

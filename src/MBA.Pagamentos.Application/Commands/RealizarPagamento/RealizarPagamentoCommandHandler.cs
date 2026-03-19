@@ -5,10 +5,10 @@ using MBA.Messages.FaturamentoCommands;
 using MBA.Pagamentos.Domain.Entities;
 using MBA.Pagamentos.Domain.ValueObjects;
 using MediatR;
-using SaberOnline.Application.Application.Commands.RealizarPagamento;
 
 
-namespace SaberOnline.Application.Commands.RealizarPagamento;
+
+namespace MBA.Pagamentos.Application.Commands.RealizarPagamento;
 public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoRepository,
     IMediatorHandler mediatorHandler) : IRequestHandler<RealizarPagamentoCommand, bool>
 {

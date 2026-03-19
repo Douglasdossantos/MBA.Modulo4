@@ -6,25 +6,14 @@ using MBA.Core.DomainObjects;
 
 namespace MBA.Conteudo.Api.Services
 {
-    public class AulaAppService : IAulaAppService
+    public class AulaAppService(IConteudoRepository conteudoRepository, IMapper mapper) : IAulaAppService
     {
-        private readonly IConteudoRepository _conteudoRepository;
-        private readonly IMapper _mapper;
-
-        public AulaAppService(IConteudoRepository conteudoRepository, IMapper mapper)
-        {
-            _conteudoRepository = conteudoRepository;
-            _mapper = mapper;
-        }
+        private readonly IConteudoRepository _conteudoRepository = conteudoRepository;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<Guid> AdicionarAulaAsync(Guid cursoId, AdicionarAulaViewModel viewModel)
         {
-            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
+            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId) ?? throw new DomainException("Curso não encontrado.");
             if (!curso.Ativo)
             {
                 throw new DomainException("Não é possível adicionar aulas a um curso inativo.");
@@ -43,17 +32,8 @@ namespace MBA.Conteudo.Api.Services
 
         public async Task AtualizarAulaAsync(Guid cursoId, AtualizarAulaViewModel viewModel)
         {
-            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
-            var aula = curso.Aulas.FirstOrDefault(a => a.Id == viewModel.Id);
-            if (aula == null)
-            {
-                throw new DomainException("Aula não encontrada neste curso.");
-            }
+            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId) ?? throw new DomainException("Curso não encontrado.");
+            var aula = curso.Aulas.FirstOrDefault(a => a.Id == viewModel.Id) ?? throw new DomainException("Aula não encontrada neste curso.");
 
             // Atualizar os dados da aula
             curso.AlterarDescricaoAula(viewModel.Id, viewModel.Descricao);
@@ -67,18 +47,8 @@ namespace MBA.Conteudo.Api.Services
 
         public async Task RemoverAulaAsync(Guid cursoId, Guid aulaId)
         {
-            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
-            var aula = curso.Aulas.FirstOrDefault(a => a.Id == aulaId);
-            if (aula == null)
-            {
-                throw new DomainException("Aula não encontrada neste curso.");
-            }
-
+            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId) ?? throw new DomainException("Curso não encontrado.");
+            var aula = curso.Aulas.FirstOrDefault(a => a.Id == aulaId) ?? throw new DomainException("Aula não encontrada neste curso.");
             curso.RemoverAula(aula);
 
             await _conteudoRepository.AtualizarAsync(curso);
@@ -87,24 +57,14 @@ namespace MBA.Conteudo.Api.Services
 
         public async Task<IEnumerable<AulaResultViewModel>> ObterAulasPorCursoAsync(Guid cursoId)
         {
-            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId);
-            if (curso == null)
-            {
-                throw new DomainException("Curso não encontrado.");
-            }
-
+            var curso = await _conteudoRepository.ObterPorIdAsync(cursoId) ?? throw new DomainException("Curso não encontrado.");
             var aulasAtivas = curso.Aulas.Where(a => a.Ativo).OrderBy(a => a.OrdemAula);
             return _mapper.Map<IEnumerable<AulaResultViewModel>>(aulasAtivas);
         }
 
         public async Task<AulaResultViewModel> ObterAulaPorIdAsync(Guid aulaId)
         {
-            var aula = await _conteudoRepository.ObterAulaPorIdAsync(aulaId);
-            if (aula == null)
-            {
-                throw new DomainException("Aula não encontrada.");
-            }
-
+            var aula = await _conteudoRepository.ObterAulaPorIdAsync(aulaId) ?? throw new DomainException("Aula não encontrada.");
             if (!aula.Ativo)
             {
                 throw new DomainException("Esta aula não está disponível.");

@@ -3,20 +3,14 @@ using MBA.WebApp.MVC.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace MBA.WebApp.MVC.Controllers
 {
-    public class IdentidadeController : MainController
+    public class IdentidadeController(IAutenticacaoService autenticacaoService) : MainController
     {
-        private readonly IAutenticacaoService _autenticacaoService;
-
-        public IdentidadeController(IAutenticacaoService autenticacaoService)
-        {
-            _autenticacaoService = autenticacaoService;
-        }
+        private readonly IAutenticacaoService _autenticacaoService = autenticacaoService;
 
         [HttpGet]
         [Route("nova-conta")]

@@ -13,23 +13,18 @@ using System.Net;
 
 namespace MBA.Conteudo.Api.Controllers
 {
-    public abstract class ConteudoMainController : MainController
+    public abstract class ConteudoMainController(
+        IAppIdentityUser appIdentityUser,
+        INotificationHandler<DomainNotificacaoRaiz> notifications,
+        IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
     {
-        protected ConteudoMainController(
-            IAppIdentityUser appIdentityUser,
-            INotificationHandler<DomainNotificacaoRaiz> notifications,
-            IMediatorHandler mediatorHandler)
-            : base(appIdentityUser, notifications, mediatorHandler)
-        {
-        }
-
-        protected IActionResult GenerateResponse(object? data, ResponseTypeEnum responseType, HttpStatusCode statusCode, List<string>? errors = null)
+        protected IActionResult GenerateResponse(object data, ResponseTypeEnum responseType, HttpStatusCode statusCode, List<string>? errors = null)
         {
             var response = new ApiResponse<object>
             {
                 Success = responseType == ResponseTypeEnum.Success,
                 Data = data,
-                Errors = errors ?? new List<string>(),
+                Errors = errors ?? [],
                 StatusCode = (int)statusCode
             };
 
@@ -43,7 +38,7 @@ namespace MBA.Conteudo.Api.Controllers
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            return GenerateResponse(null, responseType, statusCode, errors);
+            return GenerateResponse("", responseType, statusCode, errors);
         }
 
         protected IActionResult GenerateDomainExceptionResponse(object data, ResponseTypeEnum responseType, HttpStatusCode statusCode, DomainException exception)

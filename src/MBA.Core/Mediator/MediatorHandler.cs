@@ -1,7 +1,6 @@
 ﻿using FluentValidation.Results;
 using MBA.Core.Messages;
 using MediatR;
-using SaberOnline.Core.Messages;
 
 namespace MBA.Core.Mediator
 {

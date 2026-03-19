@@ -10,8 +10,6 @@ using MBA.Core.Messages.AlunoCommands;
 using MBA.Core.SharedDto.Aluno;
 using MBA.WebApi.Core.Controllers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 

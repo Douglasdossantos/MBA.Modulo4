@@ -33,7 +33,7 @@ namespace MBA.Conteudo.Api.Data.Repository
             await Task.CompletedTask;
         }
 
-        public async Task<Curso> ObterPorIdAsync(Guid id)
+        public async Task<Curso?> ObterPorIdAsync(Guid id)
         {
             return await _context.Cursos
                 .Include(c => c.ConteudoProgramatico)

@@ -14,21 +14,16 @@ namespace MBA.Conteudo.Api.Controllers
 	//[Authorize]
 	[Route("api/[controller]")]
 	[ApiController]
-	public class CursoController : ConteudoMainController
+	public class CursoController(
+        ICursoAppService cursoAppService,
+        IAppIdentityUser aspNetUser,
+        INotificationHandler<DomainNotificacaoRaiz> notifications,
+        IMediatorHandler mediatorHandler) : ConteudoMainController(aspNetUser, notifications, mediatorHandler)
 	{
-		private readonly ICursoAppService _cursoAppService;
+		private readonly ICursoAppService _cursoAppService = cursoAppService;
 
-		public CursoController(
-			ICursoAppService cursoAppService,
-			IAppIdentityUser aspNetUser,
-			INotificationHandler<DomainNotificacaoRaiz> notifications,
-			IMediatorHandler mediatorHandler) : base(aspNetUser, notifications, mediatorHandler)
-		{
-			_cursoAppService = cursoAppService;
-		}
-
-		//[ClaimsAuthorize("Cursos", "AD")]
-		[HttpPost]
+        //[ClaimsAuthorize("Cursos", "AD")]
+        [HttpPost]
 		public async Task<IActionResult> CadastrarCurso([FromBody] CadastroCursoViewModel cadastroCursoViewModel)
 		{
 			if (!ModelState.IsValid)
@@ -43,11 +38,11 @@ namespace MBA.Conteudo.Api.Controllers
 			}
 			catch (DomainException exDomain)
 			{
-				return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
+				return GenerateDomainExceptionResponse("", ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
 			}
 			catch (Exception ex)
 			{
-				return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
+				return GenerateResponse("", ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
 			}
 		}
 
@@ -62,22 +57,22 @@ namespace MBA.Conteudo.Api.Controllers
 
 			if (cursoId != atualizacaoCursoViewModel.Id)
 			{
-				return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.Forbidden,
-					new List<string> { "Você não tem permissão para realizar essa operação. Verifique sua requisição" });
+				return GenerateResponse("", ResponseTypeEnum.ValidationError, HttpStatusCode.Forbidden,
+                    ["Você não tem permissão para realizar essa operação. Verifique sua requisição"]);
 			}
 
 			try
 			{
 				await _cursoAppService.AtualizarCursoAsync(cursoId, atualizacaoCursoViewModel);
-				return GenerateResponse(null, ResponseTypeEnum.Success, HttpStatusCode.NoContent);
+				return GenerateResponse("", ResponseTypeEnum.Success, HttpStatusCode.NoContent);
 			}
 			catch (DomainException exDomain)
 			{
-				return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
+				return GenerateDomainExceptionResponse("", ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
 			}
 			catch (Exception ex)
 			{
-				return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
+				return GenerateResponse("", ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
 			}
 		}
 
@@ -88,15 +83,15 @@ namespace MBA.Conteudo.Api.Controllers
 			try
 			{
 				await _cursoAppService.DesativarCursoAsync(cursoId);
-				return GenerateResponse(null, ResponseTypeEnum.Success, HttpStatusCode.NoContent);
+				return GenerateResponse("", ResponseTypeEnum.Success, HttpStatusCode.NoContent);
 			}
 			catch (DomainException exDomain)
 			{
-				return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
+				return GenerateDomainExceptionResponse("", ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
 			}
 			catch (Exception ex)
 			{
-				return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
+				return GenerateResponse("", ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
 			}
 		}
 
@@ -111,11 +106,11 @@ namespace MBA.Conteudo.Api.Controllers
 			}
 			catch (DomainException exDomain)
 			{
-				return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.NotFound, exDomain);
+				return GenerateDomainExceptionResponse("", ResponseTypeEnum.DomainError, HttpStatusCode.NotFound, exDomain);
 			}
 			catch (Exception ex)
 			{
-				return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
+				return GenerateResponse("", ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
 			}
 		}
 
@@ -130,7 +125,7 @@ namespace MBA.Conteudo.Api.Controllers
 			}
 			catch (Exception ex)
 			{
-				return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
+				return GenerateResponse("", ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
 			}
 		}
 
@@ -145,7 +140,7 @@ namespace MBA.Conteudo.Api.Controllers
 			}
 			catch (Exception ex)
 			{
-				return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
+				return GenerateResponse("", ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
 			}
 		}
 
@@ -160,11 +155,11 @@ namespace MBA.Conteudo.Api.Controllers
 			}
 			catch (DomainException exDomain)
 			{
-				return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.NotFound, exDomain);
+				return GenerateDomainExceptionResponse("", ResponseTypeEnum.DomainError, HttpStatusCode.NotFound, exDomain);
 			}
 			catch (Exception ex)
 			{
-				return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
+				return GenerateResponse("", ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
 			}
 		}
 	}

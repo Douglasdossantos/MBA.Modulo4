@@ -10,7 +10,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace SaberOnline.Api.Controllers.Faturamento;
+namespace MBA.Pagamentos.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -27,8 +27,10 @@ public class FaturamentoController(IAppIdentityUser appIdentityUser,
 
         try
         {
-           
-            if (pagamentoViewModel.MatriculaCursoId == null) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.NotFound, ["Matrícula do curso não encontrada"]); }
+            if (pagamentoViewModel.MatriculaCursoId == default) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.NotFound, ["Matrícula do curso não encontrada"]); }
+
+            // Ensure the AlunoId from the route is used for consistency
+            pagamentoViewModel.AlunoId = alunoId;
 
             var comando = new RealizarPagamentoCommand(
                 pagamentoViewModel.MatriculaCursoId,

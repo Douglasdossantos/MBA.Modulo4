@@ -1,12 +1,12 @@
-﻿namespace MBA.Pagamentos.Api.ViewModels
+﻿namespace MBA.Bff.Api.Models.Pagamento
 {
-    public class RealizarPagamentoViewModel
+    public class AdicionarAulaViewModel
     {
         public Guid AlunoId { get; set; }
         public Guid CursoId { get; set; }
         public Guid MatriculaCursoId { get; set; }
         public bool PagamentoPodeSerRealizado { get; set; }
-        public string NomeCurso { get; set; }= string.Empty;
+        public string NomeCurso { get; set; } = string.Empty;
         public DateTime DataMatricula { get; set; }
         public DateTime? DataConclusao { get; set; }
         public string EstadoMatricula { get; set; } = string.Empty;
