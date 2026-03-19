@@ -13,7 +13,7 @@ namespace MBA.Conteudo.Api.Models.Interfaces
         Task<bool> ExisteCursoComMesmoNomeAsync(string nome);
 
         Task AdicionarAulaAsync(Aula aula);
-        Task<Aula> ObterAulaPorIdAsync(Guid aulaId);
+        Task<Aula?> ObterAulaPorIdAsync(Guid aulaId);
         Task<IEnumerable<Aula>> ObterTodasAulasAsync();
     }
 }

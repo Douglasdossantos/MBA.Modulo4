@@ -46,7 +46,7 @@ public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoR
         var pagamento = resultado.Pagamento;
 
         // 4️⃣ BLOQUEIO SOMENTE se já estiver APROVADO
-        if (pagamento != null && pagamento.PossuiPagamentoAprovado())
+        if (pagamento is not null && pagamento.PossuiPagamentoAprovado())
         {
             await _mediatorHandler.PublicarNotificacaoDominio(
                 new DomainNotificacaoRaiz(

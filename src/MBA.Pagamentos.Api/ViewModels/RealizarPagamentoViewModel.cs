@@ -6,8 +6,8 @@
         public Guid CursoId { get; set; }
         public Guid MatriculaCursoId { get; set; }
         public bool PagamentoPodeSerRealizado { get; set; }
-        public string NomeCurso { get; set; }= string.Empty;
-        public DateTime DataMatricula { get; set; }
+        public string NomeCurso { get; set; } = string.Empty;
+        public DateTime DataMatricula { get; set; } = new();
         public DateTime? DataConclusao { get; set; }
         public string EstadoMatricula { get; set; } = string.Empty;
         public decimal Valor { get; set; }

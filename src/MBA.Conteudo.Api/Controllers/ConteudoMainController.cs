@@ -18,6 +18,14 @@ namespace MBA.Conteudo.Api.Controllers
         INotificationHandler<DomainNotificacaoRaiz> notifications,
         IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
     {
+        protected ConteudoMainController(
+            IAppIdentityUser appIdentityUser,
+            INotificationHandler<DomainNotificacaoRaiz> notifications,
+            IMediatorHandler mediatorHandler)
+            : base(appIdentityUser, notifications, mediatorHandler)
+        {
+        }
+
         protected IActionResult GenerateResponse(object data, ResponseTypeEnum responseType, HttpStatusCode statusCode, List<string>? errors = null)
         {
             var response = new ApiResponse<object>
@@ -38,7 +46,7 @@ namespace MBA.Conteudo.Api.Controllers
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            return GenerateResponse("", responseType, statusCode, errors);
+            return GenerateResponse(new object(), responseType, statusCode, errors);
         }
 
         protected IActionResult GenerateDomainExceptionResponse(object data, ResponseTypeEnum responseType, HttpStatusCode statusCode, DomainException exception)

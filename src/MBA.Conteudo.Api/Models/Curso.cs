@@ -8,10 +8,10 @@ namespace MBA.Conteudo.Api.Models
     {
 
         #region Atributos
-        public string Nome { get; private set; }
-        public decimal Valor { get; private set; }
-        public bool Ativo { get; private set; }
-        public DateTime? ValidoAte { get; private set; }
+        public string Nome { get; private set; } = string.Empty;
+        public decimal Valor { get; private set; } = new();
+        public bool Ativo { get; private set; } = new();
+        public DateTime? ValidoAte { get; private set; } = new();
 
         public ConteudoProgramatico ConteudoProgramatico { get; private set; }
 
@@ -21,7 +21,8 @@ namespace MBA.Conteudo.Api.Models
         // EF Constructor
         protected Curso()
         {
-            _aulas = new List<Aula>();
+            ConteudoProgramatico = new ConteudoProgramatico(string.Empty, string.Empty);
+            _aulas = [];
         }
 
         public Curso(string nome,
@@ -47,8 +48,7 @@ namespace MBA.Conteudo.Api.Models
         public Aula ObterAulaPeloId(Guid aulaId)
         {
             var aula = _aulas.FirstOrDefault(a => a.Id == aulaId);
-            if (aula == null) { throw new DomainException("Aula não encontrada"); }
-            return aula;
+            return aula is null ? throw new DomainException("Aula não encontrada") : aula;
         }
 
         public void AtivarCurso() => Ativo = true;
@@ -129,7 +129,7 @@ namespace MBA.Conteudo.Api.Models
             aula.AlterarUrl(url);
         }
 
-        private void ValidarIntegridadeCurso(string novoNome = null, decimal? novoValor = null, DateTime? novoValidoAte = null, ConteudoProgramatico novoConteudoProgramatico = null)
+        private void ValidarIntegridadeCurso(string novoNome = "", decimal? novoValor = null, DateTime? novoValidoAte = null, ConteudoProgramatico? novoConteudoProgramatico = null)
         {
             var nome = novoNome ?? Nome;
             var valor = novoValor ?? Valor;

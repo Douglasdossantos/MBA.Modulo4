@@ -72,7 +72,7 @@ namespace MBA.Conteudo.Api.Data.Repository
             await _context.Aulas.AddAsync(aula);
         }
 
-        public async Task<Aula> ObterAulaPorIdAsync(Guid aulaId)
+        public async Task<Aula?> ObterAulaPorIdAsync(Guid aulaId)
         {
             return await _context.Aulas
                 .AsNoTracking()

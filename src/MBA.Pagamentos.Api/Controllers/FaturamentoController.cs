@@ -27,10 +27,8 @@ public class FaturamentoController(IAppIdentityUser appIdentityUser,
 
         try
         {
+           
             if (pagamentoViewModel.MatriculaCursoId == default) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.NotFound, ["Matrícula do curso não encontrada"]); }
-
-            // Ensure the AlunoId from the route is used for consistency
-            pagamentoViewModel.AlunoId = alunoId;
 
             var comando = new RealizarPagamentoCommand(
                 pagamentoViewModel.MatriculaCursoId,
