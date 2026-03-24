@@ -1,8 +1,8 @@
-﻿using MBA.Conteudo.Api.Data;
-using MBA.Conteudo.Api.Data.Repository;
-using MBA.Conteudo.Api.Models.Interfaces;
-using MBA.Conteudo.Api.Services;
-using MBA.Conteudo.Api.Services.Interfaces;
+﻿
+using MBA.Conteudo.Application.Services;
+using MBA.Conteudo.Data;
+using MBA.Conteudo.Data.Repository;
+using MBA.Conteudo.Domain.Interfaces;
 using MBA.Core.Autentications;
 using MBA.Core.DomainHadlers;
 using MBA.Core.Mediator;

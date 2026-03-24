@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ApiExplorer" Version="2.3.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.23" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.23" />
@@ -20,8 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MBA.Conteudo.Application\MBA.Conteudo.Application.csproj" />
+    <ProjectReference Include="..\MBA.Conteudo.Data\MBA.Conteudo.Data.csproj" />
     <ProjectReference Include="..\MBA.Core\MBA.Core.csproj" />
     <ProjectReference Include="..\MBA.WebApi.Core\MBA.WebApi.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>

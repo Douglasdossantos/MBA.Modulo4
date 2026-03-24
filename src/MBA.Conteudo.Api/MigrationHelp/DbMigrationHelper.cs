@@ -1,5 +1,6 @@
-using MBA.Conteudo.Api.Data;
-using Microsoft.AspNetCore.Hosting;
+
+using MBA.Conteudo.Data;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace MBA.Conteudo.Api.MigrationHelp
@@ -24,7 +25,7 @@ namespace MBA.Conteudo.Api.MigrationHelp
             if (env.IsDevelopment())
             {
                 await _conteudoContext.Database.MigrateAsync();
-                _conteudoContext.Seed();
+                //_conteudoContext.Seed();
             }
         }
     }

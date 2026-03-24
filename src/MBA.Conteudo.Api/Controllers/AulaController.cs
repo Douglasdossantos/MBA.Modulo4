@@ -1,160 +1,95 @@
-﻿using MBA.Conteudo.Api.Enumerators;
-using MBA.Conteudo.Api.Services.Interfaces;
-using MBA.Conteudo.Api.ViewModels;
-using MBA.Core.Autentications;
-using MBA.Core.DomainObjects;
-using MBA.Core.Mediator;
-using MBA.Core.Messages;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using AutoMapper;
+using MBA.Core.Autentications;
+using MBA.Conteudo.Application.Services;
+using MBA.Core.Messages;
+using MBA.Core.Mediator;
+using MBA.WebApi.Core.Controllers;
+using MBA.API.ViewModels;
+using MBA.Core.Enumerators;
+using MBA.Core.SharedDto;
+using MBA.Core.DomainObjects;
 
-namespace MBA.Conteudo.Api.Controllers
+namespace MBA.API.Controllers.Conteudo;
+
+
+[ApiController]
+[Route("api/[controller]")]
+public class AulaController(IAulaAppService aulaAppService,
+    IMapper mapper,
+    IAppIdentityUser appIdentityUser,
+    INotificationHandler<DomainNotificacaoRaiz> notifications,
+    IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
 {
-	[Authorize]
-	[ApiController]
-	[Route("api/[controller]")]
-	public class AulaController(
-        IAulaAppService aulaAppService,
-        IAppIdentityUser aspNetUser,
-        INotificationHandler<DomainNotificacaoRaiz> notifications,
-        IMediatorHandler mediatorHandler) : ConteudoMainController(aspNetUser, notifications, mediatorHandler)
-	{
-		private readonly IAulaAppService _aulaAppService = aulaAppService;
+    private readonly IAulaAppService _aulaAppService = aulaAppService;
+    private readonly IMapper _mapper = mapper;
 
-        //[ClaimsAuthorize("Aulas", "AD")]
-        [HttpPost("{cursoId}")]
-		public async Task<IActionResult> AdicionarAula(Guid cursoId, [FromBody] AdicionarAulaViewModel aulaViewModel)
-		{
-			if (!ModelState.IsValid)
-			{
-				return GenerateModelStateResponse(ResponseTypeEnum.ValidationError, HttpStatusCode.BadRequest, ModelState);
-			}
+    //[ClaimsAuthorize("Aulas", "AD")]
+    [HttpPost("{cursoId}")]
+    public async Task<IActionResult> AdicionarAula(Guid cursoId, [FromBody] AulaViewModel aulaViewModel)
+    {
+        if (!ModelState.IsValid) { return GenerateModelStateResponse(ResponseTypeEnum.ValidationError, HttpStatusCode.BadRequest, ModelState); }
+        if (cursoId != aulaViewModel.CursoId) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.Forbidden, ["Você não tem permissão para realizar essa operação. Verifique sua requisição"]); }
 
-			if (cursoId != aulaViewModel.CursoId)
-			{
-				return GenerateResponse(new object(), ResponseTypeEnum.ValidationError, HttpStatusCode.BadRequest,
-                    ["O cursoId da rota deve ser igual ao cursoId enviado no corpo da requisição."]);
-			}
+        try
+        {
+            var dto = _mapper.Map<AulaDto>(aulaViewModel);
+            var aulaId = await _aulaAppService.AdicionarAulaAsync(cursoId, dto);
+            return GenerateResponse(new { AulaId = aulaId }, ResponseTypeEnum.Success, HttpStatusCode.Created);
+        }
+        catch (DomainException exDomain)
+        {
+            return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
+        }
+        catch (Exception ex)
+        {
+            return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, [ex.Message]);
+        }
+    }
 
-			try
-			{
-				var aulaId = await _aulaAppService.AdicionarAulaAsync(cursoId, aulaViewModel);
-				return GenerateResponse(new { AulaId = aulaId }, ResponseTypeEnum.Success, HttpStatusCode.Created);
-			}
-			catch (DomainException exDomain)
-			{
-				return GenerateDomainExceptionResponse(new object(), ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
-			}
-			catch (Exception ex)
-			{
-				return GenerateResponse(new object(), ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, new List<string> { ex.Message });
-			}
-		}
+   // [ClaimsAuthorize("Aulas", "AT")]
+    [HttpPut("{cursoId}")]
+    public async Task<IActionResult> AtualizarAula(Guid cursoId, [FromBody] AulaViewModel aulaViewModel)
+    {
+        if (!ModelState.IsValid) { return GenerateModelStateResponse(ResponseTypeEnum.ValidationError, HttpStatusCode.BadRequest, ModelState); }
+        if (cursoId != aulaViewModel.CursoId) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.Forbidden, ["Você não tem permissão para realizar essa operação. Verifique sua requisição"]); }
 
-		// [ClaimsAuthorize("Aulas", "AT")]
-		[HttpPut("{cursoId}")]
-		public async Task<IActionResult> AtualizarAula(Guid cursoId, [FromBody] AtualizarAulaViewModel aulaViewModel)
-		{
-			if (!ModelState.IsValid)
-			{
-				return GenerateModelStateResponse(ResponseTypeEnum.ValidationError, HttpStatusCode.BadRequest, ModelState);
-			}
+        try
+        {
+            var dto = _mapper.Map<AulaDto>(aulaViewModel);
+            await _aulaAppService.AtualizarAulaAsync(cursoId, dto);
+            return GenerateResponse(null, ResponseTypeEnum.Success, HttpStatusCode.NoContent);
+        }
+        catch (DomainException exDomain)
+        {
+            return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
+        }
+        catch (Exception ex)
+        {
+            return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, [ex.Message]);
+        }
 
-			if (cursoId != aulaViewModel.CursoId)
-			{
-				return GenerateResponse(new object(), ResponseTypeEnum.ValidationError, HttpStatusCode.BadRequest,
-					new List<string> { "O cursoId da rota deve ser igual ao cursoId enviado no corpo da requisição." });
-			}
+    }
 
-			try
-			{
-				await _aulaAppService.AtualizarAulaAsync(cursoId, aulaViewModel);
-				return GenerateResponse(new object(), ResponseTypeEnum.Success, HttpStatusCode.NoContent);
-			}
-			catch (DomainException exDomain)
-			{
-				return GenerateDomainExceptionResponse(new object(), ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
-			}
-			catch (Exception ex)
-			{
-				return GenerateResponse(new object(), ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, new List<string> { ex.Message });
-			}
-		}
-
-		//[ClaimsAuthorize("Aulas", "RM")]
-		[HttpDelete("{cursoId}/remover/{aulaId}")]
-		public async Task<IActionResult> RemoverAula(Guid cursoId, Guid aulaId)
-		{
-			try
-			{
-				await _aulaAppService.RemoverAulaAsync(cursoId, aulaId);
-				return GenerateResponse(new object(), ResponseTypeEnum.Success, HttpStatusCode.NoContent);
-			}
-			catch (DomainException exDomain)
-			{
-				return GenerateDomainExceptionResponse(new object(), ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
-			}
-			catch (Exception ex)
-			{
-				return GenerateResponse(new object(), ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, [ex.Message]);
-			}
-		}
-
-		[HttpGet("curso/{cursoId}/aulas")]
-		public async Task<IActionResult> ObterAulasPorCurso(Guid cursoId)
-		{
-			try
-			{
-				var aulas = await _aulaAppService.ObterAulasPorCursoAsync(cursoId);
-				return GenerateResponse(aulas, ResponseTypeEnum.Success, HttpStatusCode.OK);
-			}
-			catch (DomainException exDomain)
-			{
-				return GenerateDomainExceptionResponse(new object(), ResponseTypeEnum.DomainError, HttpStatusCode.NotFound, exDomain);
-			}
-			catch (Exception ex)
-			{
-				return GenerateResponse(new object(), ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
-			}
-		}
-
-		[HttpGet("/api/Aulas")]
-		public async Task<IActionResult> ObterTodasAulas()
-		{
-			try
-			{
-				var aulas = await _aulaAppService.ObterTodasAulasAsync();
-				return GenerateResponse(aulas, ResponseTypeEnum.Success, HttpStatusCode.OK);
-			}
-			catch (DomainException exDomain)
-			{
-				return GenerateDomainExceptionResponse(new object(), ResponseTypeEnum.DomainError, HttpStatusCode.NotFound, exDomain);
-			}
-			catch (Exception ex)
-			{
-				return GenerateResponse(new object(), ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
-			}
-		}
-
-		[HttpGet("{aulaId}")]
-		public async Task<IActionResult> ObterAulaPorId(Guid aulaId)
-		{
-			try
-			{
-				var aula = await _aulaAppService.ObterAulaPorIdAsync(aulaId);
-				return GenerateResponse(aula, ResponseTypeEnum.Success, HttpStatusCode.OK);
-			}
-			catch (DomainException exDomain)
-			{
-				return GenerateDomainExceptionResponse(new object(), ResponseTypeEnum.DomainError, HttpStatusCode.NotFound, exDomain);
-			}
-			catch (Exception ex)
-			{
-				return GenerateResponse(new object(), ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, new List<string> { ex.Message });
-			}
-		}
-	}
+    ///[ClaimsAuthorize("Aulas", "RM")]
+    [HttpDelete("{cursoId}/remover/{aulaId}")]
+    public async Task<IActionResult> RemoverAula(Guid cursoId, Guid aulaId)
+    {
+        try
+        {
+            await _aulaAppService.RemoverAulaAsync(cursoId, aulaId);
+            return GenerateResponse(null, ResponseTypeEnum.Success, HttpStatusCode.NoContent);
+        }
+        catch (DomainException exDomain)
+        {
+            return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
+        }
+        catch (Exception ex)
+        {
+            return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, [ex.Message]);
+        }
+    }
 }
-
