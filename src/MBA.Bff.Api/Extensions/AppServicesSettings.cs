@@ -5,5 +5,6 @@
         public string AlunoUrl { get; set; }
         public string ConteudoUrl { get; set; }
         public string PagamentoUrl { get; set; }
+        public string AutenticacaoUrl { get; set; }
     }
 }

@@ -5,13 +5,15 @@ using MBA.Core.Autentications;
 using MBA.Core.DomainObjects;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
+using MBA.WebApi.Core.Identidade;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace MBA.Conteudo.Api.Controllers
 {
-	//[Authorize]
+	[Authorize]
 	[Route("api/[controller]")]
 	[ApiController]
 	public class CursoController(
@@ -33,7 +35,15 @@ namespace MBA.Conteudo.Api.Controllers
 
 			try
 			{
-				var cursoId = await _cursoAppService.CadastrarCursoAsync(cadastroCursoViewModel);
+
+				var curso = new CursoViewModel { 
+					Ativo= true, 
+					Nome = cadastroCursoViewModel.Nome, 
+					Valor = cadastroCursoViewModel.Valor, 
+					ValidoAte = cadastroCursoViewModel.ValidoAte, 
+					ConteudoProgramatico = cadastroCursoViewModel.ConteudoProgramatico };
+
+                var cursoId = await _cursoAppService.CadastrarCursoAsync(curso);
 				return GenerateResponse(new { CursoId = cursoId }, ResponseTypeEnum.Success, HttpStatusCode.Created);
 			}
 			catch (DomainException exDomain)

@@ -18,13 +18,6 @@ namespace MBA.Conteudo.Api.Controllers
         INotificationHandler<DomainNotificacaoRaiz> notifications,
         IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
     {
-        protected ConteudoMainController(
-            IAppIdentityUser appIdentityUser,
-            INotificationHandler<DomainNotificacaoRaiz> notifications,
-            IMediatorHandler mediatorHandler)
-            : base(appIdentityUser, notifications, mediatorHandler)
-        {
-        }
 
         protected IActionResult GenerateResponse(object data, ResponseTypeEnum responseType, HttpStatusCode statusCode, List<string>? errors = null)
         {
