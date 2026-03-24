@@ -9,14 +9,14 @@ namespace MBA.Conteudo.Domain.Entities
     {
         #region Atributos
         public Guid CursoId { get; private set; }
-        public string Descricao { get; private set; }
+        public string Descricao { get; private set; } = string.Empty;
         public bool Ativo { get; private set; }
         public short CargaHoraria { get; private set; }
         public byte OrdemAula { get; private set; }
-        public string Url { get; private set; }
+        public string Url { get; private set; } = string.Empty;
 
         [JsonIgnore]
-        public Curso Curso { get; set; }
+        public Curso? Curso { get; set; }
 
         protected Aula() { }
         public Aula(Guid cursoId,
@@ -64,7 +64,7 @@ namespace MBA.Conteudo.Domain.Entities
             Url = url;
         }
 
-        private void ValidarIntegridadeAula(string novaDescricao = null, short? novaCargaHoraria = null, byte? novaOrdemAula = null, string novoUrl = null)
+        private void ValidarIntegridadeAula(string novaDescricao = "", short? novaCargaHoraria = null, byte? novaOrdemAula = null, string novoUrl = "")
         {
             var descricao = novaDescricao ?? Descricao;
             var cargaHoraria = novaCargaHoraria ?? CargaHoraria;

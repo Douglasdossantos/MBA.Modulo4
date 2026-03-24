@@ -7,9 +7,9 @@ namespace MBA.Auth.Api.MigrationHelp
 {
     public static class DbMigrationHelper
     {
-        private static ApplicationDbContext _identityContext = null;
+        private static ApplicationDbContext? _identityContext;
 
-        private static UserManager<Usuarios> _userManager = null;
+        private static UserManager<Usuarios>? _userManager;
 
         public static async Task AutocarregamentoDadosAsync(WebApplication serviceScope)
         {
@@ -34,8 +34,10 @@ namespace MBA.Auth.Api.MigrationHelp
 
         private static async Task PopularDatabaseAsync()
         {
-            if (_identityContext.Roles.Any()) { return; }
-
+            if (_identityContext.Roles.Any())
+            {
+                return;
+            }
             string roleAdminId = await CriarRegraAcessoAsync(_identityContext, "Administrador");
             string roleUsuarioId = await CriarRegraAcessoAsync(_identityContext, "Alunos");
             string AlunoLerId = await CriarRegraAcessoAsync(_identityContext);

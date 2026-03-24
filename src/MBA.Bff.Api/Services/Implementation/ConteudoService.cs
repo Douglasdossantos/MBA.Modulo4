@@ -1,27 +1,45 @@
-﻿using MBA.Bff.Api.Extensions;
+﻿using MBA.Bff.Api.Models.Conteudo;
 using MBA.Bff.Api.Services.Interface;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MBA.Bff.Api.Services.Implementation
 {
-    public class ConteudoService : Service, IConteudoService
+    public class ConteudoService(IConteudoExternalServiceService conteudoService): IConteudoService
     {
-        private readonly HttpClient _httpClient;
-
-        public ConteudoService(HttpClient httpClient, IOptions<AppServicesSettings> settings)
+        private readonly IConteudoExternalServiceService _conteudoService = conteudoService;
+        
+        public async Task<IActionResult> CadastrarCurso(CadastroCursoViewModel cadastroCursoViewModel, string authorization)
         {
-            _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri(settings.Value.AlunoUrl);
+            // Ensure Authorization header contains the Bearer prefix when provided
+            string authHeader = null;
+            if (!string.IsNullOrWhiteSpace(authorization))
+            {
+                authHeader = authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? authorization : $"Bearer {authorization}";
+            }
+
+            // The Conteudo API expects a payload without the login credentials.
+            // Map to a request DTO that excludes the `Login` property before sending.
+            var request = new CadastrarCursoRequest
+            {
+                Nome = cadastroCursoViewModel.Nome,
+                Valor = cadastroCursoViewModel.Valor,
+                ValidoAte = cadastroCursoViewModel.ValidoAte,
+                ConteudoProgramatico = cadastroCursoViewModel.ConteudoProgramatico
+            };
+
+            var response = await _conteudoService.CadastrarCurso(request, authHeader);
+
+            if (response == null)
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            return new ContentResult
+            {
+                Content = content,
+                ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json",
+                StatusCode = (int)response.StatusCode
+            };
         }
-
-
-        //public async Task<ExemploDTO> Obter()
-        //{
-        //    var response = await _httpClient.GetAsync("/Exemplo/");
-
-        //    TratarErrosResponse(response);
-
-        //    return await DeserializarObjetoResponse<ExemploDTO>(response);
-        //}
     }
 }

@@ -1,10 +1,9 @@
-﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace MBA.WebApi.Core.Identidade
@@ -21,7 +20,7 @@ namespace MBA.WebApi.Core.Identidade
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
 
             // register JwtValidator for manual token validation when needed
-            services.AddSingleton<IJwtValidator, JwtValidator>();
+            services.AddSingleton<IJwtValidator, JwtValidator>();       
 
             services.AddAuthentication(x =>
             {

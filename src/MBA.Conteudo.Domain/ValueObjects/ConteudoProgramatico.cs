@@ -6,8 +6,8 @@ namespace SaberOnline.Conteudo.Domain.ValueObjects
     public class ConteudoProgramatico
     {
 
-        public string Finalidade { get; }
-        public string Ementa { get; }
+        public string Finalidade { get; } = string.Empty;
+        public string Ementa { get; } = string.Empty;
 
         // EF Constructor
         protected ConteudoProgramatico() { }
@@ -43,7 +43,7 @@ namespace SaberOnline.Conteudo.Domain.ValueObjects
             return Finalidade == other.Finalidade && Ementa == other.Ementa;
         }
 
-        private void ValidarIntegridadeConteudoProgramatico(string novaFinalidade = null, string novaEmenta = null)
+        private void ValidarIntegridadeConteudoProgramatico(string novaFinalidade = "", string novaEmenta = "")
         {
             var finalidade = novaFinalidade ?? Finalidade;
             var ementa = novaEmenta ?? Ementa;

@@ -30,8 +30,10 @@ namespace MBA.Conteudo.Api.Configuration
             // AutoMapper
                 services.AddAutoMapper(typeof(DependencyInjectionConfig).Assembly);
 
+            services.AddScoped<IAppIdentityUser, AppIdentityUser>();
+
             // Mediator (core notifications/comandos/eventos de domínio)
-                services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MediatorHandler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MediatorHandler).Assembly));
                 services.AddScoped<IMediatorHandler, MediatorHandler>();
                 services.AddScoped<INotificationHandler<DomainNotificacaoRaiz>, DomainNotificacaoHandler>();
         }

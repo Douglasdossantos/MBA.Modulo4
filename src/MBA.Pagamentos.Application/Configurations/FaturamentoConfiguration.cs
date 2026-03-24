@@ -4,13 +4,13 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.FaturamentoEvents;
 using MBA.Messages.FaturamentoCommands;
+using MBA.Pagamentos.Application.Commands.RealizarPagamento;
 using MBA.Pagamentos.Data.Contexts;
 using MBA.Pagamentos.Data.Repositories;
 using MediatR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SaberOnline.Application.Commands.RealizarPagamento;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 

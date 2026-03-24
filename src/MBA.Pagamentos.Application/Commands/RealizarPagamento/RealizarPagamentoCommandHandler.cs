@@ -5,10 +5,10 @@ using MBA.Messages.FaturamentoCommands;
 using MBA.Pagamentos.Domain.Entities;
 using MBA.Pagamentos.Domain.ValueObjects;
 using MediatR;
-using SaberOnline.Application.Application.Commands.RealizarPagamento;
 
 
-namespace SaberOnline.Application.Commands.RealizarPagamento;
+
+namespace MBA.Pagamentos.Application.Commands.RealizarPagamento;
 public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoRepository,
     IMediatorHandler mediatorHandler) : IRequestHandler<RealizarPagamentoCommand, bool>
 {
@@ -46,7 +46,7 @@ public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoR
         var pagamento = resultado.Pagamento;
 
         // 4️⃣ BLOQUEIO SOMENTE se já estiver APROVADO
-        if (pagamento != null && pagamento.PossuiPagamentoAprovado())
+        if (pagamento is not null && pagamento.PossuiPagamentoAprovado())
         {
             await _mediatorHandler.PublicarNotificacaoDominio(
                 new DomainNotificacaoRaiz(

@@ -1,6 +1,4 @@
-﻿using SaberOnline.Core.Messages;
-
-namespace MBA.Core.Messages.FaturamentoEvents;
+﻿namespace MBA.Core.Messages.FaturamentoEvents;
 public class PagamentoRecusadoEvent : EventoRaiz
 {
     public Guid MatriculaCursoId { get; init; }

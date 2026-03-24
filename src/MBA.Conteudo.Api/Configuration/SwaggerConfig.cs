@@ -35,7 +35,7 @@ namespace MBA.Conteudo.Api.Configuration
                                 Id = "Bearer"
                             }
                         },
-                        new string[] {}
+                        new string[] { }
                     }
                 });
             });

@@ -1,11 +1,8 @@
-﻿using EasyNetQ;
-using MBA.Auth.Api.Entidades;
-using MBA.Auth.Api.Extensions;
+﻿using MBA.Auth.Api.Entidades;
 using MBA.Auth.Api.ViewModels;
 using MBA.Core.Messages.Integration;
 using MBA.MessageBus;
 using MBA.WebApi.Core.Identidade;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -16,28 +13,19 @@ using System.Text;
 
 namespace MBA.Auth.Api.Controllers
 {
-    
-    [Route("api/identidade")]
-    public class AuthController : MainController
-    {
-        private readonly SignInManager<Usuarios> _signInManager;
-        private readonly UserManager<Usuarios> _userManager;
-        private readonly AppSettings _appSettings;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IMessageBus _bus;
 
-        public AuthController(SignInManager<Usuarios> signInManager,
-                              UserManager<Usuarios> userManager,
-                              IOptions<AppSettings> appSettings,
-                              RoleManager<IdentityRole> roleManager,
-                              IMessageBus bus)
-        {
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _appSettings = appSettings.Value;
-            _roleManager = roleManager;
-            _bus = bus;
-        }
+    [Route("api/identidade")]
+    public class AuthController(SignInManager<Usuarios> signInManager,
+                          UserManager<Usuarios> userManager,
+                          IOptions<AppSettings> appSettings,
+                          RoleManager<IdentityRole> roleManager,
+                          IMessageBus bus) : MainController
+    {
+        private readonly SignInManager<Usuarios> _signInManager = signInManager;
+        private readonly UserManager<Usuarios> _userManager = userManager;
+        private readonly AppSettings _appSettings = appSettings.Value;
+        private readonly RoleManager<IdentityRole> _roleManager = roleManager;
+        private readonly IMessageBus _bus = bus;
 
         [HttpPost("nova-conta")]
         public async Task<ActionResult> Registrar(UsuarioRegistro usuarioRegistro)
@@ -55,7 +43,7 @@ namespace MBA.Auth.Api.Controllers
                 Administrador = usuarioRegistro.Administrador
             };
 
-            var claimsToAdd = new List<Claim>();
+            List<Claim> claimsToAdd = [];
 
             if (usuarioRegistro.Administrador)
             {
@@ -67,7 +55,7 @@ namespace MBA.Auth.Api.Controllers
             }
 
 
-            var result = await _userManager.CreateAsync(user,usuarioRegistro.Senha);
+            var result = await _userManager.CreateAsync(user, usuarioRegistro.Senha);
 
 
             if (result.Succeeded)
@@ -103,7 +91,7 @@ namespace MBA.Auth.Api.Controllers
             var usuario = await _userManager.FindByEmailAsync(usuarioRegistro.Email);
 
             var usuarioRegistrado = new UsuarioRegistradoIntegrationEvent(
-                Guid.Parse(usuario.Id), usuarioRegistro.NomeUsuario, usuarioRegistro.Email, usuarioRegistro.Administrador);
+                Guid.Parse(usuario?.Id ?? Guid.NewGuid().ToString()), usuarioRegistro.NomeUsuario, usuarioRegistro.Email, usuarioRegistro.Administrador);
 
             try
             {
@@ -119,17 +107,17 @@ namespace MBA.Auth.Api.Controllers
 
 
         [HttpPost("autenticar")]
-        public async Task<ActionResult> login(UsuarioLogin usuarioLogin)
+        public async Task<ActionResult> Login(UsuarioLogin usuarioLogin)
         {
             if (!ModelState.IsValid)
             {
                 return CustomResponse(ModelState);
             }
-            var result =  await _signInManager.PasswordSignInAsync(usuarioLogin.Email, usuarioLogin.Senha, isPersistent: false, true);
+            var result = await _signInManager.PasswordSignInAsync(usuarioLogin.Email, usuarioLogin.Senha, isPersistent: false, true);
 
             if (result.Succeeded)
             {
-                return CustomResponse( await GerarJWT(usuarioLogin.Email));
+                return CustomResponse(await GerarJWT(usuarioLogin.Email));
             }
 
             if (result.IsLockedOut)
@@ -143,7 +131,7 @@ namespace MBA.Auth.Api.Controllers
         }
         private async Task<UsuarioRespostaLogin> GerarJWT(string email)
         {
-            var  user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(email);
             var claims = await _userManager.GetClaimsAsync(user);
 
             var identityClaims = await ObterClaimsUsuario(claims, user);
@@ -156,14 +144,14 @@ namespace MBA.Auth.Api.Controllers
             var userRoles = await _userManager.GetRolesAsync(user);
 
             claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
-            claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Email, user?.Email ?? ""));
             claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
             claims.Add(new Claim(JwtRegisteredClaimNames.Nbf, ToUnixEpochDate(DateTime.UtcNow).ToString()));
             claims.Add(new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(DateTime.UtcNow).ToString(), ClaimValueTypes.Integer64));
 
             foreach (var userRole in userRoles)
             {
-                claims.Add(new Claim("role",userRole));
+                claims.Add(new Claim("role", userRole));
             }
 
             var identityClaims = new ClaimsIdentity();
@@ -201,15 +189,17 @@ namespace MBA.Auth.Api.Controllers
             };
         }
 
-        private List<Claim> AdicionaClaimsAdmin()
+        private static List<Claim> AdicionaClaimsAdmin()
         {
-            var claims = new List<Claim>();
-            claims.Add(new Claim("Administrador", "ADM"));// usuario com perfil de administrador
+            var claims = new List<Claim>
+            {
+                new("Administrador", "ADM")// usuario com perfil de administrador
+            };
 
             return claims;
         }
 
-        private List<Claim> AdicionaClaimsAluno()
+        private static List<Claim> AdicionaClaimsAluno()
         {
             var claimsToAdd = new[]
            {
@@ -221,10 +211,10 @@ namespace MBA.Auth.Api.Controllers
                 new Claim("Alunos", "GT"), //BUSCAR INFORMAÇÕES
                 
             };
-            return claimsToAdd.ToList();
+            return [.. claimsToAdd];
         }
 
         private static long ToUnixEpochDate(DateTime date)
-            => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0,TimeSpan.Zero)).TotalSeconds);
+            => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds);
     }
 }

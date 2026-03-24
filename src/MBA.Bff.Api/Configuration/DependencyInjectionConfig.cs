@@ -1,38 +1,68 @@
 using MBA.Bff.Api.Extensions;
 using MBA.Bff.Api.Services.Implementation;
 using MBA.Bff.Api.Services.Interface;
-using MBA.WebApi.Core.Extensions;
+using MBA.Core.Autentications;
+using MBA.Core.DomainHadlers;
+using MBA.Core.Mediator;
+using MBA.Core.Messages;
 using MBA.WebApi.Core.Usuario;
-using Polly;
+using MediatR;
+using Refit;
 
 namespace MBA.Bff.Api.Configuration
 {
     public static class DependencyInjectionConfig
     {
-        public static void RegisterServices(this IServiceCollection services)
+        public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddScoped<IAspNetUser, AspNetUser>();
+    
 
             services.AddTransient<HttpClientAuthorizationDelegatingHandler>();
 
-            services.AddHttpClient<IAlunoService, AlunoService>()
-               .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
-               .AddPolicyHandler(PollyExtensions.EsperarTentar())
-               .AddTransientHttpErrorPolicy(
-                   p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
+            var appServices = configuration.GetSection("AppServicesSettings").Get<AppServicesSettings>() ?? new AppServicesSettings();
 
-            services.AddHttpClient<IConteudoService, ConteudoService>()
-               .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
-               .AddPolicyHandler(PollyExtensions.EsperarTentar())
-               .AddTransientHttpErrorPolicy(
-                   p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
+            // Create Refit clients manually using the authorization delegating handler
+            services.AddScoped<IAlunoExternalService>(sp =>
+            {
+                var handler = sp.GetRequiredService<HttpClientAuthorizationDelegatingHandler>();
+                if (handler.InnerHandler == null)
+                    handler.InnerHandler = new System.Net.Http.HttpClientHandler();
+                var client = new HttpClient(handler) { BaseAddress = new Uri(appServices.AlunoUrl ?? string.Empty) };
+                return RestService.For<IAlunoExternalService>(client);
+            });
 
-            services.AddHttpClient<IPagamentoService, PagamentoService>()
-               .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
-               .AddPolicyHandler(PollyExtensions.EsperarTentar())
-               .AddTransientHttpErrorPolicy(
-                   p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
+            services.AddScoped<IConteudoExternalServiceService>(sp =>
+            {
+                var handler = sp.GetRequiredService<HttpClientAuthorizationDelegatingHandler>();
+                handler.InnerHandler ??= new System.Net.Http.HttpClientHandler();
+                var client = new HttpClient(handler) { BaseAddress = new Uri(appServices.ConteudoUrl ?? string.Empty) };
+                return RestService.For<IConteudoExternalServiceService>(client);
+            });
+
+            services.AddScoped<IAutenticacaoExternalService>(sp =>
+            {
+                var handler = sp.GetRequiredService<HttpClientAuthorizationDelegatingHandler>();
+                if (handler.InnerHandler == null)
+                    handler.InnerHandler = new System.Net.Http.HttpClientHandler();
+                var client = new HttpClient(handler) { BaseAddress = new Uri(appServices.AutenticacaoUrl ?? string.Empty) };
+                return RestService.For<IAutenticacaoExternalService>(client);
+            });
+
+            services.AddScoped<IConteudoService, ConteudoService>();
+            services.AddScoped<IAutenticacaoService, AutenticacaoService>();
+           
+
+
+            services.AddTransient<HttpClientAuthorizationDelegatingHandler>();
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<IAspNetUser, AspNetUser>();
+            services.AddHttpContextAccessor();
+            services.AddScoped<IAppIdentityUser, AppIdentityUser>();
+
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MediatorHandler).Assembly));
+            services.AddScoped<IMediatorHandler, MediatorHandler>();
+            services.AddScoped<INotificationHandler<DomainNotificacaoRaiz>, DomainNotificacaoHandler>();
         }
     }
 }
