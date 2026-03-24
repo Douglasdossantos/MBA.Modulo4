@@ -19,7 +19,7 @@ namespace MBA.Conteudo.Api.Services
             _mapper = mapper;
         }
 
-        public async Task<Guid> CadastrarCursoAsync(CadastroCursoViewModel viewModel)
+        public async Task<Guid> CadastrarCursoAsync(CursoViewModel viewModel)
         {
             // Verificar se já existe curso com mesmo nome
             if (await _conteudoRepository.ExisteCursoComMesmoNomeAsync(viewModel.Nome))

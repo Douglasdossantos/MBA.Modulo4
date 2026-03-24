@@ -1,4 +1,5 @@
-﻿using MBA.Bff.Api.Services.Interface;
+﻿using MBA.Bff.Api.Models.Conteudo;
+using MBA.Bff.Api.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MBA.Bff.Api.Services.Implementation
@@ -7,10 +8,26 @@ namespace MBA.Bff.Api.Services.Implementation
     {
         private readonly IConteudoExternalServiceService _conteudoService = conteudoService;
         
-        
-        public async Task<IActionResult> ObterAulaPorId(Guid aulaId)
+        public async Task<IActionResult> CadastrarCurso(CadastroCursoViewModel cadastroCursoViewModel, string authorization)
         {
-            var response = await _conteudoService.ObterAulaPorId(aulaId);
+            // Ensure Authorization header contains the Bearer prefix when provided
+            string authHeader = null;
+            if (!string.IsNullOrWhiteSpace(authorization))
+            {
+                authHeader = authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? authorization : $"Bearer {authorization}";
+            }
+
+            // The Conteudo API expects a payload without the login credentials.
+            // Map to a request DTO that excludes the `Login` property before sending.
+            var request = new CadastrarCursoRequest
+            {
+                Nome = cadastroCursoViewModel.Nome,
+                Valor = cadastroCursoViewModel.Valor,
+                ValidoAte = cadastroCursoViewModel.ValidoAte,
+                ConteudoProgramatico = cadastroCursoViewModel.ConteudoProgramatico
+            };
+
+            var response = await _conteudoService.CadastrarCurso(request, authHeader);
 
             if (response == null)
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
@@ -20,8 +37,8 @@ namespace MBA.Bff.Api.Services.Implementation
             return new ContentResult
             {
                 Content = content,
-                StatusCode = (int)response.StatusCode,
-                ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json"
+                ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json",
+                StatusCode = (int)response.StatusCode
             };
         }
     }

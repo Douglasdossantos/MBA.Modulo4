@@ -34,23 +34,25 @@ namespace MBA.Bff.Api.Configuration
             services.AddScoped<IConteudoExternalServiceService>(sp =>
             {
                 var handler = sp.GetRequiredService<HttpClientAuthorizationDelegatingHandler>();
-                if (handler.InnerHandler == null)
-                    handler.InnerHandler = new System.Net.Http.HttpClientHandler();
+                handler.InnerHandler ??= new System.Net.Http.HttpClientHandler();
                 var client = new HttpClient(handler) { BaseAddress = new Uri(appServices.ConteudoUrl ?? string.Empty) };
                 return RestService.For<IConteudoExternalServiceService>(client);
             });
 
-            services.AddScoped<IPagamentoExternalService>(sp =>
+            services.AddScoped<IAutenticacaoExternalService>(sp =>
             {
                 var handler = sp.GetRequiredService<HttpClientAuthorizationDelegatingHandler>();
                 if (handler.InnerHandler == null)
                     handler.InnerHandler = new System.Net.Http.HttpClientHandler();
-                var client = new HttpClient(handler) { BaseAddress = new Uri(appServices.PagamentoUrl ?? string.Empty) };
-                return RestService.For<IPagamentoExternalService>(client);
+                var client = new HttpClient(handler) { BaseAddress = new Uri(appServices.AutenticacaoUrl ?? string.Empty) };
+                return RestService.For<IAutenticacaoExternalService>(client);
             });
 
             services.AddScoped<IConteudoService, ConteudoService>();
-            
+            services.AddScoped<IAutenticacaoService, AutenticacaoService>();
+           
+
+
             services.AddTransient<HttpClientAuthorizationDelegatingHandler>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

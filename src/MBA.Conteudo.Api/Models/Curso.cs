@@ -36,7 +36,7 @@ namespace MBA.Conteudo.Api.Models
             ConteudoProgramatico = conteudoProgramatico;
             Ativo = true;
 
-            ValidarIntegridadeCurso();
+            ValidarIntegridadeCurso(nome, valor,validoAte,conteudoProgramatico);
         }
         #endregion
 
