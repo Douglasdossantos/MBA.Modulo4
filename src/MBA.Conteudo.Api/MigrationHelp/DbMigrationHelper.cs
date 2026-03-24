@@ -1,12 +1,13 @@
-using MBA.Conteudo.Api.Data;
-using Microsoft.AspNetCore.Hosting;
+
+using MBA.Conteudo.Data;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace MBA.Conteudo.Api.MigrationHelp
 {
     public static class DbMigrationHelper
     {
-        private static ConteudoContext _conteudoContext = null;
+        private static ConteudoContext? _conteudoContext;
 
         public static async Task AutocarregamentoDadosAsync(WebApplication app)
         {
@@ -24,7 +25,7 @@ namespace MBA.Conteudo.Api.MigrationHelp
             if (env.IsDevelopment())
             {
                 await _conteudoContext.Database.MigrateAsync();
-                _conteudoContext.Seed();
+                //_conteudoContext.Seed();
             }
         }
     }

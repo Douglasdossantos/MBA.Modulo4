@@ -1,5 +1,5 @@
-﻿namespace MBA.API.ViewModels;
-public class AtualizacaoCursoViewModel
+﻿namespace MBA.Conteudo.Application.ViewModels;
+public class AtualizacaoCursoDto
 {
     public Guid Id { get; set; }
     public string Nome { get; set; }
