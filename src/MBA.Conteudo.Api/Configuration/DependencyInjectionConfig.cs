@@ -3,6 +3,7 @@ using MBA.Conteudo.Application.Services;
 using MBA.Conteudo.Data;
 using MBA.Conteudo.Data.Repository;
 using MBA.Conteudo.Domain.Interfaces;
+using MBA.Core.Autentications;
 using MBA.Core.DomainHadlers;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
