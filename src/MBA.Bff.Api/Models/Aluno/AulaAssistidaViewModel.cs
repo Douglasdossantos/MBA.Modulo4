@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MBA.Aluno.Appplication.ViewModel
+namespace MBA.Bff.Api.Models.Aluno
 {
-    public class AulaAssistidaViewModel
+    public class AulaAssistidaRequest
     {
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         public Guid AlunoId { get; set; }

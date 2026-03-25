@@ -21,7 +21,6 @@ namespace MBA.Bff.Api.Configuration
 
             var appServices = configuration.GetSection("AppServicesSettings").Get<AppServicesSettings>() ?? new AppServicesSettings();
 
-            // Create Refit clients manually using the authorization delegating handler
             services.AddScoped<IAlunoExternalService>(sp =>
             {
                 var handler = sp.GetRequiredService<HttpClientAuthorizationDelegatingHandler>();
@@ -48,9 +47,20 @@ namespace MBA.Bff.Api.Configuration
                 return RestService.For<IAutenticacaoExternalService>(client);
             });
 
+            services.AddScoped<IFaturamentoExternalService>(sp =>
+            {
+                var handler = sp.GetRequiredService<HttpClientAuthorizationDelegatingHandler>();
+                if (handler.InnerHandler == null)
+                    handler.InnerHandler = new System.Net.Http.HttpClientHandler();
+                var client = new HttpClient(handler) { BaseAddress = new Uri(appServices.FaturamentoUrl ?? string.Empty) };
+                return RestService.For<IFaturamentoExternalService>(client);
+            });
+
+            
             services.AddScoped<IConteudoService, ConteudoService>();
+            services.AddScoped<IAlunoService, AlunoService>();
             services.AddScoped<IAutenticacaoService, AutenticacaoService>();
-           
+            
 
 
             services.AddTransient<HttpClientAuthorizationDelegatingHandler>();

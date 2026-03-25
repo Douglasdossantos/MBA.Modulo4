@@ -6,5 +6,6 @@
         public string ConteudoUrl { get; set; }
         public string PagamentoUrl { get; set; }
         public string AutenticacaoUrl { get; set; }
+        public string FaturamentoUrl { get; set; }
     }
 }

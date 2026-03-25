@@ -24,7 +24,8 @@ namespace MBA.Bff.Api.Services.Implementation
                 Nome = cadastroCursoViewModel.Nome,
                 Valor = cadastroCursoViewModel.Valor,
                 ValidoAte = cadastroCursoViewModel.ValidoAte,
-                ConteudoProgramatico = cadastroCursoViewModel.ConteudoProgramatico
+                Finalidade = cadastroCursoViewModel.ConteudoProgramatico.Finalidade,
+                Ementa= cadastroCursoViewModel.ConteudoProgramatico.Ementa,
             };
 
             var response = await _conteudoService.CadastrarCurso(request, authHeader);

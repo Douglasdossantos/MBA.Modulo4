@@ -15,6 +15,7 @@ using System.Net;
 
 namespace MBA.Aluno.API.Controllers
 {
+    [Route("api/[controller]")]
     public class AlunoController(//ICursoAppService cursoAppService,
             IAlunoAppService alunoAppService,
             IAlunoQuery alunoQuery,
@@ -124,8 +125,6 @@ namespace MBA.Aluno.API.Controllers
 
         }
 
-
-
         [HttpPut("{alunoId}/desativar")]
         public async Task<IActionResult> DesativarAluno(Guid alunoId)
         {
@@ -189,7 +188,5 @@ namespace MBA.Aluno.API.Controllers
                 return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
             }
         }
-
-
     }
 }

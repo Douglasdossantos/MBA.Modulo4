@@ -9,11 +9,10 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.WebApi.Core.Controllers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace MBA.API.Controllers.Conteudo
+namespace MBA.Conteudo.Api.Controllers
 {
     
     [Route("api/[controller]")]
