@@ -5,11 +5,6 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.AlunoCommands;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MBA.Aluno.Appplication.Commands.ConcluirCurso
 {

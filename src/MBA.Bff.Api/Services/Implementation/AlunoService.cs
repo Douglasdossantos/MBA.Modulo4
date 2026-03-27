@@ -24,6 +24,9 @@ namespace MBA.Bff.Api.Services.Implementation
                 Valor = 1000 // Exemplo de valor, você pode ajustar conforme necessário
             }, requestCadastro.AuthHeader);
 
+
+
+
             return requestCadastro;
         }
 
