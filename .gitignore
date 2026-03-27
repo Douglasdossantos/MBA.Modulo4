@@ -370,7 +370,3 @@ FodyWeavers.xsd
 *.db-wal
 *.sqlite-shm
 *.sqlite-wal
-/src/MBA.Conteudo.Api/Data/Conteudo.db
-/src/MBA.Conteudo.Api/Data/Conteudo.db
-/src/MBA.Conteudo.Api/Data/Conteudo.db-shm
-/src/MBA.Conteudo.Api/Data/Conteudo.db-wal
