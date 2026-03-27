@@ -13,7 +13,7 @@ namespace MBA.Conteudo.Domain.Entities
         public bool Ativo { get; private set; } = new();
         public DateTime? ValidoAte { get; private set; } = new();
 
-        public ConteudoProgramatico ConteudoProgramatico { get; private set; }
+        public ConteudoProgramatico ConteudoProgramatico { get; private set; } = null!;
 
         private readonly List<Aula> _aulas = [];
         public IReadOnlyCollection<Aula> Aulas => _aulas.AsReadOnly();
@@ -21,7 +21,7 @@ namespace MBA.Conteudo.Domain.Entities
         // EF Constructor
         protected Curso()
         {
-            ConteudoProgramatico = new ConteudoProgramatico(string.Empty, string.Empty);
+            //ConteudoProgramatico = new ConteudoProgramatico(string.Empty, string.Empty);
             _aulas = [];
         }
 
@@ -38,6 +38,8 @@ namespace MBA.Conteudo.Domain.Entities
 
             ValidarIntegridadeCurso(nome, valor,validoAte,conteudoProgramatico);
         }
+
+       
         #endregion
 
         #region Métodos
@@ -81,6 +83,12 @@ namespace MBA.Conteudo.Domain.Entities
         {
             ValidarOrdemAula(Guid.Empty, ordemAula);
             _aulas.Add(new Aula(Id, descricao, cargaHoraria, ordemAula, url));
+        }
+
+        public void AdicionarAulaSeedDeDados(string descricao, short cargaHoraria, byte ordemAula, string url, Guid aulaId)//USAR SOMENTE PARA SEED DE DADOS
+        {
+            ValidarOrdemAula(Guid.Empty, ordemAula);
+            _aulas.Add(new Aula(Id, aulaId, descricao, cargaHoraria, ordemAula, url));
         }
 
         public void RemoverAula(Aula aula)
