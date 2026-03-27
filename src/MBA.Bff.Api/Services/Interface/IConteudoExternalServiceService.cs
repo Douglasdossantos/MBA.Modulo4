@@ -6,6 +6,6 @@ namespace MBA.Bff.Api.Services.Interface
     public interface IConteudoExternalServiceService
     {
         [Post("/api/Curso")]
-        Task<System.Net.Http.HttpResponseMessage> CadastrarCurso([Body] CadastrarCursoRequest aulaViewModel, [Header("Authorization")] string authorization = null);
+        Task<HttpResponseMessage> CadastrarCurso([Body] CadastrarCursoRequest aulaViewModel, [Header("Authorization")] string authorization = null);
     }
 }

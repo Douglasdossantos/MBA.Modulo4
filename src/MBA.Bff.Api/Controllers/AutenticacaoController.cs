@@ -1,4 +1,4 @@
-﻿using MBA.Bff.Api.Models.Conteudo;
+﻿using MBA.Bff.Api.Models.Autenticacao;
 using MBA.Bff.Api.Services.Interface;
 using MBA.Core.Autentications;
 using MBA.Core.DomainObjects;
@@ -14,23 +14,20 @@ using System.Text.Json;
 namespace MBA.Bff.Api.Controllers
 {
     [Route("api/[controller]")]
-    public class AdminController(IAutenticacaoService autenticacao,
-                                IConteudoService conteudoService,
-                                IAppIdentityUser appIdentityUser,
-                                INotificationHandler<DomainNotificacaoRaiz> notifications,
-                                IMediatorHandler mediatorHandler) : 
+    public class AutenticacaoController(IAutenticacaoService autenticacao,
+                                        IAppIdentityUser appIdentityUser,
+                                        INotificationHandler<DomainNotificacaoRaiz> notifications,
+                                        IMediatorHandler mediatorHandler) : 
                                                    MainController(appIdentityUser, notifications, mediatorHandler)
     {
         private readonly IAutenticacaoService _autenticacao = autenticacao;
-        private readonly IConteudoService _conteudoService = conteudoService;
 
-
-        [HttpPost("cadastro-de-curso")]
-        public async Task<IActionResult> CadastroDeCurso([FromBody] CadastroCursoViewModel cadastroCurso)
+        [HttpPost("autenticar")]
+        public async Task<IActionResult> Login([FromBody] UsuarioLoginViewModel usuarioLogin)
         {
             try
             {
-                var ResultLogin = await _autenticacao.Login(cadastroCurso.Login);
+                var ResultLogin = await _autenticacao.Login(usuarioLogin);
                 
                 if (ResultLogin != null)
                 {
@@ -56,10 +53,6 @@ namespace MBA.Bff.Api.Controllers
                         if (doc.RootElement.TryGetProperty("accessToken", out var tokenProp))
                         {
                             string accessToken = tokenProp.GetString();
-
-                            // pass token to service if needed (example shows calling service after auth)
-                            var conteudo = await _conteudoService.CadastrarCurso(cadastroCurso, accessToken);
-                            return GenerateResponse(((ContentResult)conteudo).Content, ResponseTypeEnum.Success, HttpStatusCode.OK);
                         }
                         else
                         {

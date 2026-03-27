@@ -14,7 +14,6 @@ namespace MBA.Bff.Api.Models.Conteudo
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [Range(0, double.MaxValue, ErrorMessage = "O campo {0} deve ser maior que {1}")]
         public decimal Valor { get; set; }
-
         public DateTime? ValidoAte { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]

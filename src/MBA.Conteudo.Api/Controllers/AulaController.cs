@@ -1,19 +1,18 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using MBA.API.ViewModels;
+using MBA.Conteudo.Application.Services;
+using MBA.Core.Autentications;
+using MBA.Core.DomainObjects;
+using MBA.Core.Enumerators;
+using MBA.Core.Mediator;
+using MBA.Core.Messages;
+using MBA.Core.SharedDto;
+using MBA.WebApi.Core.Controllers;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using AutoMapper;
-using MBA.Core.Autentications;
-using MBA.Conteudo.Application.Services;
-using MBA.Core.Messages;
-using MBA.Core.Mediator;
-using MBA.WebApi.Core.Controllers;
-using MBA.API.ViewModels;
-using MBA.Core.Enumerators;
-using MBA.Core.SharedDto;
-using MBA.Core.DomainObjects;
 
-namespace MBA.API.Controllers.Conteudo;
+namespace MBA.Conteudo.Api.Controllers;
 
 
 [ApiController]

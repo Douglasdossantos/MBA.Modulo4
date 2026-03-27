@@ -1,6 +1,6 @@
 ﻿namespace MBA.Bff.Api.Models.Pagamento
 {
-    public class AdicionarAulaViewModel
+    public class RealizarPagamentoRequest
     {
         public Guid AlunoId { get; set; }
         public Guid CursoId { get; set; }
