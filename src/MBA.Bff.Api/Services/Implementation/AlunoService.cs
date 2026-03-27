@@ -2,7 +2,6 @@
 using MBA.Bff.Api.Models.Aluno;
 using MBA.Bff.Api.Models.Pagamento;
 using MBA.Bff.Api.Services.Interface;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MBA.Bff.Api.Services.Implementation
