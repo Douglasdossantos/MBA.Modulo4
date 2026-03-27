@@ -48,6 +48,8 @@ namespace MBA.Conteudo.Data.Repository
                 .Include(c => c.ConteudoProgramatico)
                 .Include(c => c.Aulas)
                 .ToListAsync();
+
+            
         }
 
         public async Task<IEnumerable<Curso>> ObterAtivosAsync()

@@ -6,8 +6,8 @@ namespace SaberOnline.Conteudo.Domain.ValueObjects
     public class ConteudoProgramatico
     {
 
-        public string Finalidade { get; } = string.Empty;
-        public string Ementa { get; } = string.Empty;
+        public string Finalidade { get; private set; } = null!;
+        public string Ementa { get; private set; } = null!;
 
         // EF Constructor
         protected ConteudoProgramatico() { }
@@ -17,14 +17,7 @@ namespace SaberOnline.Conteudo.Domain.ValueObjects
             Finalidade = finalidade;
             Ementa = ementa;
 
-            var validacao = new ResultadoValidacao<ConteudoProgramatico>();
-            ValidacaoTexto.DevePossuirConteudo(finalidade, "Finalidade não pode ser vazia ou nula", validacao);
-            ValidacaoTexto.DevePossuirTamanho(finalidade, 10, 100, "Finalidade do conteúdo programático deve ter entre 10 e 100 caracteres", validacao);
-            ValidacaoTexto.DevePossuirConteudo(ementa, "Ementa do conteúdo programático não pode ser vazia ou nula", validacao);
-            ValidacaoTexto.DevePossuirTamanho(ementa, 50, 4000, "Ementa do conteúdo programático deve ter entre 50 e 4000 caracteres", validacao);
-
-            validacao.DispararExcecaoDominioSeInvalido();
-
+           ValidarIntegridadeConteudoProgramatico(finalidade, ementa);
         }
 
         public override string ToString()
@@ -50,9 +43,9 @@ namespace SaberOnline.Conteudo.Domain.ValueObjects
 
             var validacao = new ResultadoValidacao<ConteudoProgramatico>();
             ValidacaoTexto.DevePossuirConteudo(finalidade, "Finalidade não pode ser vazia ou nula", validacao);
-            ValidacaoTexto.DevePossuirTamanho(finalidade, 10, 100, "Finalidade do conteúdo programático deve ter entre 10 e 100 caracteres", validacao);
+            ValidacaoTexto.DevePossuirTamanho(finalidade, 5, 4000, "Finalidade do conteúdo programático deve ter entre 10 e 100 caracteres", validacao);
             ValidacaoTexto.DevePossuirConteudo(ementa, "Ementa do conteúdo programático não pode ser vazia ou nula", validacao);
-            ValidacaoTexto.DevePossuirTamanho(ementa, 50, 4000, "Ementa do conteúdo programático deve ter entre 50 e 4000 caracteres", validacao);
+            ValidacaoTexto.DevePossuirTamanho(ementa, 5, 4000, "Ementa do conteúdo programático deve ter entre 50 e 4000 caracteres", validacao);
 
             validacao.DispararExcecaoDominioSeInvalido();
         }

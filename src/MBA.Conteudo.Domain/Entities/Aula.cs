@@ -32,7 +32,25 @@ namespace MBA.Conteudo.Domain.Entities
             Url = url;
             Ativo = true;
 
-            ValidarIntegridadeAula();
+            ValidarIntegridadeAula(descricao, cargaHoraria, ordemAula, url);
+        }
+
+        public Aula(Guid cursoId,
+            Guid AulaId,
+            string descricao,
+            short cargaHoraria,
+            byte ordemAula,
+            string url)
+        {
+            Id= AulaId;
+            CursoId = cursoId;
+            Descricao = descricao;
+            CargaHoraria = cargaHoraria;
+            OrdemAula = ordemAula;
+            Url = url;
+            Ativo = true;
+
+            ValidarIntegridadeAula(descricao, cargaHoraria, ordemAula, url);
         }
         #endregion
 

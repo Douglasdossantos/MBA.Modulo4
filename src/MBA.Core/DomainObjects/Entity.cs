@@ -10,6 +10,11 @@ namespace MBA.Core.DomainObjects
     {
         public Guid Id { get; set; }
 
+        public Entity()
+        {
+            Id = Guid.NewGuid();
+        }
+
         public override bool Equals(object? obj)
         {
             var compareTo = obj as Entity;
