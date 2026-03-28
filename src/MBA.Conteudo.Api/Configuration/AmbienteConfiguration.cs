@@ -1,8 +1,4 @@
-﻿
-
-
-
-using MBA.Conteudo.Api.MigrationHelp;
+﻿using MBA.Conteudo.Api.MigrationHelp;
 
 namespace MBA.API.Configurations
 {

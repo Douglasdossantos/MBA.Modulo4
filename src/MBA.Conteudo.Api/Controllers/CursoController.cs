@@ -8,6 +8,7 @@ using MBA.Core.Enumerators;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.WebApi.Core.Controllers;
+using MBA.WebApi.Core.Identidade;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -26,7 +27,7 @@ namespace MBA.Conteudo.Api.Controllers
         private readonly ICursoAppService _cursoAppService = cursoAppService;
         private readonly IMapper _mapper = mapper;
 
-        //[ClaimsAuthorize("Cursos", "AD")]
+        [ClaimsAuthorize("Cursos", "AD")]
         [HttpPost]
         public async Task<IActionResult> CadastrarCurso([FromBody] CadastroCursoViewModel cadastroCursoViewModel)
         {
@@ -48,7 +49,7 @@ namespace MBA.Conteudo.Api.Controllers
             }
         }
 
-        //[ClaimsAuthorize("Cursos", "AT")]
+        [ClaimsAuthorize("Cursos", "AT")]
         [HttpPut("{cursoId}")]
         public async Task<IActionResult> AtualizarCurso(Guid cursoId, [FromBody] AtualizacaoCursoViewModel atualizacaoCursoViewModel)
         {
@@ -71,7 +72,7 @@ namespace MBA.Conteudo.Api.Controllers
             }
         }
 
-       // [ClaimsAuthorize("Cursos", "DS")]
+        [ClaimsAuthorize("Cursos", "DS")]
         [HttpPatch("{cursoId}/desativar")]
         public async Task<IActionResult> DesativarCurso(Guid cursoId)
         {
@@ -90,7 +91,7 @@ namespace MBA.Conteudo.Api.Controllers
             }
         }
 
-        //[ClaimsAuthorize("Cursos", "VI")]
+        [ClaimsAuthorize("Cursos", "VI")]
         [HttpGet("{cursoId}")]
         public async Task<IActionResult> ObterPorId(Guid cursoId)
         {
@@ -109,7 +110,7 @@ namespace MBA.Conteudo.Api.Controllers
             }
         }
 
-       // [ClaimsAuthorize("Cursos", "VI")]
+        [ClaimsAuthorize("Cursos", "VI")]
         [HttpGet("ativos")]
         public async Task<IActionResult> ObterAtivos()
         {
@@ -124,7 +125,7 @@ namespace MBA.Conteudo.Api.Controllers
             }
         }
 
-        //[ClaimsAuthorize("Cursos", "VI")]
+        [ClaimsAuthorize("Cursos", "VI")]
         [HttpGet]
         public async Task<IActionResult> ObterTodos()
         {
