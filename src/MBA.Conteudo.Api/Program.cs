@@ -8,7 +8,6 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using System.Reflection;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
@@ -26,9 +25,7 @@ builder.Services.AddHttpContextAccessor()
     .AddScoped<IMediatorHandler, MediatorHandler>()
 
     .ConfigurarJwt(appSettings.JwtSettings)
-    //.ConfigurarAlunoApplication(appSettings.DatabaseSettings.ConnectionStringAluno, builder.Environment.IsProduction())
     .ConfigurarConteudoApplication(appSettings.DatabaseSettings.ConnectionStringConteudo, builder.Environment.IsProduction())
-   // .ConfigurarFaturamentoApplication(appSettings.DatabaseSettings.ConnectionStringFaturamento, builder.Environment.IsProduction())
     .ConfigurarApi()
     .ConfigurarCors()
     .AddSwaggerConfig();

@@ -6,6 +6,7 @@ using MBA.Core.Messages;
 using MBA.Messages.FaturamentoCommands;
 using MBA.Pagamentos.Api.ViewModels;
 using MBA.WebApi.Core.Controllers;
+using MBA.WebApi.Core.Identidade;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -19,7 +20,7 @@ public class FaturamentoController(IAppIdentityUser appIdentityUser,
     IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
 {
 
-    //[ClaimsAuthorize("Alunos", "PG")]
+    [ClaimsAuthorize("Alunos", "PG")]
     [HttpPost("{alunoId}/registrar-pagamento")]
     public async Task<IActionResult> RealizarPagamento(Guid alunoId, RealizarPagamentoViewModel pagamentoViewModel)
     {
