@@ -88,6 +88,7 @@ namespace MBA.WebApi.Core.Identidade
         {
             app.UseAuthentication();
             app.UseAuthorization();
+
         }
     }
 }

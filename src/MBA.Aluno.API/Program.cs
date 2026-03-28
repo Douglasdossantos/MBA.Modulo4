@@ -24,12 +24,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 Batteries.Init();
 
-
+builder.AddDatabaseSelector();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+builder.Services.AddSwaggerConfiguration();
+builder.Services.ResolveDependencies();
 
 builder.Services.AddMessageBusConfiguration(builder.Configuration);
 
@@ -38,67 +39,23 @@ builder.Services.Configure<AppSettings>(configuration.GetSection(nameof(AppSetti
 var appSettings = configuration.GetSection(nameof(AppSettings)).Get<AppSettings>();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IAppIdentityUser, AppIdentityUser>();
-
-builder.Services.AddScoped<IAlunoAppService, AlunoAppService>();
-builder.Services.AddScoped<IAlunoRepository, AlunoRepository>();
-
-//builder.Services.AddScoped<IRequestHandler<RegistrarAlunoCommand, bool>, RegistrarAlunoCommandHandler>();
-
-
-
 
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
 });
 
-builder.Services.AddDbContext<AlunoDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("ConnectionStringAluno")));
-
-builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
-builder.Services.AddScoped<INotificationHandler<DomainNotificacaoRaiz>, DomainNotificacaoHandler>();
-
-// Aluno
-builder.Services.AddScoped<IAlunoRepository, AlunoRepository>();
-builder.Services.AddScoped<IAlunoAppService, AlunoAppService>();
-
-// Aluno - Commands Handlers
-builder.Services.AddScoped<IRequestHandler<CadastroAlunoCommand, ValidationResult>, CadastroAlunoCommandHandler>();
-//builder.Services.AddScoped<IRequestHandler<RegistrarAulaAssistidaCommand, bool>, RegistrarAulaAssistidaCommandHandler>();
-builder.Services.AddScoped<IRequestHandler<ConcluirCursoCommand, bool>, ConcluirCursoCommandHandler>();
-
-// Matricula
-builder.Services.AddScoped<IMatriculaRepository, MatriculaRepository>();
-builder.Services.AddScoped<IMatriculaAppService, MatriculaAppService>();
-builder.Services.AddScoped<IAlunoQuery, AlunoQueryService>();
-builder.Services.AddScoped<IRequestHandler<MatricularAlunoCommand, bool>, MatricularAlunoCommandHandler>();
-
-
-
+builder.Services.ResolveDependencies();
 
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 });
 
-
-
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwaggerConfiguration();
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
+app.UseApiConfiguration(app.Environment);
 
 app.Run();
