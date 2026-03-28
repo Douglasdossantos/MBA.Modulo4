@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace MBA.Aluno.Data.Context
 {
-    public class AlunoDbContextFactory
-        : IDesignTimeDbContextFactory<AlunoDbContext>
-    {
-        public AlunoDbContext CreateDbContext(string[] args)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<AlunoDbContext>();
+    //public class AlunoDbContextFactory
+    //    : IDesignTimeDbContextFactory<AlunoDbContext>
+    //{
+    //    public AlunoDbContext CreateDbContext(string[] args)
+    //    {
+    //        var optionsBuilder = new DbContextOptionsBuilder<AlunoDbContext>();
 
-            optionsBuilder.UseSqlite("Data Source=Data/AlunoDB.db");
+    //        optionsBuilder.UseSqlite("Data Source=Data/AlunoDB.db");
 
-            return new AlunoDbContext(optionsBuilder.Options);
-        }
-    }
+    //        return new AlunoDbContext(optionsBuilder.Options);
+    //    }
+    //}
 }
