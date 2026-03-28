@@ -8,6 +8,7 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.SharedDto;
 using MBA.WebApi.Core.Controllers;
+using MBA.WebApi.Core.Identidade;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -26,7 +27,7 @@ public class AulaController(IAulaAppService aulaAppService,
     private readonly IAulaAppService _aulaAppService = aulaAppService;
     private readonly IMapper _mapper = mapper;
 
-    //[ClaimsAuthorize("Aulas", "AD")]
+    [ClaimsAuthorize("Aulas", "AD")]
     [HttpPost("{cursoId}")]
     public async Task<IActionResult> AdicionarAula(Guid cursoId, [FromBody] AulaViewModel aulaViewModel)
     {
@@ -49,7 +50,7 @@ public class AulaController(IAulaAppService aulaAppService,
         }
     }
 
-   // [ClaimsAuthorize("Aulas", "AT")]
+    [ClaimsAuthorize("Aulas", "AT")]
     [HttpPut("{cursoId}")]
     public async Task<IActionResult> AtualizarAula(Guid cursoId, [FromBody] AulaViewModel aulaViewModel)
     {
@@ -73,7 +74,7 @@ public class AulaController(IAulaAppService aulaAppService,
 
     }
 
-    ///[ClaimsAuthorize("Aulas", "RM")]
+    [ClaimsAuthorize("Aulas", "RM")]
     [HttpDelete("{cursoId}/remover/{aulaId}")]
     public async Task<IActionResult> RemoverAula(Guid cursoId, Guid aulaId)
     {

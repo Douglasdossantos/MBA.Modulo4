@@ -1,7 +1,6 @@
 ﻿using MBA.API.Filters;
 using MBA.Core.Autentications;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MBA.API.Configurations
 {
