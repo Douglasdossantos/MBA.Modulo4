@@ -1,6 +1,5 @@
 ﻿using MBA.Aluno.Data.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
 
 namespace MBA.Aluno.API.Configuration
 {
