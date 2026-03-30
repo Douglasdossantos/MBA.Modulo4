@@ -2,6 +2,7 @@
 using MBA.Conteudo.Data;
 using MBA.Conteudo.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 using SaberOnline.Conteudo.Domain.ValueObjects;
 
 namespace MBA.Conteudo.Api.MigrationHelp
@@ -26,6 +27,18 @@ namespace MBA.Conteudo.Api.MigrationHelp
 
             if (env.IsDevelopment())
             {
+                // Ensure the folder for the Sqlite database exists (e.g. "Data")
+                try
+                {
+                    var dataDir = Path.Combine(env.ContentRootPath, "Data");
+                    if (!Directory.Exists(dataDir))
+                        Directory.CreateDirectory(dataDir);
+                }
+                catch
+                {
+                    // ignore directory creation errors; migration will surface meaningful errors
+                }
+
                 await _conteudoContext.Database.MigrateAsync();
                 await PopularDatabaseAsync();
             }

@@ -31,7 +31,15 @@ public sealed class MessageBus(string connectionString) : IMessageBus
     {
         ArgumentNullException.ThrowIfNull(message);
         EnsureConnected();
-        _bus!.PubSub.PublishAsync(message, cancellationToken).GetAwaiter().GetResult();
+        try
+        {
+            _bus!.PubSub.PublishAsync(message, cancellationToken).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"MessageBus.Publish error: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
     }
 
     public async Task PublishAsync<T>(T message, CancellationToken cancellationToken = default)
@@ -39,7 +47,15 @@ public sealed class MessageBus(string connectionString) : IMessageBus
     {
         ArgumentNullException.ThrowIfNull(message);
         EnsureConnected();
-        await _bus!.PubSub.PublishAsync(message, cancellationToken);
+        try
+        {
+            await _bus!.PubSub.PublishAsync(message, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"MessageBus.PublishAsync error: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
     }
 
     public SubscriptionResult Subscribe<T>(
@@ -51,7 +67,15 @@ public sealed class MessageBus(string connectionString) : IMessageBus
         ArgumentException.ThrowIfNullOrWhiteSpace(subscriptionId);
         ArgumentNullException.ThrowIfNull(onMessage);
         EnsureConnected();
-        return _bus!.PubSub.SubscribeAsync(subscriptionId, onMessage, cancellationToken).GetAwaiter().GetResult();
+        try
+        {
+            return _bus!.PubSub.SubscribeAsync(subscriptionId, onMessage, cancellationToken).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"MessageBus.Subscribe error: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
     }
 
     public Task<SubscriptionResult> SubscribeAsync<T>(
@@ -63,7 +87,15 @@ public sealed class MessageBus(string connectionString) : IMessageBus
         ArgumentException.ThrowIfNullOrWhiteSpace(subscriptionId);
         ArgumentNullException.ThrowIfNull(onMessage);
         EnsureConnected();
-        return _bus!.PubSub.SubscribeAsync(subscriptionId, onMessage, cancellationToken);
+        try
+        {
+            return _bus!.PubSub.SubscribeAsync(subscriptionId, onMessage, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"MessageBus.SubscribeAsync error: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
     }
 
     public TResponse Request<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
@@ -72,7 +104,15 @@ public sealed class MessageBus(string connectionString) : IMessageBus
     {
         ArgumentNullException.ThrowIfNull(request);
         EnsureConnected();
-        return _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken).GetAwaiter().GetResult();
+        try
+        {
+            return _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"MessageBus.Request error: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
     }
 
     public async Task<TResponse> RequestAsync<TRequest, TResponse>(
@@ -84,7 +124,15 @@ public sealed class MessageBus(string connectionString) : IMessageBus
     {
         ArgumentNullException.ThrowIfNull(request);
         EnsureConnected();
-        return await _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken);
+        try
+        {
+            return await _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"MessageBus.RequestAsync error: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
     }
 
     public IAsyncDisposable Respond<TRequest, TResponse>(
@@ -96,7 +144,15 @@ public sealed class MessageBus(string connectionString) : IMessageBus
     {
         ArgumentNullException.ThrowIfNull(responder);
         EnsureConnected();
-        return _bus!.Rpc.RespondAsync(responder, cancellationToken).GetAwaiter().GetResult();
+        try
+        {
+            return _bus!.Rpc.RespondAsync(responder, cancellationToken).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"MessageBus.Respond error: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
     }
 
     public Task<IAsyncDisposable> RespondAsync<TRequest, TResponse>(
@@ -108,7 +164,15 @@ public sealed class MessageBus(string connectionString) : IMessageBus
     {
         ArgumentNullException.ThrowIfNull(responder);
         EnsureConnected();
-        return _bus!.Rpc.RespondAsync(responder, cancellationToken);
+        try
+        {
+            return _bus!.Rpc.RespondAsync(responder, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"MessageBus.RespondAsync error: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
     }
 
     private void EnsureConnected()

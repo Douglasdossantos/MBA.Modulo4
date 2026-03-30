@@ -154,6 +154,23 @@ namespace MBA.Auth.Api.Controllers
                 claims.Add(new Claim("role", userRole));
             }
 
+            // Include claims that are assigned to the roles (e.g. permission claims)
+            foreach (var userRole in userRoles)
+            {
+                var identityRole = await _roleManager.FindByNameAsync(userRole);
+                if (identityRole == null) continue;
+
+                var roleClaims = await _roleManager.GetClaimsAsync(identityRole);
+                foreach (var rc in roleClaims)
+                {
+                    // avoid duplicates
+                    if (!claims.Any(c => c.Type == rc.Type && c.Value == rc.Value))
+                    {
+                        claims.Add(new Claim(rc.Type, rc.Value));
+                    }
+                }
+            }
+
             var identityClaims = new ClaimsIdentity();
             identityClaims.AddClaims(claims);
 

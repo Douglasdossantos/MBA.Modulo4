@@ -1,4 +1,5 @@
 ﻿using MBA.Bff.Api.Models.Aluno;
+using MBA.Bff.Api.Response;
 using MBA.Bff.Api.Services.Interface;
 using MBA.Core.Autentications;
 using MBA.Core.Enumerators;
@@ -7,6 +8,7 @@ using MBA.Core.Messages;
 using MBA.WebApi.Core.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text.Json;
 
@@ -54,6 +56,15 @@ namespace MBA.Bff.Api.Controllers
                         if (doc.RootElement.TryGetProperty("accessToken", out var tokenProp))
                         {
                             string accessToken = tokenProp.GetString();
+                            JsonSerializerOptions options = new()
+                            {
+                                PropertyNameCaseInsensitive = true
+                            };
+
+                            var result = JsonSerializer.Deserialize<LoginResponse>(content, options);
+
+                            matriculaViewModel.Login.AlunoId = Guid.Parse(result.UsuarioToken.Id);
+
 
                             // pass token to service if needed (example shows calling service after auth)
                             var conteudo = await _alunoService.MatriculaPagamento(matriculaViewModel, accessToken);

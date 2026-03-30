@@ -1,4 +1,4 @@
-﻿namespace MBA.API.Configurations
+﻿namespace MBA.Conteudo.Api.Configuration
 {
     public static class CorsConfiguration
     {

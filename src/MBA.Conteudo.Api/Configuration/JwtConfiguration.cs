@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace MBA.Conteudo.API.Configurations
+namespace MBA.Conteudo.Api.Configuration
 {
     public static class JwtConfiguration
     {

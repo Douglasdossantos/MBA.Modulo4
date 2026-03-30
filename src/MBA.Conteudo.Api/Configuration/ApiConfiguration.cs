@@ -2,7 +2,7 @@
 using MBA.Core.Autentications;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MBA.API.Configurations
+namespace MBA.Conteudo.Api.Configuration
 {
     public static class ApiConfiguration
     {
