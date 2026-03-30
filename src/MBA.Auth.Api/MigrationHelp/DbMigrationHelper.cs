@@ -55,11 +55,29 @@ namespace MBA.Auth.Api.MigrationHelp
             {
                 Id = roleId,
                 Name = role,
-                NormalizedName = role,
+                NormalizedName = role.ToUpperInvariant(),
                 ConcurrencyStamp = DateTime.Now.ToString()
             });
 
             await identityContext.SaveChangesAsync();
+
+            // If this is the administrator role, add default permission claims
+            if (role.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                var permissions = new[] { "AD", "AT", "DS", "VI", "PG" };
+
+                foreach (var p in permissions)
+                {
+                    identityContext.RoleClaims.Add(new IdentityRoleClaim<string>
+                    {
+                        RoleId = roleId,
+                        ClaimType = "permission",
+                        ClaimValue = p
+                    });
+                }
+
+                await identityContext.SaveChangesAsync();
+            }
 
             return roleId;
         }
@@ -78,6 +96,22 @@ namespace MBA.Auth.Api.MigrationHelp
 
             identityContext.Roles.Add(role);
             await identityContext.SaveChangesAsync();
+            var permissions = new[] { "AD", "AT", "RM", "PG" };
+
+            foreach (var p in permissions)
+            {
+                identityContext.RoleClaims.Add(new IdentityRoleClaim<string>
+                {
+                    RoleId = role.Id,
+                    ClaimType = "permission",
+                    ClaimValue = p
+                });
+            }
+
+            await identityContext.SaveChangesAsync();
+
+
+
 
             identityContext.RoleClaims.Add(new IdentityRoleClaim<string>
             {
@@ -93,7 +127,7 @@ namespace MBA.Auth.Api.MigrationHelp
 
         private static async Task CriarUsuarioAsync(string email, string senha, string nome, DateTime dataNascimento, string roleId, bool ehAdmin)
         {
-            var identityUser = new Usuarios { UserName = email, Email = email, EmailConfirmed = true , Administrador = ehAdmin };
+            var identityUser = new Usuarios { UserName = email, Email = email, EmailConfirmed = true, Administrador = ehAdmin };
             var result = await _userManager.CreateAsync(identityUser, senha);
 
             if (result.Succeeded)

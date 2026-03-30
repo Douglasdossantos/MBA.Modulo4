@@ -27,7 +27,7 @@ namespace MBA.WebApi.Core.Controllers
         public string Email => _appIdentityUser.ObterEmail();
         public bool EhAdministrador => _appIdentityUser.EhAdministrador();
 
-        protected ICollection<string> Erros = new List<string>();
+        protected ICollection<string> Erros = [];
 
         protected ActionResult CustomResponse(object result = null)
         {

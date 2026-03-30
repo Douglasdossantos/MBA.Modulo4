@@ -27,15 +27,13 @@ public class FaturamentoRepository(FaturamentoDbContext context) : IFaturamentoR
         await Task.CompletedTask;
     }
 
-    public async Task<Pagamento> ObterPorMatriculaIdAsync(Guid matriculaId)
+    public async Task<Pagamento?> ObterPorMatriculaIdAsync(Guid matriculaId)
     {
-
         return await _context.Pagamentos.FirstOrDefaultAsync(p => p.MatriculaId == matriculaId);
-
     }
     public void Dispose()
     {
         _context?.Dispose();
+        GC.SuppressFinalize(this);
     }
-
 }

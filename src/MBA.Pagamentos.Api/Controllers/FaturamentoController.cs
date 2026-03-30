@@ -3,12 +3,14 @@ using MBA.Core.DomainObjects;
 using MBA.Core.Enumerators;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
+using MBA.Core.DomainHadlers;
 using MBA.Messages.FaturamentoCommands;
 using MBA.Pagamentos.Api.ViewModels;
 using MBA.WebApi.Core.Controllers;
 using MBA.WebApi.Core.Identidade;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Net;
 
 namespace MBA.Pagamentos.Api.Controllers;
@@ -17,9 +19,12 @@ namespace MBA.Pagamentos.Api.Controllers;
 [Route("api/[controller]")]
 public class FaturamentoController(IAppIdentityUser appIdentityUser,
     INotificationHandler<DomainNotificacaoRaiz> notifications,
-    IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
+    IMediatorHandler mediatorHandler,
+    ILogger<FaturamentoController> logger) : MainController(appIdentityUser, notifications, mediatorHandler)
 {
+    private readonly ILogger<FaturamentoController> _logger = logger;
 
+    [ClaimsAuthorize("Administrador", "PG")]
     [ClaimsAuthorize("Alunos", "PG")]
     [HttpPost("{alunoId}/registrar-pagamento")]
     public async Task<IActionResult> RealizarPagamento(Guid alunoId, RealizarPagamentoViewModel pagamentoViewModel)
@@ -53,6 +58,22 @@ public class FaturamentoController(IAppIdentityUser appIdentityUser,
                 return GenerateResponse(new { pagamentoViewModel.AlunoId, pagamentoViewModel.MatriculaCursoId },
                     responseType: ResponseTypeEnum.Success,
                     statusCode: HttpStatusCode.Created);
+            }
+
+            // If mediator returned false, gather domain notifications for details
+            try
+            {
+                var handler = (DomainNotificacaoHandler)notifications;
+                if (handler != null && handler.TemNotificacao())
+                {
+                    var errors = handler.ObterNotificacoes().Select(n => n.Valor).ToList();
+                    _logger?.LogWarning("Pagamento command failed: {Errors}", string.Join("; ", errors));
+                    return GenerateResponse(responseType: ResponseTypeEnum.ValidationError, statusCode: HttpStatusCode.BadRequest, errors: errors);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error while reading domain notifications after command failure");
             }
 
             return GenerateResponse(responseType: ResponseTypeEnum.GenericError, statusCode: HttpStatusCode.BadRequest);
