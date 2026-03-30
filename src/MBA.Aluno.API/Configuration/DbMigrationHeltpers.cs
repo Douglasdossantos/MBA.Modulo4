@@ -1,5 +1,4 @@
-﻿using MBA.Aluno.API.Models.Enum;
-using MBA.Aluno.Data.Context;
+﻿using MBA.Aluno.Data.Context;
 using MBA.Aluno.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,15 +24,15 @@ namespace MBA.Aluno.API.Configuration
                 await EnsureSeedProducts(context);
             }
         }
-         
+
         private static async Task EnsureSeedProducts(AlunoDbContext context)
         {
             if (!context.Alunos.Any())
             {
                 var alunos = new List<Domain.Entities.Aluno>
                 {
-                    new Domain.Entities.Aluno(Guid.NewGuid(), "Douglas", "douglas@email.com", true, false, DateTime.Now),
-                    new Domain.Entities.Aluno(Guid.NewGuid(), "Maria", "maria@email.com", true, false, DateTime.Now)
+                    new(Guid.NewGuid(), "Douglas", "douglas@email.com", true, false, DateTime.Now),
+                    new(Guid.NewGuid(), "Maria", "maria@email.com", true, false, DateTime.Now)
                 };
 
                 await context.Alunos.AddRangeAsync(alunos);
@@ -61,9 +60,9 @@ namespace MBA.Aluno.API.Configuration
 
                 var aulasAssistidas = new List<AulaAssistida>
                 {
-                    new AulaAssistida(matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-3)),
-                    new AulaAssistida(matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-2)),
-                    new AulaAssistida(matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-1))
+                    new(matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-3)),
+                    new (matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-2)),
+                    new (matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-1))
                 };
 
                 await context.AulaAssistidas.AddRangeAsync(aulasAssistidas);

@@ -2,23 +2,23 @@
 {
     public sealed class AppSettings
     {
-        public JwtSettings JwtSettings { get; set; }
-        public DatabaseSettings DatabaseSettings { get; set; }
+        public required JwtSettings JwtSettings { get; set; }
+        public required DatabaseSettings DatabaseSettings { get; set; }
     }
 
     public sealed class DatabaseSettings
     {
-        public string ConnectionStringIdentity { get; set; }
-        public string ConnectionStringConteudo { get; set; }
-        public string ConnectionStringAluno { get; set; }
-        public string ConnectionStringFaturamento { get; set; }
+        public required string ConnectionStringIdentity { get; set; }
+        public required string ConnectionStringConteudo { get; set; }
+        public required string ConnectionStringAluno { get; set; }
+        public required string ConnectionStringFaturamento { get; set; }
     }
 
     public sealed class JwtSettings
     {
-        public string Secret { get; set; }
-        public int ExpirationInHours { get; set; }
-        public string Issuer { get; set; }
-        public string Audience { get; set; }
+        public required string Secret { get; set; }
+        public required int ExpirationInHours { get; set; }
+        public required string Issuer { get; set; }
+        public required string Audience { get; set; }
     }
 }
