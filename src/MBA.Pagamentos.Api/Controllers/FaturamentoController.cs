@@ -20,7 +20,7 @@ public class FaturamentoController(IAppIdentityUser appIdentityUser,
     IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
 {
 
-    [ClaimsAuthorize("Alunos", "PG")]
+    //[ClaimsAuthorize("Alunos", "PG")]
     [HttpPost("{alunoId}/registrar-pagamento")]
     public async Task<IActionResult> RealizarPagamento(Guid alunoId, RealizarPagamentoViewModel pagamentoViewModel)
     {

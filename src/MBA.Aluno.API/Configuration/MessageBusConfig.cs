@@ -11,6 +11,8 @@ namespace MBA.Aluno.API.Configuration
         {
             services.AddMessageBus(configuration.GetMessageQueueConnection("MessageBus"))
                 .AddHostedService<CadastroAlunoIntegrationHandler>();
+
+
         }
     }
 }

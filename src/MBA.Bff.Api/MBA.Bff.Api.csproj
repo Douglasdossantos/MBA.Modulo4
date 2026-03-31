@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MBA.MessageBus\MBA.MessageBus.csproj" />
     <ProjectReference Include="..\MBA.WebApi.Core\MBA.WebApi.Core.csproj" />
   </ItemGroup>
 
