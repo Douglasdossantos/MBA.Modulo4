@@ -168,5 +168,43 @@ namespace MBA.Bff.Api.Services.Implementation
                 };
             }
         }
+
+        public async Task<ContentResult> AlterarStatusMatricula(Guid Matricula, int Status, string authorization)
+        {
+            // normalize authorization header expected by external services
+            string authHeader = null;
+            if (!string.IsNullOrWhiteSpace(authorization))
+            {
+                authHeader = authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? authorization : $"Bearer {authorization}";
+            }
+
+            try
+            {
+                var response = await _alunoExternalService.AlteraStatusMatricula(Matricula, Status, authHeader);
+
+                if (response == null)
+                    return new ContentResult();
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                return new ContentResult
+                {
+                    Content = content,
+                    ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json",
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Refit.ApiException ex)
+            {
+                var errorContent = ex.Content ?? ex.Message;
+                var status = ex.StatusCode != default ? (int)ex.StatusCode : 500;
+                return new ContentResult
+                {
+                    Content = errorContent,
+                    ContentType = "application/json",
+                    StatusCode = status
+                };
+            }
+        }
     }
 }

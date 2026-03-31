@@ -1,4 +1,5 @@
 ﻿using MBA.Bff.Api.Models.Aluno;
+using MBA.Core.SharedDto.Aluno.Enum;
 using Refit;
 
 namespace MBA.Bff.Api.Services.Interface
@@ -13,5 +14,8 @@ namespace MBA.Bff.Api.Services.Interface
 
         [Get("/api/Aluno/{alunoId}/PorId")]
         Task<AlunoViewModel> ObterPorId(Guid alunoId, [Header("Authorization")] string authorization = null);
+
+        [Put("/api/Aluno/{matriculaId}/{status}/status-matricula")]
+        Task<HttpResponseMessage> AlteraStatusMatricula(Guid matriculaId, int status, [Header("Authorization")] string authorization = null);
     }
 }

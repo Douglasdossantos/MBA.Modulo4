@@ -14,7 +14,7 @@ namespace MBA.Aluno.Domain.Interface
         Task AtualizarAsync(Matricula matricula);
         Task<Matricula> ObterPorIdAsync(Guid id);
         Task<IEnumerable<Matricula>> ObterTodosAsync();
-
+        Task AtualizarStatusAsync(Guid id, Enum status);
         Task AdicionarAsync(Certificado certificado);
         Task<Certificado> ObterCertificadoPorMatriculaAsync(Guid matriculaId);
 

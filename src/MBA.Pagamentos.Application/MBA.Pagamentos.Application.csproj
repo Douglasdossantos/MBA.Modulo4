@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
+	  <ProjectReference Include="..\MBA.MessageBus\MBA.MessageBus.csproj" />
 	  <ProjectReference Include="..\MBA.Pagamentos.Data\MBA.Pagamentos.Data.csproj" />
 	</ItemGroup>
   <PropertyGroup>

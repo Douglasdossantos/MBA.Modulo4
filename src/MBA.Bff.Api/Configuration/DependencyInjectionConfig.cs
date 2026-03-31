@@ -60,10 +60,10 @@ namespace MBA.Bff.Api.Configuration
             services.AddScoped<IConteudoService, ConteudoService>();
             services.AddScoped<IAlunoService, AlunoService>();
             services.AddScoped<IAutenticacaoService, AutenticacaoService>();
-            
 
 
             services.AddTransient<HttpClientAuthorizationDelegatingHandler>();
+            services.AddHostedService<AlterarStatusMatriculaIntegrationHandler>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<IAspNetUser, AspNetUser>();

@@ -3,6 +3,7 @@ using MBA.Core.Autentications;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Financeiro.Application.Configurations;
+using MBA.Pagamentos.Api.Configurations;
 using MBA.Settings;
 using SQLitePCL;
 using System.Reflection;
@@ -26,6 +27,7 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
 });
+builder.Services.AddMessageBusConfiguration(builder.Configuration);
 
 builder.Services.AddScoped<IAppIdentityUser, AppIdentityUser>();
 

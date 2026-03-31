@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MBA.Aluno.API.Models.Enum;
 using MBA.Aluno.Appplication.Interfaces;
 using MBA.Aluno.Appplication.ViewModel;
 using MBA.Core.Autentications;
@@ -8,6 +9,7 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.AlunoCommands;
 using MBA.Core.SharedDto.Aluno;
+using MBA.Core.SharedDto.Aluno.Enum;
 using MBA.WebApi.Core.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +39,7 @@ namespace MBA.Aluno.API.Controllers
 
             try
             {
-                if (UserId != matriculaCursoViewModel.AlunoId) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.Forbidden, ["Você não tem permissão para realizar essa operação"]); }
+                //if (UserId != matriculaCursoViewModel.AlunoId) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.Forbidden, ["Você não tem permissão para realizar essa operação"]); }
 
                 //CursoDto cursoDto = await _cursoAppService.ObterPorIdAsync(matriculaCursoViewModel.CursoId);
                 var comando = new MatricularAlunoCommand(matriculaCursoViewModel.CursoId, matriculaCursoViewModel.AlunoId);
@@ -60,6 +62,8 @@ namespace MBA.Aluno.API.Controllers
                 return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, [ex.Message]);
             }
         }
+
+        
 
         [HttpPost("registrar-aula-assistida")]
         public async Task<IActionResult> RegistrarAulaAssistida(AulaAssistidaViewModel aulaAssistidaCursoViewModel)
@@ -158,6 +162,37 @@ namespace MBA.Aluno.API.Controllers
             catch (Exception ex)
             {
                 return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError, [ex.Message]);
+            }
+        }
+
+        [HttpPut("{matriculaId}/{status}/status-matricula")]
+        public async Task<IActionResult> AlterarStatusMatricula(Guid matriculaId, int status)
+        {
+            if (!ModelState.IsValid) { return GenerateModelStateResponse(ResponseTypeEnum.ValidationError, HttpStatusCode.BadRequest, ModelState); }
+
+            try
+            {
+                //if (UserId != matriculaCursoViewModel.AlunoId) { return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.Forbidden, ["Você não tem permissão para realizar essa operação"]); }
+                var statusInt = (Core.SharedDto.Aluno.Enum.StatusMatricula)status;
+
+                var comando = new AlterarStatusMatriculaCommand(matriculaId, statusInt);
+                var sucesso = await _mediatorHandler.EnviarComandoRaiz(comando);
+                if (sucesso)
+                {
+                    return GenerateResponse("matricula alterada",
+                        responseType: ResponseTypeEnum.Success,
+                        statusCode: HttpStatusCode.Created);
+                }
+
+                return GenerateResponse(responseType: ResponseTypeEnum.GenericError, statusCode: HttpStatusCode.BadRequest);
+            }
+            catch (DomainException exDomain)
+            {
+                return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError, HttpStatusCode.BadRequest, exDomain);
+            }
+            catch (Exception ex)
+            {
+                return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, [ex.Message]);
             }
         }
 

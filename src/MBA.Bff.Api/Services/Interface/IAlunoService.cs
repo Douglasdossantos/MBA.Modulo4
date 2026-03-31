@@ -7,5 +7,6 @@ namespace MBA.Bff.Api.Services.Interface
     {
         Task<IActionResult> MatriculaPagamento(MatriculaViewModel matriculaViewModel, string authorization);
         Task<ContentResult> RealizarAula(AulaAssistidaViewModel aulaAssistidaViewModel, string authorization);
+        Task<ContentResult> AlterarStatusMatricula(Guid Matricula, int Status, string authorization);
     }
 }

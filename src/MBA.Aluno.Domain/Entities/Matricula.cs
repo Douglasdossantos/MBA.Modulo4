@@ -25,7 +25,7 @@ namespace MBA.Aluno.Domain.Entities
         public Guid AlunoId { get; private set; }
         public DateTime DataMatricula { get; private set; }
         public DateTime? DataCursoConcluido { get; private set; }
-        public StatusMatricula Status { get; private set; }
+        public StatusMatricula Status { get;  private set; }
         public Aluno? Aluno { get; set; }
         public Certificado? Certificado { get; private set; }
 
@@ -57,6 +57,33 @@ namespace MBA.Aluno.Domain.Entities
             Validacoes.ValidarSeVazio(cursoId, "O ID do curso não pode ser vazio.");
             Validacoes.ValidarSeVazio(alunoId, "O ID do aluno não pode ser vazio.");
             Validacoes.ValidarData(data, "A data da matrícula é inválida.");
+        }
+
+        public void AlterarStatusPorCodigo(int codigo)
+        {
+            switch (codigo)
+            {
+                case 1:
+                    statusPendentePagamento();
+                    break;
+
+                case 2:
+                    statusPagamentoRealizado();
+                    break;
+
+                case 3:
+                    statuConcluido();
+                    break;
+
+                case 4:
+                    statusCancelada();
+                    break;
+
+                
+
+                default:
+                    throw new ArgumentException("Código de status inválido");
+            }
         }
 
         public override string ToString()

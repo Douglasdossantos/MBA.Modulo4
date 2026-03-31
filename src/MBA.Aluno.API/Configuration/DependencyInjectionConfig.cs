@@ -1,4 +1,6 @@
-﻿using MBA.Aluno.Appplication.Commands.CadastroAluno;
+﻿using FluentValidation.Results;
+using MBA.Aluno.Appplication.Commands.AlterarStatusMatricula;
+using MBA.Aluno.Appplication.Commands.CadastroAluno;
 using MBA.Aluno.Appplication.Commands.ConcluirCurso;
 using MBA.Aluno.Appplication.Commands.Matricular;
 using MBA.Aluno.Appplication.Interfaces;
@@ -9,10 +11,9 @@ using MBA.Aluno.Domain.Interface;
 using MBA.Core.Autentications;
 using MBA.Core.DomainHadlers;
 using MBA.Core.Mediator;
-using MBA.Core.Messages.AlunoCommands;
 using MBA.Core.Messages;
+using MBA.Core.Messages.AlunoCommands;
 using MediatR;
-using FluentValidation.Results;
 
 namespace MBA.Aluno.API.Configuration
 {
@@ -36,6 +37,7 @@ namespace MBA.Aluno.API.Configuration
             services.AddScoped<IRequestHandler<CadastroAlunoCommand, ValidationResult>, CadastroAlunoCommandHandler>();
             //builder.Services.AddScoped<IRequestHandler<RegistrarAulaAssistidaCommand, bool>, RegistrarAulaAssistidaCommandHandler>();
             services.AddScoped<IRequestHandler<ConcluirCursoCommand, bool>, ConcluirCursoCommandHandler>();
+            services.AddScoped<IRequestHandler<AlterarStatusMatriculaCommand, bool>, AlterarStatusMatriculaCommandHandler>();
 
             // Matricula
             services.AddScoped<IMatriculaRepository, MatriculaRepository>();

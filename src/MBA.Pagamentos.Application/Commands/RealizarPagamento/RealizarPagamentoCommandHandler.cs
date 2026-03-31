@@ -1,6 +1,9 @@
 ﻿using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.FaturamentoEvents;
+using MBA.Core.Messages.Integration;
+using MBA.Core.SharedDto.Aluno.Enum;
+using MBA.MessageBus;
 using MBA.Messages.FaturamentoCommands;
 using MBA.Pagamentos.Domain.Entities;
 using MBA.Pagamentos.Domain.ValueObjects;
@@ -9,11 +12,12 @@ using MediatR;
 
 
 namespace MBA.Pagamentos.Application.Commands.RealizarPagamento;
-public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoRepository,
+public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoRepository, IMessageBus bus,
     IMediatorHandler mediatorHandler) : IRequestHandler<RealizarPagamentoCommand, bool>
 {
     private readonly IFaturamentoRepository _faturamentoRepository = faturamentoRepository;
     private readonly IMediatorHandler _mediatorHandler = mediatorHandler;
+    private readonly IMessageBus _bus = bus;
     private Guid _raizAgregacao;
 
     public async Task<bool> Handle(
@@ -87,6 +91,16 @@ public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoR
             dadosCartao);
 
         // 9️⃣ Commit
+        var clienteResult = await AlterarStatusMatricula(request.MatriculaCursoId);
+        if (!clienteResult.ValidationResult.IsValid)
+        {
+            await _mediatorHandler.PublicarNotificacaoDominio(
+                new DomainNotificacaoRaiz(
+                    _raizAgregacao,
+                    nameof(Pagamento),
+                    "ERRO AO ALTERAR O STATUS DA MATRICULA."));
+            return false;
+        }
         await _faturamentoRepository.UnitOfWork.Commit();
 
         // 🔟 Evento de domínio
@@ -146,5 +160,20 @@ public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoR
         }
 
         return true;
+    }
+
+    private async Task<ResponseMessage> AlterarStatusMatricula(Guid matriculaId)
+    {
+
+        var alterarMatricula = new AlterarStatusMatriculaIntegrationEvent(matriculaId, StatusMatricula.PagamentoRealizado);
+
+        try
+        {
+            return await _bus.RequestAsync<AlterarStatusMatriculaIntegrationEvent, ResponseMessage>(alterarMatricula);
+        }
+        catch
+        {
+            throw;
+        }
     }
 }

@@ -66,6 +66,19 @@ namespace MBA.Aluno.Data.Repositories
                 .FirstOrDefaultAsync(c => c.MatriculaId == matriculaId);
         }
 
+        public async Task AtualizarStatusAsync(Guid id, Enum status)
+        {
+            var matricula = await _context.Matriculas.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (matricula == null)
+                throw new Exception("Matrícula não encontrada");
+
+            int statusCodigo = Convert.ToInt32(status);
+            matricula.AlterarStatusPorCodigo(statusCodigo);
+
+            _context.Matriculas.Update(matricula);
+        }
+
 
         public void Dispose()
         {
