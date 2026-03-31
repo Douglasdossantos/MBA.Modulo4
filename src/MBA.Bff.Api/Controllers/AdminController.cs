@@ -1,4 +1,5 @@
 ﻿using MBA.Bff.Api.Models.Conteudo;
+using MBA.Bff.Api.Response;
 using MBA.Bff.Api.Services.Interface;
 using MBA.Core.Autentications;
 using MBA.Core.DomainObjects;
@@ -57,8 +58,18 @@ namespace MBA.Bff.Api.Controllers
                         {
                             string accessToken = tokenProp.GetString();
 
+                            var options = new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true
+                            };
+
+                            var result = JsonSerializer.Deserialize<LoginResponse>(content, options);
+
+                            cadastroCurso.Login.AlunoId = Guid.Parse(result.UsuarioToken.Id);
+
                             // pass token to service if needed (example shows calling service after auth)
                             var conteudo = await _conteudoService.CadastrarCurso(cadastroCurso, accessToken);
+
                             return GenerateResponse(((ContentResult)conteudo).Content, ResponseTypeEnum.Success, HttpStatusCode.OK);
                         }
                         else

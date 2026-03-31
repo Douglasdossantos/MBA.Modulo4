@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MBA.Bff.Api.Services.Implementation
 {
-    public class ConteudoService(IConteudoExternalServiceService conteudoService): IConteudoService
+    public class ConteudoService(IConteudoExternalServiceService conteudoService, IFaturamentoExternalService faturamentoService) : IConteudoService
     {
         private readonly IConteudoExternalServiceService _conteudoService = conteudoService;
-        
+        private readonly IFaturamentoExternalService _faturamentoService = faturamentoService;
+
+         
+
         public async Task<IActionResult> CadastrarCurso(CadastroCursoViewModel cadastroCursoViewModel, string authorization)
         {
             // Ensure Authorization header contains the Bearer prefix when provided

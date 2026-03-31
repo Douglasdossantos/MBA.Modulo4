@@ -1,7 +1,4 @@
-
-using MBA.API.Configurations;
 using MBA.Conteudo.Api.Configuration;
-using MBA.Conteudo.API.Configurations;
 using MBA.Conteudo.API.Settings;
 using MBA.Conteudo.Application.Configurations;
 using MBA.Core.Mediator;

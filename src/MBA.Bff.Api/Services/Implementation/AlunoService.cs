@@ -15,15 +15,49 @@ namespace MBA.Bff.Api.Services.Implementation
 
         public async Task<IActionResult> MatriculaPagamento(MatriculaViewModel matriculaViewModel, string authorization)
         {
-            var requestCadastro = await CadastrarCurso(matriculaViewModel, authorization);
+            // normalize authorization header
+            string authHeader = null;
+            if (!string.IsNullOrWhiteSpace(authorization))
+            {
+                authHeader = authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? authorization : $"Bearer {authorization}";
+            }
+
+            var requestCadastro = await CadastrarCurso(matriculaViewModel, authHeader);
 
             var requestPagamento = await AlunoRealizaPagamento(matriculaViewModel.AlunoId, new RealizarPagamentoRequest
             {
+                AlunoId = matriculaViewModel.AlunoId,   
                 CursoId = matriculaViewModel.CursoId,
-                Valor = 1000 // Exemplo de valor, você pode ajustar conforme necessário
+                MatriculaCursoId = matriculaViewModel.MatriculaCursoId != Guid.Empty ? matriculaViewModel.MatriculaCursoId : matriculaViewModel.CursoId,
+                PagamentoPodeSerRealizado = requestCadastro.StatusCode == 200, // pagamento só se matrícula ok
+                NomeCurso = matriculaViewModel.NomeCurso, // Você pode obter o nome do curso de outra fonte se necessário
+                DataMatricula = DateTime.UtcNow,
+                Valor = matriculaViewModel.Valor,
+                CvvCartao = matriculaViewModel.CvvCartao,
+                NomeTitularCartao = matriculaViewModel.NomeTitularCartao,   
+                NumeroCartao = matriculaViewModel.NumeroCartao, 
+                ValidadeCartao = matriculaViewModel.ValidadeCartao
+
             }, requestCadastro.AuthHeader);
 
-            return requestCadastro;
+            if (requestPagamento == null)
+            {
+                return new ContentResult
+                {
+                    Content = string.Empty,
+                    ContentType = "application/json",
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
+
+            var paymentContent = await requestPagamento.Content.ReadAsStringAsync();
+
+            return new ContentResult
+            {
+                Content = paymentContent,
+                ContentType = requestPagamento.Content.Headers.ContentType?.ToString() ?? "application/json",
+                StatusCode = (int)requestPagamento.StatusCode
+            };
         }
 
         private async Task<ContentCustomResult> CadastrarCurso(MatriculaViewModel matriculaViewModel, string authorization)
@@ -56,21 +90,36 @@ namespace MBA.Bff.Api.Services.Implementation
             };
         }
 
-        public async Task<ContentResult> AlunoRealizaPagamento(Guid alunoId, RealizarPagamentoRequest matriculaViewModel, string authorization)
+        public async Task<HttpResponseMessage> AlunoRealizaPagamento(Guid alunoId, RealizarPagamentoRequest matriculaViewModel, string authorization)
         {
-            var response = await _faturamentoExternalService.RealizarPagamento(alunoId, matriculaViewModel, authorization);
-
-            if (response == null)
-                return new ContentResult();
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            return new ContentResult
+            // normalize authorization header
+            string authHeader = null;
+            if (!string.IsNullOrWhiteSpace(authorization))
             {
-                Content = content,
-                ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json",
-                StatusCode = (int)response.StatusCode
-            };
+                authHeader = authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? authorization : $"Bearer {authorization}";
+            }
+
+            try
+            {
+                var response = await _faturamentoExternalService.RealizarPagamento(alunoId, matriculaViewModel, authHeader);
+
+                if (response == null)
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError)
+                    {
+                        Content = new System.Net.Http.StringContent(string.Empty)
+                    };
+
+                return response;
+            }
+            catch (Refit.ApiException ex)
+            {
+                var status = ex.StatusCode != default ? ex.StatusCode : System.Net.HttpStatusCode.InternalServerError;
+                var content = ex.Content ?? ex.Message;
+                return new HttpResponseMessage(status)
+                {
+                    Content = new System.Net.Http.StringContent(content)
+                };
+            }
         }
 
         public async Task<ContentResult> RealizarAula(AulaAssistidaViewModel aulaAssistidaViewModel, string authorization)

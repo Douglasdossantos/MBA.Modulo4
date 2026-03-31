@@ -1,6 +1,6 @@
 ﻿using MBA.Conteudo.Api.MigrationHelp;
 
-namespace MBA.API.Configurations
+namespace MBA.Conteudo.Api.Configuration
 {
     public static class AmbienteConfiguration
     {
