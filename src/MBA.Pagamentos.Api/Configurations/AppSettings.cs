@@ -12,6 +12,7 @@
         public string ConnectionStringConteudo { get; set; } = string.Empty;
         public string ConnectionStringAluno { get; set; } = string.Empty;
         public string ConnectionStringFaturamento { get; set; } = string.Empty;
+        public string? SqliteFolderPath { get; set; }
     }
 
     public sealed class JwtSettings
