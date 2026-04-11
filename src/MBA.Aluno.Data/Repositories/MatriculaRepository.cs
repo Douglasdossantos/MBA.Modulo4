@@ -3,22 +3,12 @@ using MBA.Aluno.Domain.Entities;
 using MBA.Aluno.Domain.Interface;
 using MBA.Core.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MBA.Aluno.Data.Repositories
 {
-    public class MatriculaRepository : IMatriculaRepository
+    public class MatriculaRepository(AlunoDbContext context) : IMatriculaRepository
     {
-        private readonly AlunoDbContext _context;
-
-        public MatriculaRepository(AlunoDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AlunoDbContext _context = context;
 
         public IUnitOfWork UnitOfWork => _context;
 
@@ -68,11 +58,7 @@ namespace MBA.Aluno.Data.Repositories
 
         public async Task AtualizarStatusAsync(Guid id, Enum status)
         {
-            var matricula = await _context.Matriculas.FirstOrDefaultAsync(x => x.Id == id);
-
-            if (matricula == null)
-                throw new Exception("Matrícula não encontrada");
-
+            var matricula = await _context.Matriculas.FirstOrDefaultAsync(x => x.Id == id) ?? throw new Exception("Matrícula não encontrada");
             int statusCodigo = Convert.ToInt32(status);
             matricula.AlterarStatusPorCodigo(statusCodigo);
 

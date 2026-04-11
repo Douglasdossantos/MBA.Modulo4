@@ -1,34 +1,18 @@
-﻿using FluentValidation.Results;
-using MBA.Aluno.Appplication.Commands.CadastroAluno;
-using MBA.Aluno.Appplication.Commands.Matricular;
-using MBA.Aluno.Appplication.Interfaces;
-using MBA.Aluno.Data.Repositories;
-using MBA.Aluno.Domain.Interface;
+﻿using MBA.Aluno.Domain.Interface;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.AlunoCommands;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MBA.Aluno.Appplication.Commands.AlterarStatusMatricula
 {
-    public class AlterarStatusMatriculaCommandHandler : IRequestHandler<AlterarStatusMatriculaCommand, bool>
+    public class AlterarStatusMatriculaCommandHandler(
+        IMatriculaRepository matriculaRepository,
+        IMediatorHandler mediatorHandler) : IRequestHandler<AlterarStatusMatriculaCommand, bool>
     {
-        private readonly IMatriculaRepository _matriculaRepository;
-        private readonly IMediatorHandler _mediatorHandler;
+        private readonly IMatriculaRepository _matriculaRepository = matriculaRepository;
+        private readonly IMediatorHandler _mediatorHandler = mediatorHandler;
         private Guid _raizAgregacao;
-
-        public AlterarStatusMatriculaCommandHandler(
-            IMatriculaRepository matriculaRepository,
-            IMediatorHandler mediatorHandler)
-        {
-            _matriculaRepository = matriculaRepository;
-            _mediatorHandler = mediatorHandler;
-        }
 
         public async Task<bool> Handle(AlterarStatusMatriculaCommand request, CancellationToken cancellationToken)
         {

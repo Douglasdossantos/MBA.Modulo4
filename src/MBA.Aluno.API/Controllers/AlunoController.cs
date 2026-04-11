@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MBA.Aluno.API.Models.Enum;
 using MBA.Aluno.Appplication.Interfaces;
 using MBA.Aluno.Appplication.ViewModel;
 using MBA.Core.Autentications;
@@ -9,7 +8,6 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.AlunoCommands;
 using MBA.Core.SharedDto.Aluno;
-using MBA.Core.SharedDto.Aluno.Enum;
 using MBA.WebApi.Core.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +16,7 @@ using System.Net;
 namespace MBA.Aluno.API.Controllers
 {
     [Route("api/[controller]")]
-    public class AlunoController(//ICursoAppService cursoAppService,
+    public class AlunoController(
             IAlunoAppService alunoAppService,
             IAlunoQuery alunoQuery,
             IMapper mapper,
@@ -26,7 +24,6 @@ namespace MBA.Aluno.API.Controllers
             INotificationHandler<DomainNotificacaoRaiz> notifications,
             IMediatorHandler mediatorHandler) : MainController(appIdentityUser, notifications, mediatorHandler)
     {
-        //private readonly ICursoAppService _cursoAppService = cursoAppService;
         private readonly IAlunoAppService _alunoAppService = alunoAppService;
         private readonly IAlunoQuery _alunoQuery = alunoQuery;
         private readonly IMapper _mapper = mapper;
@@ -62,8 +59,6 @@ namespace MBA.Aluno.API.Controllers
                 return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.BadRequest, [ex.Message]);
             }
         }
-
-        
 
         [HttpPost("registrar-aula-assistida")]
         public async Task<IActionResult> RegistrarAulaAssistida(AulaAssistidaViewModel aulaAssistidaCursoViewModel)

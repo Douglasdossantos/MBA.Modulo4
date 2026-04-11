@@ -5,23 +5,26 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.FaturamentoEvents;
 using MBA.Core.SharedDto;
+using MBA.MessageBus;
 using MBA.Messages.FaturamentoCommands;
 using MBA.Pagamentos.Application.Commands.RealizarPagamento;
 using MBA.Pagamentos.Domain.Entities;
 using MBA.Pagamentos.Domain.ValueObjects;
 using Moq;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MBA.Pagamentos.Testes.Applications.Commands;
 public class RealizarPagamentoCommandHandlerTests
 {
     private readonly Mock<IFaturamentoRepository> _faturamentoRepositoryMock;
     private readonly Mock<IMediatorHandler> _mediatorHandlerMock;
+    private readonly Mock<IMessageBus> _messageBus;
+    
     private readonly RealizarPagamentoCommandHandler _handler;
 
     public RealizarPagamentoCommandHandlerTests()
     {
         _faturamentoRepositoryMock = new Mock<IFaturamentoRepository>();
+        _messageBus = new Mock<IMessageBus>();
         _mediatorHandlerMock = new Mock<IMediatorHandler>();
 
         var unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -30,11 +33,12 @@ public class RealizarPagamentoCommandHandlerTests
 
         _handler = new RealizarPagamentoCommandHandler(
             _faturamentoRepositoryMock.Object,
+            _messageBus.Object,
             _mediatorHandlerMock.Object
         );
     }
 
-    private RealizarPagamentoCommand CriarComandoValido()
+    private static RealizarPagamentoCommand CriarComandoValido()
     {
         var matriculaId = Guid.NewGuid();
         decimal valor = 2500.00m;
@@ -44,7 +48,7 @@ public class RealizarPagamentoCommandHandlerTests
         {
             Id = matriculaId,
             AlunoId = Guid.NewGuid(),
-            CursoId = Guid.NewGuid(),
+            CursoId = cursoId,
             Valor = valor,
             PagamentoPodeSerRealizado = true
         };

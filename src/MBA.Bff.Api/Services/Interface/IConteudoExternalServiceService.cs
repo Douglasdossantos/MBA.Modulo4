@@ -7,5 +7,9 @@ namespace MBA.Bff.Api.Services.Interface
     {
         [Post("/api/Curso")]
         Task<HttpResponseMessage> CadastrarCurso([Body] CadastrarCursoRequest aulaViewModel, [Header("Authorization")] string authorization = null);
+
+
+        [Get("/api/Curso/{cursoId}")]
+        Task<HttpResponseMessage> ObterCursoPorId(Guid cursoId, [Header("Authorization")] string authorization = null);
     }
 }

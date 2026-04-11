@@ -8,7 +8,6 @@ using MBA.Core.Messages;
 using MBA.WebApi.Core.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text.Json;
 
@@ -118,11 +117,9 @@ namespace MBA.Bff.Api.Controllers
                             string accessToken = tokenProp.GetString();
 
                             var conteudo = await _alunoService.RealizarAula(aulaAssistidaViewModel, accessToken);
-                            //return GenerateResponse(((ContentResult)conteudo).Content, ResponseTypeEnum.Success, HttpStatusCode.OK);
                         }
                         else
                         {
-                            // accessToken not present - treat as auth failure
                             return GenerateResponse(ResultLogin, ResponseTypeEnum.GenericError, HttpStatusCode.Unauthorized);
                         }
                     }
@@ -134,5 +131,55 @@ namespace MBA.Bff.Api.Controllers
             }
             return CustomResponse();
         }
+
+
+        [HttpPost("concluir-curso")]
+        public async Task<IActionResult> ConcluirCurso([FromBody] ConcluirCursoViewModel concluirCursoViewModel)
+        {
+            try
+            {
+                var ResultLogin = await _autenticacao.Login(concluirCursoViewModel.Login);
+
+                if (ResultLogin != null)
+                {
+                    string content = null;
+
+                    if (ResultLogin is ContentResult cr)
+                    {
+                        content = cr.Content;
+                    }
+                    else if (ResultLogin is ObjectResult orr)
+                    {
+                        if (orr.Value is string s) content = s;
+                        else content = JsonSerializer.Serialize(orr.Value);
+                    }
+                    else if (ResultLogin is JsonResult jr)
+                    {
+                        content = JsonSerializer.Serialize(jr.Value);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(content))
+                    {
+                        using var doc = JsonDocument.Parse(content);
+                        if (doc.RootElement.TryGetProperty("accessToken", out var tokenProp))
+                        {
+                            string accessToken = tokenProp.GetString();
+
+                            var conteudo = await _alunoService.ConcluirCurso(concluirCursoViewModel, accessToken);
+                        }
+                        else
+                        {
+                            return GenerateResponse(ResultLogin, ResponseTypeEnum.GenericError, HttpStatusCode.Unauthorized);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return CustomResponse();
+        }
+
     }
 }
