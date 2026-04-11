@@ -1,47 +1,50 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 
-namespace MBA.WebApp.MVC.Extensions
+namespace MBA.WebApp.MVC.Extensions;
+
+public class AspNetUser : IUser
 {
-    public class AspNetUser : IUser
-    {
-        private readonly IHttpContextAccessor _accessor;
+	private readonly IHttpContextAccessor _accessor;
 
-        public AspNetUser(IHttpContextAccessor acessor)
-        {
-            _accessor = acessor;
-        }
+	public AspNetUser(IHttpContextAccessor acessor)
+	{
+		_accessor = acessor;
+	}
 
-        public string Name => _accessor.HttpContext.User.Identity.Name;
-        public Guid ObterUserId()
-        {
-            return EstaAutenticado() ? Guid.Parse(_accessor.HttpContext.User.GetUserId()) : Guid.Empty;
-        }
-        public string ObterUserEmail()
-        {
-            return EstaAutenticado() ?_accessor.HttpContext.User.getUserEmail() : string.Empty;
-        }
-        public string ObterUserToken()
-        {
-            return EstaAutenticado() ? _accessor.HttpContext.User.getUserToken() : string.Empty;
-        }
+	public string Name => _accessor.HttpContext!.User.Identity!.Name!;
 
-        public bool EstaAutenticado()
-        {
-            return _accessor.HttpContext.User.Identity.IsAuthenticated;
-        }
+	public Guid ObterUserId()
+	{
+		return EstaAutenticado() ? Guid.Parse(_accessor.HttpContext!.User.GetUserId()) : Guid.Empty;
+	}
 
-        public IEnumerable<Claim> obterClaims()
-        {
-            return _accessor.HttpContext.User.Claims;
-        }
-        public bool PossuiRole(string role)
-        {
-            return _accessor.HttpContext.User.IsInRole(role);
-        }
+	public string ObterUserEmail()
+	{
+		return EstaAutenticado() ? _accessor.HttpContext!.User.GetUserEmail() : string.Empty;
+	}
 
-        public HttpContext ObterHttpContext()
-        {
-            return _accessor.HttpContext;
-        }
-    }
+	public string ObterUserToken()
+	{
+		return EstaAutenticado() ? _accessor.HttpContext!.User.GetUserToken() : string.Empty;
+	}
+
+	public bool EstaAutenticado()
+	{
+		return _accessor.HttpContext!.User.Identity!.IsAuthenticated;
+	}
+
+	public IEnumerable<Claim> ObterClaims()
+	{
+		return _accessor.HttpContext!.User.Claims;
+	}
+
+	public bool PossuiRole(string role)
+	{
+		return _accessor.HttpContext!.User.IsInRole(role);
+	}
+
+	public HttpContext ObterHttpContext()
+	{
+		return _accessor.HttpContext!;
+	}
 }

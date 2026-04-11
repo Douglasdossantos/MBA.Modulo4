@@ -1,11 +1,10 @@
-﻿namespace MBA.Bff.Api.Extensions
+﻿namespace MBA.Bff.Api.Extensions;
+
+public class AppServicesSettings
 {
-    public class AppServicesSettings
-    {
-        public string AlunoUrl { get; set; }
-        public string ConteudoUrl { get; set; }
-        public string PagamentoUrl { get; set; }
-        public string AutenticacaoUrl { get; set; }
-        public string FaturamentoUrl { get; set; }
-    }
+	public string AlunoUrl { get; set; }
+	public string ConteudoUrl { get; set; }
+	public string PagamentoUrl { get; set; }
+	public string AutenticacaoUrl { get; set; }
+	public string FaturamentoUrl { get; set; }
 }

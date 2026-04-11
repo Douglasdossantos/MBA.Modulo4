@@ -1,4 +1,3 @@
-﻿using System.Runtime.CompilerServices;
-
-//DESCOMENTAR QUANTO TIVER OS TESTES DE UNIDADE PRONTOS
+﻿//DESCOMENTAR QUANTO TIVER OS TESTES DE UNIDADE PRONTOS
 //[assembly: InternalsVisibleTo("MBA.Conteudo.Testes")]
+

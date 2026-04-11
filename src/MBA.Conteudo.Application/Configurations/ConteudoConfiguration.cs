@@ -12,63 +12,58 @@ using MBA.Conteudo.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 
-namespace MBA.Conteudo.Application.Configurations
+namespace MBA.Conteudo.Application.Configurations;
+
+[ExcludeFromCodeCoverage]
+public static class ConteudoConfiguration
 {
-    [ExcludeFromCodeCoverage]
-    public static class ConteudoConfiguration
-    {
-        
-        public static IServiceCollection ConfigurarConteudoApplication(this IServiceCollection services, string stringConexao, bool ehProducao)
-        {
-            return services
-                .ConfigurarInjecoesDependenciasRepository()
-                .ConfigurarInjecoesDependenciasApplication()
-                .ConfigurarRepositorios(stringConexao, ehProducao);
-        }
+	public static IServiceCollection ConfigurarConteudoApplication(this IServiceCollection services,
+		string stringConexao, bool ehProducao)
+	{
+		return services
+			.ConfigurarInjecoesDependenciasRepository()
+			.ConfigurarInjecoesDependenciasApplication()
+			.ConfigurarRepositorios(stringConexao, ehProducao);
+	}
 
-        private static IServiceCollection ConfigurarInjecoesDependenciasRepository(this IServiceCollection services)
-        {
-            services.AddScoped<IConteudoRepository, ConteudoRepository>();
-            return services;
-        }
+	private static IServiceCollection ConfigurarInjecoesDependenciasRepository(this IServiceCollection services)
+	{
+		services.AddScoped<IConteudoRepository, ConteudoRepository>();
+		return services;
+	}
 
-        private static IServiceCollection ConfigurarInjecoesDependenciasApplication(this IServiceCollection services)
-        {
-            services.AddScoped<IMediatorHandler, MediatorHandler>();
+	private static IServiceCollection ConfigurarInjecoesDependenciasApplication(this IServiceCollection services)
+	{
+		services.AddScoped<IMediatorHandler, MediatorHandler>();
 
-            services.AddScoped<INotificationHandler<DomainNotificacaoRaiz>, DomainNotificacaoHandler>();
-            
-            services.AddScoped<ICursoAppService, CursoAppService>();
-            services.AddScoped<IAulaAppService, AulaAppService>();
+		services.AddScoped<INotificationHandler<DomainNotificacaoRaiz>, DomainNotificacaoHandler>();
 
-            return services;
-        }
+		services.AddScoped<ICursoAppService, CursoAppService>();
+		services.AddScoped<IAulaAppService, AulaAppService>();
 
-        private static IServiceCollection ConfigurarRepositorios(this IServiceCollection services, string stringConexao, bool ehProducao)
-        {
-            services.AddDbContext<ConteudoContext>(o =>
-            {
-                if (ehProducao)
-                {
-                    o.UseSqlServer(stringConexao);
-                }
-                else
-                {
-                    var connection = new SqliteConnection(stringConexao);
-                    connection.CreateCollation("LATIN1_GENERAL_CI_AI", (x, y) =>
-                    {
-                        if (x == null && y == null) return 0;
-                        if (x == null) return -1;
-                        if (y == null) return 1;
+		return services;
+	}
 
-                        return string.Compare(x, y, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace);
-                    });
+	private static IServiceCollection ConfigurarRepositorios(this IServiceCollection services, string stringConexao,
+		bool ehProducao)
+	{
+		services.AddDbContext<ConteudoContext>(o =>
+		{
+			if (ehProducao)
+			{
+				o.UseSqlServer(stringConexao);
+			}
+			else
+			{
+				var connection = new SqliteConnection(stringConexao);
+				connection.CreateCollation("LATIN1_GENERAL_CI_AI", (x, y) =>
+					string.Compare(x, y, CultureInfo.CurrentCulture,
+						CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace));
 
-                    o.UseSqlite(connection);
-                }
-            });
+				o.UseSqlite(connection);
+			}
+		});
 
-            return services;
-        }
-    }
+		return services;
+	}
 }

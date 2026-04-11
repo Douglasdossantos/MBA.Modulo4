@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace MBA.Bff.Api.Models
+namespace MBA.Bff.Api.Models;
+
+public class ContentCustomResult : ContentResult
 {
-    public class ContentCustomResult: ContentResult
-    {
-        public string AuthHeader { get; set; }
-    }
+	public string AuthHeader { get; set; }
 }

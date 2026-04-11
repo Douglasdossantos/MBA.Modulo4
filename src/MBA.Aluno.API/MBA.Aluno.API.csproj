@@ -24,10 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MBA.Aluno.Appplication\MBA.Aluno.Appplication.csproj" />
+    <ProjectReference Include="..\MBA.Aluno.Appplication\MBA.Aluno.Application.csproj" />
     <ProjectReference Include="..\MBA.Aluno.Data\MBA.Aluno.Data.csproj" />
     <ProjectReference Include="..\MBA.Aluno.Domain\MBA.Aluno.Domain.csproj" />
     <ProjectReference Include="..\MBA.Auth.Api\MBA.Auth.Api.csproj" />
+    <ProjectReference Include="..\MBA.Conteudo.Data\MBA.Conteudo.Data.csproj" />
     <ProjectReference Include="..\MBA.Core\MBA.Core.csproj" />
     <ProjectReference Include="..\MBA.MessageBus\MBA.MessageBus.csproj" />
     <ProjectReference Include="..\MBA.WebApi.Core\MBA.WebApi.Core.csproj" />

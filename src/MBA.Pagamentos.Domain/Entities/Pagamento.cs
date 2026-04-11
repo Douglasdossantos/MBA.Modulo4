@@ -11,9 +11,9 @@ public class Pagamento : Entity, IAggregateRoot
     public decimal Valor { get; private set; }
     public DateTime DataVencimento { get; private set; }
     public DateTime? DataPagamento { get; private set; }
-    public DadosCartao Cartao { get; private set; }
-    public StatusPagamento StatusPagamento { get; private set; }
-    public string CodigoConfirmacaoPagamento { get; private set; }
+    public DadosCartao Cartao { get; private set; } = null!;
+    public StatusPagamento StatusPagamento { get; private set; } = null!;
+    public string CodigoConfirmacaoPagamento { get; private set; } = string.Empty;
 
     protected Pagamento() { }
     public Pagamento(Guid matriculaId, decimal valor, DateTime dataVencimento)
@@ -46,7 +46,7 @@ public class Pagamento : Entity, IAggregateRoot
         DataPagamento = null;
     }
 
-    private void ValidarIntegridadePagamento(DateTime? novaDataPagamento = null, string novoCodigoConfirmacaoPagamento = null)
+    private void ValidarIntegridadePagamento(DateTime? novaDataPagamento = null, string? novoCodigoConfirmacaoPagamento = null)
     {
         var matriculaId = MatriculaId;
         var valor = Valor;

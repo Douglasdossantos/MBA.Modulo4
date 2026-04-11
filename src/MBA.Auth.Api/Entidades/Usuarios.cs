@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace MBA.Auth.Api.Entidades
+namespace MBA.Auth.Api.Entidades;
+
+public class Usuarios : IdentityUser
 {
-    public class Usuarios : IdentityUser
-    {
-        public bool Administrador { get; set; }
-    }
+	public bool Administrador { get; set; }
 }

@@ -1,35 +1,34 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace MBA.Auth.Api.ViewModels
+namespace MBA.Auth.Api.ViewModels;
+
+public class UsuarioRegistro
 {
-    public class UsuarioRegistro
-    {
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        [StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
-        public string NomeUsuario { get; set; }
+	[Required(ErrorMessage = "O campo {0} é obrigatório")]
+	[StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
+	public string NomeUsuario { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        [EmailAddress(ErrorMessage = " O campo {0} está em formato inválido")]
-        public string Email { get; set; }
+	[Required(ErrorMessage = "O campo {0} é obrigatório")]
+	[EmailAddress(ErrorMessage = " O campo {0} está em formato inválido")]
+	public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        [StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
-        public string Senha { get; set; }
+	[Required(ErrorMessage = "O campo {0} é obrigatório")]
+	[StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
+	public string Senha { get; set; } = string.Empty;
 
-        [Compare("Senha", ErrorMessage ="As senhas não conferem.")]
-        public string SenhaConfirmacao { get; set; }
+	[Compare("Senha", ErrorMessage = "As senhas não conferem.")]
+	public string SenhaConfirmacao { get; set; } = string.Empty;
 
-        public bool Administrador { get; set; }
-    }
+	public bool Administrador { get; set; }
+}
 
-    public class UsuarioLogin
-    {
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        [EmailAddress(ErrorMessage = " O campo {0} está em formato inválido")]
-        public string Email { get; set; }
+public class UsuarioLogin
+{
+	[Required(ErrorMessage = "O campo {0} é obrigatório")]
+	[EmailAddress(ErrorMessage = " O campo {0} está em formato inválido")]
+	public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        [StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
-        public string Senha { get; set; }
-    }
+	[Required(ErrorMessage = "O campo {0} é obrigatório")]
+	[StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 6)]
+	public string Senha { get; set; } = string.Empty;
 }

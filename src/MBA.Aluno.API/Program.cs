@@ -1,5 +1,7 @@
 using MBA.Aluno.API.Configuration;
+
 using SQLitePCL;
+
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,17 +26,10 @@ builder.Services.Configure<AppSettings>(configuration.GetSection(nameof(AppSetti
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAutoMapper(cfg =>
-{
-    cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
-});
-
-builder.Services.ResolveDependencies();
-
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-});
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
+	Assembly.GetExecutingAssembly(),
+	typeof(MBA.Aluno.Application.Services.AlunoAppService).Assembly
+));
 
 var app = builder.Build();
 

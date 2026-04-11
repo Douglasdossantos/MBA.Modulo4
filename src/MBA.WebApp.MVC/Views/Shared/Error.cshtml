@@ -4,7 +4,7 @@
 }
 
 @{
-    if(Model == null)
+    if(string.IsNullOrWhiteSpace(Model.Titulo))
     {
         <div>
             <h2> Ooops! Ocorreu um erro, mas não se preocupe. Nosso time será avisado e iremos corrigir em breve!</h2>

@@ -1,17 +1,16 @@
 ﻿using MBA.Aluno.API.Models.Enum;
 using MBA.Core.DomainObjects;
 
-namespace MBA.Aluno.API.Models
-{
-    public class Matricula : Entity
-    {
-        public Guid Id { get; private set; }
-        public Guid AlunoId { get; private set; }
-        public Guid CursoId { get; private set; }
+namespace MBA.Aluno.API.Models;
 
-        public StatusMatricula Status { get; private set; }
-        public DateTime CriadaEm { get; private set; }
-        public DateTime? AtivadaEm { get; private set; }
-        public DateTime? FinalizadaEm { get; private set; }
-    }
+public class Matricula : Entity
+{
+	public new Guid Id { get; init; }
+	public Guid AlunoId { get; init; }
+	public Guid CursoId { get; init; }
+
+	public StatusMatricula Status { get; init; }
+	public DateTime CriadaEm { get; init; }
+	public DateTime? AtivadaEm { get; init; }
+	public DateTime? FinalizadaEm { get; init; }
 }

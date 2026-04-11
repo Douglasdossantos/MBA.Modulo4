@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.DataProtection.Repositories;
+namespace MBA.WebApp.MVC.Models;
 
-namespace MBA.WebApp.MVC.Models
+public class ResponseResult
 {
-    public class ResponseResult
-    {
-        public string Title { get; set; }
-        public int Status { get; set; }
-        public ResponseErrorMessages Errors{ get; set; }
-    }
+	public string Title { get; set; } = string.Empty;
+	public int Status { get; set; }
+	public ResponseErrorMessages Errors { get; set; } = new();
 }

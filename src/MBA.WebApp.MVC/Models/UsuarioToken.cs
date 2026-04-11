@@ -1,9 +1,8 @@
-﻿namespace MBA.WebApp.MVC.Models
+namespace MBA.WebApp.MVC.Models;
+
+public class UsuarioToken
 {
-    public class UsuarioToken
-    {
-        public string id { get; set; }
-        public string Email { get; set; }
-        public IEnumerable<UsuarioClaim> Claims { get; set; }
-    }
+	public string Id { get; set; } = string.Empty;
+	public string Email { get; set; } = string.Empty;
+	public IEnumerable<UsuarioClaim> Claims { get; set; } = [];
 }

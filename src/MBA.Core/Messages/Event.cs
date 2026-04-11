@@ -1,14 +1,13 @@
 ﻿using MediatR;
 
-namespace MBA.Core.Messages
-{
-    public class Event : Message, INotification
-    {
-        public DateTime Timestamp { get; private set; }
+namespace MBA.Core.Messages;
 
-        protected Event()
-        {
-            Timestamp = DateTime.Now;
-        }
-    }
+public class Event : Message, INotification
+{
+	public DateTime Timestamp { get; private set; }
+
+	protected Event()
+	{
+		Timestamp = DateTime.Now;
+	}
 }

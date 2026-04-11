@@ -1,39 +1,55 @@
 ﻿using MBA.Aluno.Data.Context;
+using MBA.Conteudo.Data;
+using MBA.Conteudo.Data.Repository;
+using MBA.Conteudo.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace MBA.Aluno.API.Configuration
+namespace MBA.Aluno.API.Configuration;
+
+public static class DataBaseSelectorExtension
 {
-    public static class DataBaseSelectorExtension
-    {
-        public static void AddDatabaseSelector(this WebApplicationBuilder builder)
-        {
-            var provider = builder.Environment.EnvironmentName;
+	public static void AddDatabaseSelector(this WebApplicationBuilder builder)
+	{
+		var provider = builder.Environment.EnvironmentName;
 
-            var dbName = builder.Configuration.GetConnectionString("ConnectionStringAluno");
+		var dbName = builder.Configuration.GetConnectionString("ConnectionStringAluno");
 
-            var dbPath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "..",
-                "MBA.Aluno.Data",
-                dbName);
+		var dbPath = Path.Combine(
+			Directory.GetCurrentDirectory(),
+			"..",
+			"MBA.Aluno.Data",
+			dbName ?? string.Empty);
 
-            var sqliteConnection = $"Data Source={dbPath}";
+		var sqliteConnection = $"Data Source={dbPath}";
 
+		var conteudoDbName = builder.Configuration.GetConnectionString("ConnectionStringConteudo");
+		var conteudoDbPath = Path.Combine(
+			Directory.GetCurrentDirectory(),
+			"..",
+			"MBA.Conteudo.Data",
+			conteudoDbName ?? string.Empty);
+		var conteudoSqliteConnection = $"Data Source={conteudoDbPath}";
 
-            switch (provider)
-            {
-                case "Development":
-                    builder.Services.AddDbContext<AlunoDbContext>(options =>
-                    options.UseSqlite(sqliteConnection));
-                    break;
+		switch (provider)
+		{
+			case "Development":
+				builder.Services.AddDbContext<AlunoDbContext>(options =>
+					options.UseSqlite(sqliteConnection));
+				builder.Services.AddDbContext<ConteudoContext>(options =>
+					options.UseSqlite(conteudoSqliteConnection));
+				break;
 
-                default:
-                    var connectionString = builder.Configuration.GetConnectionString("ConnectionStringAluno");
+			default:
+				var connectionString = builder.Configuration.GetConnectionString("ConnectionStringAluno");
+				var conteudoConnectionString = builder.Configuration.GetConnectionString("ConnectionStringConteudo");
 
-                    builder.Services.AddDbContext<AlunoDbContext>(options =>
-                    options.UseSqlServer(connectionString));
-                    break;
-            }
-        }
-    }
+				builder.Services.AddDbContext<AlunoDbContext>(options =>
+					options.UseSqlServer(connectionString));
+				builder.Services.AddDbContext<ConteudoContext>(options =>
+					options.UseSqlServer(conteudoConnectionString));
+				break;
+		}
+
+		builder.Services.AddScoped<IConteudoRepository, ConteudoRepository>();
+	}
 }
