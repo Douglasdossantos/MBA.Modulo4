@@ -12,8 +12,9 @@ using MediatR;
 
 
 namespace MBA.Pagamentos.Application.Commands.RealizarPagamento;
-public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoRepository, IMessageBus bus,
-    IMediatorHandler mediatorHandler) : IRequestHandler<RealizarPagamentoCommand, bool>
+public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoRepository, 
+                                             IMessageBus bus,
+                                             IMediatorHandler mediatorHandler) : IRequestHandler<RealizarPagamentoCommand, bool>
 {
     private readonly IFaturamentoRepository _faturamentoRepository = faturamentoRepository;
     private readonly IMediatorHandler _mediatorHandler = mediatorHandler;

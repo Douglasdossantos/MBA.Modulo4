@@ -35,7 +35,7 @@ namespace MBA.Aluno.Appplication.Commands.ConcluirCurso
             if (!await ObterEvolucaoAsync(request.MatriculaId)) { return false; }
             if (!ObterMatricula(request.MatriculaId, out Matricula matricula)) { return false; }
 
-            matricula.statuConcluido();
+            matricula.StatuConcluido();
             matricula.CriarDataConcluido();
 
             var certificado = new Certificado(request.MatriculaId);

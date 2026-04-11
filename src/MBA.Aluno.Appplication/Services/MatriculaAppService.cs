@@ -31,7 +31,7 @@ namespace MBA.Aluno.Appplication.Services
 
             var matricula = _mapper.Map<Matricula>(dto);
             matricula.CriarData();
-            matricula.statusPendentePagamento();
+            matricula.StatusPendentePagamento();
             await _matriculaRepository.AdicionarAsync(matricula);
 
             await _matriculaRepository.UnitOfWork.Commit();

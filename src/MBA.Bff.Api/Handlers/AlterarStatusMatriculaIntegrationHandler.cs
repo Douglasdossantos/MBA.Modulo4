@@ -1,10 +1,9 @@
 ﻿using FluentValidation.Results;
 using MBA.Bff.Api.Services.Interface;
-using MBA.Core.Messages.AlunoCommands;
 using MBA.Core.Messages.Integration;
 using MBA.MessageBus;
 
-namespace MBA.Bff.Api.Services.Implementation
+namespace MBA.Bff.Api.Handlers
 {
     public class AlterarStatusMatriculaIntegrationHandler : BackgroundService
     {

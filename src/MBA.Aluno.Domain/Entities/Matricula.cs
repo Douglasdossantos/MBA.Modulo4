@@ -32,10 +32,10 @@ namespace MBA.Aluno.Domain.Entities
 
         public void CriarData() => DataMatricula = DateTime.Now;
         public void CriarDataConcluido() => DataCursoConcluido = DateTime.Now;
-        public void statusCancelada() => Status = StatusMatricula.Cancelada;
-        public void statusPendentePagamento() => Status = StatusMatricula.PendentePagamento;
-        public void statusPagamentoRealizado() => Status = StatusMatricula.PagamentoRealizado;
-        public void statuConcluido() => Status = StatusMatricula.Concluido;
+        public void StatusCancelada() => Status = StatusMatricula.Cancelada;
+        public void StatusPendentePagamento() => Status = StatusMatricula.PendentePagamento;
+        public void StatusPagamentoRealizado() => Status = StatusMatricula.PagamentoRealizado;
+        public void StatuConcluido() => Status = StatusMatricula.Concluido;
 
         public void AlterarCursoId(Guid cursoId)
         {
@@ -64,19 +64,19 @@ namespace MBA.Aluno.Domain.Entities
             switch (codigo)
             {
                 case 1:
-                    statusPendentePagamento();
+                    StatusPendentePagamento();
                     break;
 
                 case 2:
-                    statusPagamentoRealizado();
+                    StatusPagamentoRealizado();
                     break;
 
                 case 3:
-                    statuConcluido();
+                    StatuConcluido();
                     break;
 
                 case 4:
-                    statusCancelada();
+                    StatusCancelada();
                     break;
 
                 
