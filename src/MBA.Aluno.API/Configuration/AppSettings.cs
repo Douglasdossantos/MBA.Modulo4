@@ -8,10 +8,7 @@ public sealed class AppSettings
 
 public sealed class DatabaseSettings
 {
-	public required string ConnectionStringIdentity { get; set; }
-	public required string ConnectionStringConteudo { get; set; }
 	public required string ConnectionStringAluno { get; set; }
-	public required string ConnectionStringFaturamento { get; set; }
 }
 
 public sealed class JwtSettings
