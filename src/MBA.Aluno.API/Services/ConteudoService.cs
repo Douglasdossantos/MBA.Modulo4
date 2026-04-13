@@ -57,10 +57,49 @@ public sealed class ConteudoService : IConteudoService
 		return envelope?.Result;
 	}
 
+	public async Task<int> ObterTotalAulasAsync(Guid cursoId, CancellationToken cancellationToken)
+	{
+		if (cursoId == Guid.Empty) return 0;
+
+		try
+		{
+			using var response = await _httpClient.GetAsync(
+				$"api/curso/{cursoId}/aulas/total", cancellationToken);
+
+			if (!response.IsSuccessStatusCode)
+			{
+				_logger.LogWarning(
+					"Conteúdo API retornou {StatusCode} ao consultar total de aulas do curso {CursoId}",
+					response.StatusCode, cursoId);
+				return 0;
+			}
+
+			var payload = await response.Content.ReadFromJsonAsync<TotalAulasResponse>(
+				JsonOptions, cancellationToken);
+			return payload?.Total ?? 0;
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex,
+				"Falha ao consultar total de aulas do curso {CursoId}", cursoId);
+			return 0;
+		}
+	}
+
 	private sealed class ConteudoApiEnvelope<T>
 	{
 		public bool Success { get; set; }
 		public string? Type { get; set; }
 		public T? Result { get; set; }
+	}
+
+	private sealed class TotalAulasResponse
+	{
+		public Guid CursoId { get; set; }
+		public int Total { get; set; }
 	}
 }
