@@ -38,16 +38,35 @@ namespace MBA.Core.Autentications
             return claim is null ? string.Empty : claim;
         }
 
+        // Alinhado com as claims emitidas pela Auth API
+        // (AuthController.AdicionaClaimsAdmin/ObterClaimsUsuario):
+        //   - role "Administrador"
+        //   - claim "Administrador" = "ADM"
+        private const string AdministradorRole = "Administrador";
+        private const string AdministradorClaimType = "Administrador";
+        private const string AdministradorClaimValue = "ADM";
+        private const string RoleClaimType = "role";
+
         public bool EhAdministrador()
         {
             if (!EstahAutenticado()) return false;
 
-            var claim = _accessor.HttpContext?.User.FindFirst("nivel")?.Value;
+            var user = _accessor.HttpContext?.User;
+            if (user is null) return false;
 
-            if (string.IsNullOrEmpty(claim))
-                claim = _accessor.HttpContext?.User.FindFirst("nivel")?.Value;
+            // 1) Role claim emitida como "role" em AuthController.cs:152-155
+            if (user.IsInRole(AdministradorRole) ||
+                user.HasClaim(c =>
+                    (c.Type == RoleClaimType || c.Type == ClaimTypes.Role) &&
+                    string.Equals(c.Value, AdministradorRole, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
 
-            return claim is null ? false : string.Equals(claim, "Admin", StringComparison.OrdinalIgnoreCase);
+            // 2) Claim "Administrador" = "ADM" emitida em AuthController.cs:209-217
+            return user.HasClaim(c =>
+                string.Equals(c.Type, AdministradorClaimType, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(c.Value, AdministradorClaimValue, StringComparison.OrdinalIgnoreCase));
         }
 
         public bool EstahAutenticado()
