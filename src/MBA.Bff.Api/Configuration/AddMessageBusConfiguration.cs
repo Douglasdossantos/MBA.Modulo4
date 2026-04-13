@@ -1,6 +1,6 @@
-﻿using MBA.Bff.Api.Services.Implementation;
-using MBA.MessageBus;
+﻿using MBA.MessageBus;
 using MBA.Core.Utils;
+using MBA.Bff.Api.Handlers;
 
 namespace MBA.Bff.Api.Configuration;
 
