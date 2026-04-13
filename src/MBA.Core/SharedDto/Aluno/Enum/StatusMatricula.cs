@@ -5,5 +5,6 @@ public enum StatusMatricula
 	PendentePagamento = 1,
 	PagamentoRealizado = 2,
 	Concluido = 3,
-	Cancelada = 4
+	Cancelada = 4,
+	PagamentoRecusado = 5
 }

@@ -1,4 +1,5 @@
-﻿using MBA.Core.Mediator;
+﻿using MBA.Core.DomainObjects;
+using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.FaturamentoCommands;
 using MBA.Core.Messages.FaturamentoEvents;
@@ -65,7 +66,11 @@ public class RealizarPagamentoCommandHandler(
 		var valorReferencia = pagamento?.Valor ?? request.Valor;
 
 		if (!ValidarValorPagamentoMatriculaCurso(request.Valor, valorReferencia))
+		{
+			await PublicarPagamentoRecusadoAsync(request,
+				"Valor de pagamento diverge do valor desta matricula", cancellationToken);
 			return false;
+		}
 
 		// 6️⃣ Dados do cartão
 		var dadosCartao = new DadosCartao(
@@ -86,13 +91,30 @@ public class RealizarPagamentoCommandHandler(
 		}
 
 		// 8️⃣ Confirma pagamento (DOMÍNIO decide)
-		pagamento.ConfirmarPagamento(
-			DateTime.Now,
-			Guid.NewGuid().ToString(),
-			dadosCartao);
+		try
+		{
+			pagamento.ConfirmarPagamento(
+				DateTime.Now,
+				Guid.NewGuid().ToString(),
+				dadosCartao);
+		}
+		catch (DomainException ex)
+		{
+			pagamento.RecusarPagamento();
+
+			await mediatorHandler.PublicarEventoRaiz(
+				new PagamentoRecusadoEvent(
+					request.MatriculaCursoId,
+					request.AlunoId,
+					request.CursoId,
+					ex.Message));
+
+			await PublicarPagamentoRecusadoAsync(request, ex.Message, cancellationToken);
+			return false;
+		}
 
 		// 9️⃣ Commit
-		var clienteResult = await AlterarStatusMatricula(request.MatriculaCursoId);
+		var clienteResult = await AlterarStatusMatricula(request.MatriculaCursoId, StatusMatricula.PagamentoRealizado);
 		if (!clienteResult.ValidationResult.IsValid)
 		{
 			await mediatorHandler.PublicarNotificacaoDominio(
@@ -100,6 +122,10 @@ public class RealizarPagamentoCommandHandler(
 					_raizAgregacao,
 					nameof(Pagamento),
 					"ERRO AO ALTERAR O STATUS DA MATRICULA."));
+
+			await PublicarPagamentoRecusadoAsync(request,
+				"Falha ao alterar status da matrícula após confirmação do pagamento",
+				cancellationToken);
 			return false;
 		}
 
@@ -173,11 +199,23 @@ public class RealizarPagamentoCommandHandler(
 		return true;
 	}
 
-	private async Task<ResponseMessage> AlterarStatusMatricula(Guid matriculaId)
+	private async Task<ResponseMessage> AlterarStatusMatricula(Guid matriculaId, StatusMatricula status)
 	{
-		var alterarMatricula =
-			new AlterarStatusMatriculaIntegrationEvent(matriculaId, StatusMatricula.PagamentoRealizado);
+		var alterarMatricula = new AlterarStatusMatriculaIntegrationEvent(matriculaId, status);
 
 		return await bus.RequestAsync<AlterarStatusMatriculaIntegrationEvent, ResponseMessage>(alterarMatricula);
+	}
+
+	private async Task PublicarPagamentoRecusadoAsync(
+		RealizarPagamentoCommand request,
+		string motivoRecusa,
+		CancellationToken cancellationToken)
+	{
+		await bus.PublishAsync(new PagamentoRecusadoIntegrationEvent(
+			request.MatriculaCursoId,
+			request.AlunoId,
+			request.CursoId,
+			motivoRecusa),
+			cancellationToken);
 	}
 }

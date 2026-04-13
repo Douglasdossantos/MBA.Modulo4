@@ -11,6 +11,7 @@ public static class MessageBusConfig
 	{
 		services.AddMessageBus(configuration.GetMessageQueueConnection("MessageBus"))
 			.AddHostedService<CadastroAlunoIntegrationHandler>()
-			.AddHostedService<PagamentoConfirmadoIntegrationHandler>();
+			.AddHostedService<PagamentoConfirmadoIntegrationHandler>()
+			.AddHostedService<PagamentoRecusadoIntegrationHandler>();
 	}
 }
