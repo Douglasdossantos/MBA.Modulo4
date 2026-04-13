@@ -1,40 +1,36 @@
-﻿using MBA.WebApi.Core.Identidade;
+﻿namespace MBA.Aluno.API.Configuration;
 
-namespace MBA.Aluno.API.Configuration
+public static class ApiConfig
 {
-    public static class ApiConfig
-    {
-        public static IServiceCollection AddApiConfiguration(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddControllers();
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+	public static IServiceCollection AddApiConfiguration(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddControllers();
+		services.AddEndpointsApiExplorer();
+		services.AddSwaggerGen();
 
-            services.AddAuthorization();
-            services.AddAuthentication();
+		services.AddAuthorization();
+		services.AddAuthentication();
 
-            return services;
-        }
+		return services;
+	}
 
-        public static IApplicationBuilder UseApiConfiguration(this WebApplication app, IWebHostEnvironment env)
-        {
+	public static IApplicationBuilder UseApiConfiguration(this WebApplication app, IWebHostEnvironment env)
+	{
+		if (app.Environment.IsDevelopment())
+		{
+			app.UseSwagger();
+			app.UseSwaggerUI();
+		}
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+		app.UseHttpsRedirection();
 
-            app.UseHttpsRedirection();
+		app.UseAuthentication();
+		app.UseAuthorization();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+		app.MapControllers();
 
-            app.MapControllers();
+		DbMigrationHelpers.EnsureSeedData(app).Wait();
 
-            DbMigrationHelpers.EnsureSeedData(app).Wait();
-
-            return app;
-        }
-    }
+		return app;
+	}
 }

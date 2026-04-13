@@ -1,12 +1,11 @@
-﻿namespace MBA.Core.Enumerators
+﻿namespace MBA.Core.Enumerators;
+
+public enum ResponseTypeEnum
 {
-    public enum ResponseTypeEnum
-    {
-        Success,
-        ValidationError,
-        GenericError,
-        DomainError,
-        Unauthorized,
-        NotFound
-    }
+	Success,
+	ValidationError,
+	GenericError,
+	DomainError,
+	Unauthorized,
+	NotFound
 }

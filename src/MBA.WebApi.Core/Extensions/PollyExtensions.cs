@@ -2,22 +2,21 @@
 using Polly.Extensions.Http;
 using Polly.Retry;
 
-namespace MBA.WebApi.Core.Extensions
-{
-    public static class PollyExtensions
-    {
-        public static AsyncRetryPolicy<HttpResponseMessage> EsperarTentar()
-        {
-            var retry = HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .WaitAndRetryAsync(
-                [
-                    TimeSpan.FromSeconds(1),
-                    TimeSpan.FromSeconds(5),
-                    TimeSpan.FromSeconds(10),
-                ]);
+namespace MBA.WebApi.Core.Extensions;
 
-            return retry;
-        }
-    }
+public static class PollyExtensions
+{
+	public static AsyncRetryPolicy<HttpResponseMessage> EsperarTentar()
+	{
+		var retry = HttpPolicyExtensions
+			.HandleTransientHttpError()
+			.WaitAndRetryAsync(
+			[
+				TimeSpan.FromSeconds(1),
+				TimeSpan.FromSeconds(5),
+				TimeSpan.FromSeconds(10)
+			]);
+
+		return retry;
+	}
 }

@@ -1,13 +1,12 @@
 ﻿using MBA.Core.DomainObjects;
 
-namespace MBA.Aluno.API.Models
-{
-    public class ProgressoAula: Entity
-    {
-        public Guid MatriculaId { get; private set; }
-        public Guid AulaId { get; private set; }
+namespace MBA.Aluno.API.Models;
 
-        public bool Concluida { get; private set; }
-        public DateTime? ConcluidaEm { get; private set; }
-    }
+public class ProgressoAula : Entity
+{
+	public Guid MatriculaId { get; init; }
+	public Guid AulaId { get; init; }
+
+	public bool Concluida { get; init; }
+	public DateTime? ConcluidaEm { get; init; }
 }

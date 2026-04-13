@@ -1,49 +1,42 @@
 ﻿using MBA.Bff.Api.Models.Conteudo;
 using MBA.Bff.Api.Services.Interface;
+
 using Microsoft.AspNetCore.Mvc;
 
-namespace MBA.Bff.Api.Services.Implementation
+namespace MBA.Bff.Api.Services.Implementation;
+
+public class ConteudoService(
+	IConteudoExternalServiceService conteudoService) : IConteudoService
 {
-    public class ConteudoService(IConteudoExternalServiceService conteudoService, IFaturamentoExternalService faturamentoService) : IConteudoService
-    {
-        private readonly IConteudoExternalServiceService _conteudoService = conteudoService;
-        private readonly IFaturamentoExternalService _faturamentoService = faturamentoService;
+	public async Task<IActionResult> CadastrarCurso(CadastroCursoViewModel cadastroCursoViewModel, string authorization)
+	{
+		string authHeader = null;
+		if (!string.IsNullOrWhiteSpace(authorization))
+			authHeader = authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+				? authorization
+				: $"Bearer {authorization}";
 
-         
+		var request = new CadastrarCursoRequest
+		{
+			Nome = cadastroCursoViewModel.Nome,
+			Valor = cadastroCursoViewModel.Valor,
+			ValidoAte = cadastroCursoViewModel.ValidoAte,
+			Finalidade = cadastroCursoViewModel.ConteudoProgramatico.Finalidade,
+			Ementa = cadastroCursoViewModel.ConteudoProgramatico.Ementa
+		};
 
-        public async Task<IActionResult> CadastrarCurso(CadastroCursoViewModel cadastroCursoViewModel, string authorization)
-        {
-            // Ensure Authorization header contains the Bearer prefix when provided
-            string authHeader = null;
-            if (!string.IsNullOrWhiteSpace(authorization))
-            {
-                authHeader = authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? authorization : $"Bearer {authorization}";
-            }
+		var response = await conteudoService.CadastrarCurso(request, authHeader);
 
-            // The Conteudo API expects a payload without the login credentials.
-            // Map to a request DTO that excludes the `Login` property before sending.
-            var request = new CadastrarCursoRequest
-            {
-                Nome = cadastroCursoViewModel.Nome,
-                Valor = cadastroCursoViewModel.Valor,
-                ValidoAte = cadastroCursoViewModel.ValidoAte,
-                Finalidade = cadastroCursoViewModel.ConteudoProgramatico.Finalidade,
-                Ementa= cadastroCursoViewModel.ConteudoProgramatico.Ementa,
-            };
+		if (response == null)
+			return new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
-            var response = await _conteudoService.CadastrarCurso(request, authHeader);
+		var content = await response.Content.ReadAsStringAsync();
 
-            if (response == null)
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            return new ContentResult
-            {
-                Content = content,
-                ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json",
-                StatusCode = (int)response.StatusCode
-            };
-        }
-    }
+		return new ContentResult
+		{
+			Content = content,
+			ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/json",
+			StatusCode = (int)response.StatusCode
+		};
+	}
 }

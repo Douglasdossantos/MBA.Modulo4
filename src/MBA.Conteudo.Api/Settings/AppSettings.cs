@@ -1,24 +1,23 @@
-﻿namespace MBA.Conteudo.API.Settings
+namespace MBA.Conteudo.Api.Settings;
+
+public sealed class AppSettings
 {
-    public sealed class AppSettings
-    {
-        public JwtSettings JwtSettings { get; set; }
-        public DatabaseSettings DatabaseSettings { get; set; }
-    }
+	public JwtSettings JwtSettings { get; set; } = null!;
+	public DatabaseSettings DatabaseSettings { get; set; } = null!;
+}
 
-    public sealed class DatabaseSettings
-    {
-        public string ConnectionStringIdentity { get; set; }
-        public string ConnectionStringConteudo { get; set; }
-        public string ConnectionStringAluno { get; set; }
-        public string ConnectionStringFaturamento { get; set; }
-    }
+public sealed class DatabaseSettings
+{
+	public string ConnectionStringIdentity { get; set; } = string.Empty;
+	public string ConnectionStringConteudo { get; set; } = string.Empty;
+	public string ConnectionStringAluno { get; set; } = string.Empty;
+	public string ConnectionStringFaturamento { get; set; } = string.Empty;
+}
 
-    public sealed class JwtSettings
-    {
-        public string Secret { get; set; }
-        public int ExpirationInHours { get; set; }
-        public string Issuer { get; set; }
-        public string Audience { get; set; }
-    }
+public sealed class JwtSettings
+{
+	public string Secret { get; set; } = string.Empty;
+	public int ExpirationInHours { get; set; }
+	public string Issuer { get; set; } = string.Empty;
+	public string Audience { get; set; } = string.Empty;
 }

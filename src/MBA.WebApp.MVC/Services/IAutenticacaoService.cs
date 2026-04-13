@@ -1,10 +1,9 @@
 ﻿using MBA.WebApp.MVC.Models;
 
-namespace MBA.WebApp.MVC.Services
+namespace MBA.WebApp.MVC.Services;
+
+public interface IAutenticacaoService
 {
-    public interface IAutenticacaoService
-    {
-        Task<UsuarioRespostaLogin>Login(UsuarioLoginViewModel loginViewModel);
-        Task<UsuarioRespostaLogin> Registro(UsuarioRegistroViewModel registroViewModel);
-    }
+	Task<UsuarioRespostaLogin> Login(UsuarioLoginViewModel loginViewModel);
+	Task<UsuarioRespostaLogin> Registro(UsuarioRegistroViewModel registroViewModel);
 }

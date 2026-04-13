@@ -7,12 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="16.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MBA.Aluno.Data\MBA.Aluno.Data.csproj" />
     <ProjectReference Include="..\MBA.Aluno.Domain\MBA.Aluno.Domain.csproj" />
+    <ProjectReference Include="..\MBA.Conteudo.Domain\MBA.Conteudo.Domain.csproj" />
     <ProjectReference Include="..\MBA.Core\MBA.Core.csproj" />
   </ItemGroup>
 

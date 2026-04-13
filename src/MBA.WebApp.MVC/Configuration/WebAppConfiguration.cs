@@ -1,39 +1,29 @@
-﻿using MBA.WebApp.MVC.Configuration;
-using MBA.WebApp.MVC.Extensions;
-using Microsoft.Extensions.Hosting;
+﻿using MBA.WebApp.MVC.Extensions;
 
-namespace MBA.WebApp.MVC.Controllers
+namespace MBA.WebApp.MVC.Configuration;
+
+public static class WebAppConfiguration
 {
-    public static class WebAppConfiguration
-    {
-        public static void AddMvcConfiguration(this IServiceCollection services,  IConfiguration configuration)
-        {
-            services.AddControllersWithViews();
+	public static void UseMvcConfiguration(this WebApplication app, IWebHostEnvironment env)
+	{
+		if (!env.IsDevelopment())
+		{
+			app.UseExceptionHandler("/erro/500");
+			app.UseStatusCodePagesWithRedirects("/erro/{0}");
+			app.UseHsts();
+		}
 
-            services.Configure<AppSettings>(
-                configuration.GetSection("AppSettings"));
-        }
-        public static void UseMvcConfiguration(this WebApplication app, IWebHostEnvironment env)
-        {
-            if (!env.IsDevelopment())
-            {
-                app.UseExceptionHandler("/erro/500");
-                app.UseStatusCodePagesWithRedirects("/erro/{0}");
-                app.UseHsts();
-            }
+		app.UseHttpsRedirection();
+		app.UseStaticFiles();
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+		app.UseRouting();
 
-            app.UseRouting();
+		app.UserIdentityConfiguration();
 
-            app.UserIdentityConfiguration();
+		app.UseMiddleware<ExceptionMiddleware>();
 
-            app.UseMiddleware<ExceptionMiddleware>();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-        }
-    }
+		app.MapControllerRoute(
+			"default",
+			"{controller=Home}/{action=Index}/{id?}");
+	}
 }

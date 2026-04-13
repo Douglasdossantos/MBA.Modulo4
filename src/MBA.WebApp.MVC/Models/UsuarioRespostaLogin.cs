@@ -1,10 +1,9 @@
-﻿namespace MBA.WebApp.MVC.Models
+namespace MBA.WebApp.MVC.Models;
+
+public class UsuarioRespostaLogin
 {
-    public class UsuarioRespostaLogin
-    {
-        public string AccessToken { get; set; }
-        public double ExpiresIn { get; set; }
-        public UsuarioToken UsuarioToken { get; set; }
-        public ResponseResult ResponseResult { get; set; }
-    }
+	public string AccessToken { get; set; } = string.Empty;
+	public double ExpiresIn { get; set; }
+	public UsuarioToken UsuarioToken { get; set; } = null!;
+	public ResponseResult? ResponseResult { get; set; }
 }

@@ -3,42 +3,41 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
-namespace MBA.Bff.Api.Services
+namespace MBA.Bff.Api.Services;
+
+public abstract class Service
 {
-    public abstract class Service
-    {
-        private static readonly JsonSerializerOptions _jsonOptions = new()
-        {
-            PropertyNameCaseInsensitive = true
-        };
+	private static readonly JsonSerializerOptions JsonOptions = new()
+	{
+		PropertyNameCaseInsensitive = true
+	};
 
-        protected StringContent ObterConteudo(object dado)
-        {
-            return new StringContent(
-                JsonSerializer.Serialize(dado),
-                Encoding.UTF8,
-                "application/json");
-        }
+	protected StringContent ObterConteudo(object dado)
+	{
+		return new StringContent(
+			JsonSerializer.Serialize(dado),
+			Encoding.UTF8,
+			"application/json");
+	}
 
-        protected async Task<T> DeserializarObjetoResponse<T>(HttpResponseMessage responseMessage)
-        {
-            var jsonString = await responseMessage.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<T>(jsonString, _jsonOptions);
+	protected async Task<T> DeserializarObjetoResponse<T>(HttpResponseMessage responseMessage)
+	{
+		var jsonString = await responseMessage.Content.ReadAsStringAsync();
+		var result = JsonSerializer.Deserialize<T>(jsonString, JsonOptions);
 
-            return result is null ? throw new InvalidOperationException("Deserialization returned null.") : result;
-        }
+		return result is null ? throw new InvalidOperationException("Deserialization returned null.") : result;
+	}
 
-        protected bool TratarErrosResponse(HttpResponseMessage response)
-        {
-            if (response.StatusCode == HttpStatusCode.BadRequest) return false;
+	protected bool TratarErrosResponse(HttpResponseMessage response)
+	{
+		if (response.StatusCode == HttpStatusCode.BadRequest) return false;
 
-            response.EnsureSuccessStatusCode();
-            return true;
-        }
+		response.EnsureSuccessStatusCode();
+		return true;
+	}
 
-        protected ResponseResult RetornoOk()
-        {
-            return new ResponseResult();
-        }
-    }
+	protected ResponseResult RetornoOk()
+	{
+		return new ResponseResult();
+	}
 }

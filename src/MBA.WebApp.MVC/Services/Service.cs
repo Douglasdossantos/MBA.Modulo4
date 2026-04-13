@@ -2,45 +2,43 @@
 using System.Text;
 using System.Text.Json;
 
-namespace MBA.WebApp.MVC.Services
+namespace MBA.WebApp.MVC.Services;
+
+public abstract class Service
 {
-    public abstract class Service
-    {  
-        protected StringContent ObterConteudo(object dado)
-        {
-            return new StringContent(
-                    JsonSerializer.Serialize(dado),
-                    Encoding.UTF8,
-                    "Application/Json");
-        }
-        protected async Task<T> DeserializarObjetoResponse<T>(HttpResponseMessage responseMessage)
-        {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-            };
+	protected StringContent ObterConteudo(object dado)
+	{
+		return new StringContent(
+			JsonSerializer.Serialize(dado),
+			Encoding.UTF8,
+			"Application/Json");
+	}
 
-            return JsonSerializer.Deserialize<T>(await responseMessage.Content.ReadAsStringAsync(), options);
-        }
+	protected async Task<T> DeserializarObjetoResponse<T>(HttpResponseMessage responseMessage)
+	{
+		var options = new JsonSerializerOptions
+		{
+			PropertyNameCaseInsensitive = true
+		};
 
-        protected bool TratarErrrosResponse(HttpResponseMessage response)
-        {
-           
-            switch ((int)response.StatusCode)
-            {
-                case 401: 
-                case 403: 
-                case 404: 
-                case 500:
-                    throw new CustomHttpRequestException(response.StatusCode);
+		return JsonSerializer.Deserialize<T>(await responseMessage.Content.ReadAsStringAsync(), options)!;
+	}
 
-                case 400:
-                    return false;
-            }
+	protected bool TratarErrrosResponse(HttpResponseMessage response)
+	{
+		switch ((int)response.StatusCode)
+		{
+			case 401:
+			case 403:
+			case 404:
+			case 500:
+				throw new CustomHttpRequestException(response.StatusCode);
 
-            response.EnsureSuccessStatusCode();
-            return true;
+			case 400:
+				return false;
+		}
 
-        }
-    }
+		response.EnsureSuccessStatusCode();
+		return true;
+	}
 }

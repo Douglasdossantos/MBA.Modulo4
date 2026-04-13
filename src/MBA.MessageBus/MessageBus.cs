@@ -9,260 +9,254 @@ namespace MBA.MessageBus;
 
 public sealed class MessageBus(string connectionString) : IMessageBus
 {
-    private readonly string _connectionString = !string.IsNullOrWhiteSpace(connectionString)
-        ? connectionString
-        : throw new ArgumentException("Connection string cannot be null or empty.", nameof(connectionString));
-    private static readonly object v = new();
-    private readonly object _sync = v;
-    private ServiceProvider? _serviceProvider;
-    private IBus? _bus;
-    private IAdvancedBus? _advancedBus;
-    private bool _disposed;
+	private readonly string _connectionString = !string.IsNullOrWhiteSpace(connectionString)
+		? connectionString
+		: throw new ArgumentException("Connection string cannot be null or empty.", nameof(connectionString));
 
-    public bool IsConnected =>
-        _advancedBus is not null
-        && _advancedBus.GetConnectionStatus(PersistentConnectionType.Producer).State
-        == PersistentConnectionState.Connected
-        && _advancedBus.GetConnectionStatus(PersistentConnectionType.Consumer).State
-        == PersistentConnectionState.Connected;
-    public IAdvancedBus AdvancedBus => _advancedBus ?? throw new InvalidOperationException("Message bus is not connected.");
+	private static readonly object V = new();
+	private readonly object _sync = V;
+	private ServiceProvider? _serviceProvider;
+	private IBus? _bus;
+	private IAdvancedBus? _advancedBus;
+	private bool _disposed;
 
-    public void Publish<T>(T message, CancellationToken cancellationToken = default) where T : IntegrationEvent
-    {
-        ArgumentNullException.ThrowIfNull(message);
-        EnsureConnected();
-        try
-        {
-            _bus!.PubSub.PublishAsync(message, cancellationToken).GetAwaiter().GetResult();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"MessageBus.Publish error: {ex.GetType().FullName} - {ex.Message}");
-            throw;
-        }
-    }
+	public bool IsConnected =>
+		_advancedBus is not null
+		&& _advancedBus.GetConnectionStatus(PersistentConnectionType.Producer).State
+		== PersistentConnectionState.Connected
+		&& _advancedBus.GetConnectionStatus(PersistentConnectionType.Consumer).State
+		== PersistentConnectionState.Connected;
 
-    public async Task PublishAsync<T>(T message, CancellationToken cancellationToken = default)
-        where T : IntegrationEvent
-    {
-        ArgumentNullException.ThrowIfNull(message);
-        EnsureConnected();
-        try
-        {
-            await _bus!.PubSub.PublishAsync(message, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"MessageBus.PublishAsync error: {ex.GetType().FullName} - {ex.Message}");
-            throw;
-        }
-    }
+	public IAdvancedBus AdvancedBus =>
+		_advancedBus ?? throw new InvalidOperationException("Message bus is not connected.");
 
-    public SubscriptionResult Subscribe<T>(
-        string subscriptionId,
-        Action<T> onMessage,
-        CancellationToken cancellationToken = default
-    ) where T : class
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(subscriptionId);
-        ArgumentNullException.ThrowIfNull(onMessage);
-        EnsureConnected();
-        try
-        {
-            return _bus!.PubSub.SubscribeAsync(subscriptionId, onMessage, cancellationToken).GetAwaiter().GetResult();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"MessageBus.Subscribe error: {ex.GetType().FullName} - {ex.Message}");
-            throw;
-        }
-    }
+	public void Publish<T>(T message, CancellationToken cancellationToken = default) where T : IntegrationEvent
+	{
+		ArgumentNullException.ThrowIfNull(message);
+		EnsureConnected();
+		try
+		{
+			_bus!.PubSub.PublishAsync(message, cancellationToken).GetAwaiter().GetResult();
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"MessageBus.Publish error: {ex.GetType().FullName} - {ex.Message}");
+			throw;
+		}
+	}
 
-    public Task<SubscriptionResult> SubscribeAsync<T>(
-        string subscriptionId,
-        Func<T, Task> onMessage,
-        CancellationToken cancellationToken = default
-    ) where T : class
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(subscriptionId);
-        ArgumentNullException.ThrowIfNull(onMessage);
-        EnsureConnected();
-        try
-        {
-            return _bus!.PubSub.SubscribeAsync(subscriptionId, onMessage, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"MessageBus.SubscribeAsync error: {ex.GetType().FullName} - {ex.Message}");
-            throw;
-        }
-    }
+	public async Task PublishAsync<T>(T message, CancellationToken cancellationToken = default)
+		where T : IntegrationEvent
+	{
+		ArgumentNullException.ThrowIfNull(message);
+		EnsureConnected();
+		try
+		{
+			await _bus!.PubSub.PublishAsync(message, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"MessageBus.PublishAsync error: {ex.GetType().FullName} - {ex.Message}");
+			throw;
+		}
+	}
 
-    public TResponse Request<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
-        where TRequest : IntegrationEvent
-        where TResponse : ResponseMessage
-    {
-        ArgumentNullException.ThrowIfNull(request);
-        EnsureConnected();
-        try
-        {
-            return _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken).GetAwaiter().GetResult();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"MessageBus.Request error: {ex.GetType().FullName} - {ex.Message}");
-            throw;
-        }
-    }
+	public SubscriptionResult Subscribe<T>(
+		string subscriptionId,
+		Action<T> onMessage,
+		CancellationToken cancellationToken = default
+	) where T : class
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(subscriptionId);
+		ArgumentNullException.ThrowIfNull(onMessage);
+		EnsureConnected();
+		try
+		{
+			return _bus!.PubSub.SubscribeAsync(subscriptionId, onMessage, cancellationToken).GetAwaiter().GetResult();
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"MessageBus.Subscribe error: {ex.GetType().FullName} - {ex.Message}");
+			throw;
+		}
+	}
 
-    public async Task<TResponse> RequestAsync<TRequest, TResponse>(
-        TRequest request,
-        CancellationToken cancellationToken = default
-    )
-        where TRequest : IntegrationEvent
-        where TResponse : ResponseMessage
-    {
-        ArgumentNullException.ThrowIfNull(request);
-        EnsureConnected();
-        try
-        {
-            return await _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"MessageBus.RequestAsync error: {ex.GetType().FullName} - {ex.Message}");
-            throw;
-        }
-    }
+	public Task<SubscriptionResult> SubscribeAsync<T>(
+		string subscriptionId,
+		Func<T, Task> onMessage,
+		CancellationToken cancellationToken = default
+	) where T : class
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(subscriptionId);
+		ArgumentNullException.ThrowIfNull(onMessage);
+		EnsureConnected();
+		try
+		{
+			return _bus!.PubSub.SubscribeAsync(subscriptionId, onMessage, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"MessageBus.SubscribeAsync error: {ex.GetType().FullName} - {ex.Message}");
+			throw;
+		}
+	}
 
-    public IAsyncDisposable Respond<TRequest, TResponse>(
-        Func<TRequest, TResponse> responder,
-        CancellationToken cancellationToken = default
-    )
-        where TRequest : IntegrationEvent
-        where TResponse : ResponseMessage
-    {
-        ArgumentNullException.ThrowIfNull(responder);
-        EnsureConnected();
-        try
-        {
-            return _bus!.Rpc.RespondAsync(responder, cancellationToken).GetAwaiter().GetResult();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"MessageBus.Respond error: {ex.GetType().FullName} - {ex.Message}");
-            throw;
-        }
-    }
+	public TResponse Request<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
+		where TRequest : IntegrationEvent
+		where TResponse : ResponseMessage
+	{
+		ArgumentNullException.ThrowIfNull(request);
+		EnsureConnected();
+		try
+		{
+			return _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken).GetAwaiter().GetResult();
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"MessageBus.Request error: {ex.GetType().FullName} - {ex.Message}");
+			throw;
+		}
+	}
 
-    public Task<IAsyncDisposable> RespondAsync<TRequest, TResponse>(
-        Func<TRequest, Task<TResponse>> responder,
-        CancellationToken cancellationToken = default
-    )
-        where TRequest : IntegrationEvent
-        where TResponse : ResponseMessage
-    {
-        ArgumentNullException.ThrowIfNull(responder);
-        EnsureConnected();
-        try
-        {
-            return _bus!.Rpc.RespondAsync(responder, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"MessageBus.RespondAsync error: {ex.GetType().FullName} - {ex.Message}");
-            throw;
-        }
-    }
+	public async Task<TResponse> RequestAsync<TRequest, TResponse>(
+		TRequest request,
+		CancellationToken cancellationToken = default
+	)
+		where TRequest : IntegrationEvent
+		where TResponse : ResponseMessage
+	{
+		ArgumentNullException.ThrowIfNull(request);
+		EnsureConnected();
+		try
+		{
+			return await _bus!.Rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"MessageBus.RequestAsync error: {ex.GetType().FullName} - {ex.Message}");
+			throw;
+		}
+	}
 
-    private void EnsureConnected()
-    {
-        ThrowIfDisposed();
-        if (IsConnected) return;
+	public IAsyncDisposable Respond<TRequest, TResponse>(
+		Func<TRequest, TResponse> responder,
+		CancellationToken cancellationToken = default
+	)
+		where TRequest : IntegrationEvent
+		where TResponse : ResponseMessage
+	{
+		ArgumentNullException.ThrowIfNull(responder);
+		EnsureConnected();
+		try
+		{
+			return _bus!.Rpc.RespondAsync(responder, cancellationToken).GetAwaiter().GetResult();
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"MessageBus.Respond error: {ex.GetType().FullName} - {ex.Message}");
+			throw;
+		}
+	}
 
-        lock (_sync)
-        {
-            if (IsConnected) return;
+	public Task<IAsyncDisposable> RespondAsync<TRequest, TResponse>(
+		Func<TRequest, Task<TResponse>> responder,
+		CancellationToken cancellationToken = default
+	)
+		where TRequest : IntegrationEvent
+		where TResponse : ResponseMessage
+	{
+		ArgumentNullException.ThrowIfNull(responder);
+		EnsureConnected();
+		try
+		{
+			return _bus!.Rpc.RespondAsync(responder, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"MessageBus.RespondAsync error: {ex.GetType().FullName} - {ex.Message}");
+			throw;
+		}
+	}
 
-            var policy = Policy.Handle<EasyNetQException>()
-                .Or<BrokerUnreachableException>()
-                .WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+	private void EnsureConnected()
+	{
+		ThrowIfDisposed();
+		if (IsConnected) return;
 
-            policy.Execute(() => ConnectAsync(CancellationToken.None).GetAwaiter().GetResult());
-        }
-    }
+		lock (_sync)
+		{
+			if (IsConnected) return;
 
-    private void OnDisconnect(object? sender, DisconnectedEventArgs e)
-    {
-        if (_disposed) return;
+			var policy = Policy.Handle<EasyNetQException>()
+				.Or<BrokerUnreachableException>()
+				.WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
 
-        var policy = Policy.Handle<EasyNetQException>()
-            .Or<BrokerUnreachableException>()
-            .WaitAndRetryForever(_ => TimeSpan.FromSeconds(5));
+			policy.Execute(() => ConnectAsync(CancellationToken.None).GetAwaiter().GetResult());
+		}
+	}
 
-        policy.Execute(EnsureConnected);
-    }
+	private void OnDisconnect(object? sender, DisconnectedEventArgs e)
+	{
+		if (_disposed) return;
 
-    public void Dispose()
-    {
-        DisposeAsync().AsTask().GetAwaiter().GetResult();
-    }
+		var policy = Policy.Handle<EasyNetQException>()
+			.Or<BrokerUnreachableException>()
+			.WaitAndRetryForever(_ => TimeSpan.FromSeconds(5));
 
-    public async ValueTask DisposeAsync()
-    {
-        if (_disposed) return;
-        _disposed = true;
+		policy.Execute(EnsureConnected);
+	}
 
-        if (_advancedBus is not null)
-        {
-            _advancedBus.Disconnected -= OnDisconnect;
-        }
+	public void Dispose()
+	{
+		DisposeAsync().AsTask().GetAwaiter().GetResult();
+	}
 
-        await DisposeBusAsync();
-    }
+	public async ValueTask DisposeAsync()
+	{
+		if (_disposed) return;
+		_disposed = true;
 
-    private async Task ConnectAsync(CancellationToken cancellationToken)
-    {
-        await DisposeBusAsync();
+		if (_advancedBus is not null) _advancedBus.Disconnected -= OnDisconnect;
 
-        var services = new ServiceCollection();
-        RabbitHutch.AddEasyNetQ(services, _connectionString);
+		await DisposeBusAsync();
+	}
 
-        _serviceProvider = services.BuildServiceProvider();
-        _bus = _serviceProvider.GetRequiredService<IBus>();
-        _advancedBus = _bus.Advanced;
+	private async Task ConnectAsync(CancellationToken cancellationToken)
+	{
+		await DisposeBusAsync();
 
-        _advancedBus.Disconnected -= OnDisconnect;
-        _advancedBus.Disconnected += OnDisconnect;
+		var services = new ServiceCollection();
+		RabbitHutch.AddEasyNetQ(services, _connectionString);
 
-        await _advancedBus.EnsureConnectedAsync(PersistentConnectionType.Producer, cancellationToken);
-        await _advancedBus.EnsureConnectedAsync(PersistentConnectionType.Consumer, cancellationToken);
-    }
+		_serviceProvider = services.BuildServiceProvider();
+		_bus = _serviceProvider.GetRequiredService<IBus>();
+		_advancedBus = _bus.Advanced;
 
-    private async Task DisposeBusAsync()
-    {
-        if (_advancedBus is not null)
-        {
-            _advancedBus.Disconnected -= OnDisconnect;
-        }
+		_advancedBus.Disconnected -= OnDisconnect;
+		_advancedBus.Disconnected += OnDisconnect;
 
-        _bus = null;
+		await _advancedBus.EnsureConnectedAsync(PersistentConnectionType.Producer, cancellationToken);
+		await _advancedBus.EnsureConnectedAsync(PersistentConnectionType.Consumer, cancellationToken);
+	}
 
-        if (_serviceProvider is not null)
-        {
-            await _serviceProvider.DisposeAsync();
-            _serviceProvider = null;
-        }
+	private async Task DisposeBusAsync()
+	{
+		if (_advancedBus is not null) _advancedBus.Disconnected -= OnDisconnect;
 
-        _advancedBus = null;
-    }
+		_bus = null;
 
-    private void ThrowIfDisposed()
-    {
-        if (!_disposed)
-        {
-            return;
-        }
-        throw new ObjectDisposedException(nameof(MessageBus));
-    }
+		if (_serviceProvider is not null)
+		{
+			await _serviceProvider.DisposeAsync();
+			_serviceProvider = null;
+		}
+
+		_advancedBus = null;
+	}
+
+	private void ThrowIfDisposed()
+	{
+		if (!_disposed) return;
+		throw new ObjectDisposedException(nameof(MessageBus));
+	}
 }

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace MBA.Aluno.Application.Interfaces;
 
-namespace MBA.Aluno.Appplication.Interfaces
+public interface ICertificadoAppService
 {
-    public interface ICertificadoAppService
-    {
-        Task<Guid> CadastrarCertificadoAsync(Guid MatriculaId);
-    }
+	Task<Guid> CadastrarCertificadoAsync(Guid matriculaId);
 }

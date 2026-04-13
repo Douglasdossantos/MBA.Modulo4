@@ -1,16 +1,13 @@
-﻿
+﻿using MBA.Core.SharedDto;
 
-using MBA.Core.SharedDto;
+namespace MBA.Conteudo.Api.ViewModels;
 
-namespace MBA.Conteudo.Api.ViewModels
+public class EvolucaoAlunoDto
 {
-    public class EvolucaoAlunoDto
-    {
-        public Guid Id { get; set; }
-        public string Nome { get; set; }
-        public string Email { get; set; }
-        public DateTime DataNascimento { get; set; }
+	public Guid Id { get; set; }
+	public string Nome { get; set; } = string.Empty;
+	public string Email { get; set; } = string.Empty;
+	public DateTime DataNascimento { get; set; }
 
-        public ICollection<EvolucaoMatriculaCursoDto> MatriculasCursos { get; set; }
-    }
+	public ICollection<EvolucaoMatriculaCursoDto> MatriculasCursos { get; set; } = [];
 }

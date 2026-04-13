@@ -1,17 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace MBA.WebApi.Core.Usuario
+namespace MBA.WebApi.Core.Usuario;
+
+public interface IAspNetUser
 {
-    public interface IAspNetUser
-    {
-        string Name { get; }
-        Guid ObterUserId();
-        string ObterUserEmail();
-        string ObterUserToken();
-        bool EstaAutenticado();
-        bool PossuiRole(string role);
-        IEnumerable<Claim> ObterClaims();
-        HttpContext ObterHttpContext();
-    }
+	string Name { get; }
+	Guid ObterUserId();
+	string ObterUserEmail();
+	string ObterUserToken();
+	bool EstaAutenticado();
+	bool PossuiRole(string role);
+	IEnumerable<Claim> ObterClaims();
+	HttpContext ObterHttpContext();
 }

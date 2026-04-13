@@ -2,84 +2,84 @@
 using MBA.Aluno.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace MBA.Aluno.API.Configuration
+namespace MBA.Aluno.API.Configuration;
+
+public static class DbMigrationHelpers
 {
-    public static class DbMigrationHelpers
-    {
-        public static async Task EnsureSeedData(WebApplication serviceScope)
-        {
-            var services = serviceScope.Services.CreateScope().ServiceProvider;
-            await EnsureSeedData(services);
-        }
-        public static async Task EnsureSeedData(IServiceProvider serviceProvider)
-        {
-            using var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+	public static async Task EnsureSeedData(WebApplication serviceScope)
+	{
+		var services = serviceScope.Services.CreateScope().ServiceProvider;
+		await EnsureSeedData(services);
+	}
 
-            var context = scope.ServiceProvider.GetRequiredService<AlunoDbContext>();
+	public static async Task EnsureSeedData(IServiceProvider serviceProvider)
+	{
+		using var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+		var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
 
-            if (env.IsDevelopment() || env.IsEnvironment("Docker"))
-            {
-                await context.Database.MigrateAsync();
-                await EnsureSeedProducts(context);
-            }
-        }
+		var context = scope.ServiceProvider.GetRequiredService<AlunoDbContext>();
 
-        private static async Task EnsureSeedProducts(AlunoDbContext context)
-        {
-            if (!context.Alunos.Any())
-            {
-                var alunos = new List<Domain.Entities.Aluno>
-                {
-                    new(Guid.NewGuid(), "Douglas", "douglas@email.com", true, false, DateTime.Now),
-                    new(Guid.NewGuid(), "Maria", "maria@email.com", true, false, DateTime.Now)
-                };
+		if (env.IsDevelopment() || env.IsEnvironment("Docker"))
+		{
+			await context.Database.MigrateAsync();
+			await EnsureSeedProducts(context);
+		}
+	}
 
-                await context.Alunos.AddRangeAsync(alunos);
-                await context.SaveChangesAsync();
-            }
+	private static async Task EnsureSeedProducts(AlunoDbContext context)
+	{
+		if (!context.Alunos.Any())
+		{
+			var alunos = new List<Domain.Entities.Aluno>
+			{
+				new(Guid.NewGuid(), "Douglas", "douglas@email.com", true, false, DateTime.Now),
+				new(Guid.NewGuid(), "Maria", "maria@email.com", true, false, DateTime.Now)
+			};
 
-            if (!context.Matriculas.Any())
-            {
-                var aluno = context.Alunos.First();
+			await context.Alunos.AddRangeAsync(alunos);
+			await context.SaveChangesAsync();
+		}
 
-                var matricula = new Matricula(
-                    Guid.NewGuid(),
-                    aluno.Id,
-                    DateTime.Now,
-                    Core.SharedDto.Aluno.Enum.StatusMatricula.PagamentoRealizado
-                );
+		if (!context.Matriculas.Any())
+		{
+			var aluno = context.Alunos.First();
 
-                await context.Matriculas.AddAsync(matricula);
-                await context.SaveChangesAsync();
-            }
+			var matricula = new Matricula(
+				Guid.NewGuid(),
+				aluno.Id,
+				DateTime.Now,
+				Core.SharedDto.Aluno.Enum.StatusMatricula.PagamentoRealizado
+			);
 
-            if (!context.AulaAssistidas.Any())
-            {
-                var matricula = context.Matriculas.First();
+			await context.Matriculas.AddAsync(matricula);
+			await context.SaveChangesAsync();
+		}
 
-                var aulasAssistidas = new List<AulaAssistida>
-                {
-                    new(matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-3)),
-                    new (matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-2)),
-                    new (matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-1))
-                };
+		if (!context.AulaAssistidas.Any())
+		{
+			var matricula = context.Matriculas.First();
 
-                await context.AulaAssistidas.AddRangeAsync(aulasAssistidas);
-                await context.SaveChangesAsync();
-            }
+			var aulasAssistidas = new List<AulaAssistida>
+			{
+				new(matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-3)),
+				new(matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-2)),
+				new(matricula.Id, Guid.NewGuid(), DateTime.Now.AddDays(-1))
+			};
 
-            if (!context.Certificados.Any())
-            {
-                var matricula = context.Matriculas.First();
+			await context.AulaAssistidas.AddRangeAsync(aulasAssistidas);
+			await context.SaveChangesAsync();
+		}
 
-                var certificado = new Certificado(matricula.Id);
-                certificado.CriarData();
-                certificado.Path();
+		if (!context.Certificados.Any())
+		{
+			var matricula = context.Matriculas.First();
 
-                await context.Certificados.AddAsync(certificado);
-                await context.SaveChangesAsync();
-            }
-        }
-    }
+			var certificado = new Certificado(matricula.Id);
+			certificado.CriarData();
+			certificado.Path();
+
+			await context.Certificados.AddAsync(certificado);
+			await context.SaveChangesAsync();
+		}
+	}
 }

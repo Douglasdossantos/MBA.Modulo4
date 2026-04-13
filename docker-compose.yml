@@ -1,0 +1,220 @@
+services:
+
+  # =========================================================
+  # Infrastructure
+  # =========================================================
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: mba-rabbitmq
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mba-network
+
+  # =========================================================
+  # APIs
+  # =========================================================
+
+  auth-api:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        PROJECT_NAME: MBA.Auth.Api
+    container_name: mba-auth-api
+    command: ["MBA.Auth.Api.dll"]
+    ports:
+      - "${AUTH_API_PORT:-5020}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Data Source=/app/data/AuthDB.db"
+      AppSettings__Secret: "9F3KxR7QmL2WJ8ZpE0YB5aTgN1C4H6Md"
+      AppSettings__ExpiracaoHoras: "2"
+      AppSettings__Emissor: "MBA.Modulo4"
+      AppSettings__ValidoEm: "http://bff-api:8080"
+      MessageQueueConnection__MessageBus: "host=rabbitmq:5672;publisherConfirms=true;timeout=30;username=guest;password=guest"
+    volumes:
+      - auth_data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - mba-network
+
+  conteudo-api:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        PROJECT_NAME: MBA.Conteudo.Api
+    container_name: mba-conteudo-api
+    command: ["MBA.Conteudo.Api.dll"]
+    ports:
+      - "${CONTEUDO_API_PORT:-5137}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      AppSettings__DatabaseSettings__ConnectionStringConteudo: "Data Source=/app/data/ConteudoDB.db"
+      AppSettings__JwtSettings__Secret: "9F3KxR7QmL2WJ8ZpE0YB5aTgN1C4H6Md"
+      AppSettings__JwtSettings__ExpirationInHours: "2"
+      AppSettings__JwtSettings__Issuer: "MBA.Modulo4"
+      AppSettings__JwtSettings__Audience: "http://bff-api:8080"
+    volumes:
+      - conteudo_data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - mba-network
+
+  aluno-api:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        PROJECT_NAME: MBA.Aluno.API
+    container_name: mba-aluno-api
+    command: ["MBA.Aluno.API.dll"]
+    ports:
+      - "${ALUNO_API_PORT:-5236}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      # Absolute path trick: Path.Combine ignores previous segments when a component starts with /
+      ConnectionStrings__ConnectionStringAluno: "/app/data/AlunoDB.db"
+      ConnectionStrings__ConnectionStringConteudo: "/app/data/ConteudoDB.db"
+      AppSettings__Secret: "9F3KxR7QmL2WJ8ZpE0YB5aTgN1C4H6Md"
+      AppSettings__ExpiracaoHoras: "2"
+      AppSettings__Emissor: "MBA.Modulo4"
+      AppSettings__ValidoEm: "http://bff-api:8080"
+      MessageQueueConnection__MessageBus: "host=rabbitmq:5672;publisherConfirms=true;timeout=30;username=guest;password=guest"
+    volumes:
+      - aluno_data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - mba-network
+
+  pagamentos-api:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        PROJECT_NAME: MBA.Pagamentos.Api
+    container_name: mba-pagamentos-api
+    command: ["MBA.Pagamentos.Api.dll"]
+    ports:
+      - "${PAGAMENTOS_API_PORT:-5190}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      AppSettings__DatabaseSettings__ConnectionStringFaturamento: "Data Source=/app/data/PagamentoDB.db"
+      AppSettings__JwtSettings__Secret: "9F3KxR7QmL2WJ8ZpE0YB5aTgN1C4H6Md"
+      AppSettings__JwtSettings__ExpirationInHours: "2"
+      AppSettings__JwtSettings__Issuer: "MBA.Modulo4"
+      AppSettings__JwtSettings__Audience: "http://bff-api:8080"
+      MessageQueueConnection__MessageBus: "host=rabbitmq:5672;publisherConfirms=true;timeout=30;username=guest;password=guest"
+    volumes:
+      - pagamentos_data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - mba-network
+
+  bff-api:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        PROJECT_NAME: MBA.Bff.Api
+    container_name: mba-bff-api
+    command: ["MBA.Bff.Api.dll"]
+    ports:
+      - "${BFF_API_PORT:-5293}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      AppServicesSettings__AlunoUrl: "http://aluno-api:8080"
+      AppServicesSettings__ConteudoUrl: "http://conteudo-api:8080"
+      AppServicesSettings__PagamentoUrl: "http://pagamentos-api:8080"
+      AppServicesSettings__AutenticacaoUrl: "http://auth-api:8080"
+      AppServicesSettings__FaturamentoUrl: "http://pagamentos-api:8080"
+      AppSettings__Secret: "9F3KxR7QmL2WJ8ZpE0YB5aTgN1C4H6Md"
+      AppSettings__ExpiracaoHoras: "2"
+      AppSettings__Emissor: "MBA.Modulo4"
+      AppSettings__ValidoEm: "http://bff-api:8080"
+      MessageQueueConnection__MessageBus: "host=rabbitmq:5672;publisherConfirms=true;timeout=30;username=guest;password=guest"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      auth-api:
+        condition: service_started
+      conteudo-api:
+        condition: service_started
+      aluno-api:
+        condition: service_started
+      pagamentos-api:
+        condition: service_started
+    networks:
+      - mba-network
+
+  webapp-mvc:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      args:
+        PROJECT_NAME: MBA.WebApp.MVC
+    container_name: mba-webapp-mvc
+    command: ["MBA.WebApp.MVC.dll"]
+    ports:
+      - "${WEBAPP_MVC_PORT:-5132}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      AppSettings__AutenticacaoUrl: "http://auth-api:8080"
+      AppSettings__AlunosUrl: "http://aluno-api:8080"
+      AppSettings__ConteudoUrl: "http://conteudo-api:8080"
+      AppSettings__PagamentosUrl: "http://pagamentos-api:8080"
+      AppSettings__BFF: "http://bff-api:8080"
+    depends_on:
+      bff-api:
+        condition: service_started
+      auth-api:
+        condition: service_started
+    networks:
+      - mba-network
+
+# =========================================================
+# Volumes (SQLite data persistence)
+# =========================================================
+
+volumes:
+  rabbitmq_data:
+  auth_data:
+  conteudo_data:
+  aluno_data:
+  pagamentos_data:
+
+# =========================================================
+# Network
+# =========================================================
+
+networks:
+  mba-network:
+    driver: bridge

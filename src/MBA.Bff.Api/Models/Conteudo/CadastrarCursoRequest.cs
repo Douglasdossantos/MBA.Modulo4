@@ -1,15 +1,10 @@
-using System;
+namespace MBA.Bff.Api.Models.Conteudo;
 
-namespace MBA.Bff.Api.Models.Conteudo
+public class CadastrarCursoRequest
 {
-    // DTO sent to Conteudo API (excludes Login property)
-    public class CadastrarCursoRequest
-    {
-        public string Nome { get; set; }
-        public decimal Valor { get; set; }
-        public DateTime? ValidoAte { get; set; }
-
-        public string Finalidade { get; set; }
-        public string Ementa { get; set; }
-    }
+	public string Nome { get; set; }
+	public decimal Valor { get; set; }
+	public DateTime? ValidoAte { get; set; }
+	public string Finalidade { get; set; }
+	public string Ementa { get; set; }
 }

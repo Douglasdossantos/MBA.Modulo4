@@ -2,17 +2,14 @@
 using MBA.MessageBus;
 using MBA.Core.Utils;
 
-namespace MBA.Aluno.API.Configuration
+namespace MBA.Aluno.API.Configuration;
+
+public static class MessageBusConfig
 {
-    public static class MessageBusConfig
-    {
-        public static void AddMessageBusConfiguration(this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            services.AddMessageBus(configuration.GetMessageQueueConnection("MessageBus"))
-                .AddHostedService<CadastroAlunoIntegrationHandler>();
-
-
-        }
-    }
+	public static void AddMessageBusConfiguration(this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		services.AddMessageBus(configuration.GetMessageQueueConnection("MessageBus"))
+			.AddHostedService<CadastroAlunoIntegrationHandler>();
+	}
 }

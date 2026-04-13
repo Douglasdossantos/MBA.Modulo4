@@ -2,24 +2,23 @@
 using MBA.Core.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace MBA.Conteudo.Data
+namespace MBA.Conteudo.Data;
+
+public class ConteudoContext : DbContext, IUnitOfWork
 {
-    public class ConteudoContext : DbContext, IUnitOfWork
-    {
-        public ConteudoContext(DbContextOptions<ConteudoContext> options) : base(options) { }
+	public ConteudoContext(DbContextOptions<ConteudoContext> options) : base(options) { }
 
-        public DbSet<Aula> Aulas { get; set; }
-        public DbSet<Curso> Cursos { get; set; }
+	public DbSet<Aula> Aulas { get; set; }
+	public DbSet<Curso> Cursos { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ConteudoContext).Assembly);
-            base.OnModelCreating(modelBuilder);
-        }
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		modelBuilder.ApplyConfigurationsFromAssembly(typeof(ConteudoContext).Assembly);
+		base.OnModelCreating(modelBuilder);
+	}
 
-        public async Task<bool> Commit()
-        {
-            return await base.SaveChangesAsync() > 0;
-        }
-    }
+	public async Task<bool> Commit()
+	{
+		return await base.SaveChangesAsync() > 0;
+	}
 }

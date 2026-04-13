@@ -1,11 +1,10 @@
 using MBA.WebApp.MVC.Configuration;
-using MBA.WebApp.MVC.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentityConfiguration();
 builder.Services.AddControllersWithViews();
-builder.Services.RegisterServices();
+builder.Services.RegisterServices(builder.Configuration);
 
 builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)

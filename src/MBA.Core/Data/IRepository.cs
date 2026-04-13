@@ -1,14 +1,8 @@
 ﻿using MBA.Core.DomainObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MBA.Core.Data
+namespace MBA.Core.Data;
+
+public interface IRepository<T> : IDisposable where T : IAggregateRoot
 {
-    public interface IRepository<T> :IDisposable where T : IAggregateRoot
-    {
-        IUnitOfWork UnitOfWork { get; }
-    }
+	IUnitOfWork UnitOfWork { get; }
 }

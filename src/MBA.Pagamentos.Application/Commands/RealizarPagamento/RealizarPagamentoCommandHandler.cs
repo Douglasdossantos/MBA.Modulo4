@@ -1,180 +1,175 @@
 ﻿using MBA.Core.Mediator;
 using MBA.Core.Messages;
+using MBA.Core.Messages.FaturamentoCommands;
 using MBA.Core.Messages.FaturamentoEvents;
 using MBA.Core.Messages.Integration;
 using MBA.Core.SharedDto.Aluno.Enum;
 using MBA.MessageBus;
-using MBA.Messages.FaturamentoCommands;
 using MBA.Pagamentos.Domain.Entities;
+using MBA.Pagamentos.Domain.Interfaces;
 using MBA.Pagamentos.Domain.ValueObjects;
+
 using MediatR;
 
 
-
 namespace MBA.Pagamentos.Application.Commands.RealizarPagamento;
-public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoRepository, 
-                                             IMessageBus bus,
-                                             IMediatorHandler mediatorHandler) : IRequestHandler<RealizarPagamentoCommand, bool>
+
+public class RealizarPagamentoCommandHandler(
+	IFaturamentoRepository faturamentoRepository,
+	IMessageBus bus,
+	IMediatorHandler mediatorHandler) : IRequestHandler<RealizarPagamentoCommand, bool>
 {
-    private readonly IFaturamentoRepository _faturamentoRepository = faturamentoRepository;
-    private readonly IMediatorHandler _mediatorHandler = mediatorHandler;
-    private readonly IMessageBus _bus = bus;
-    private Guid _raizAgregacao;
+	private Guid _raizAgregacao;
 
-    public async Task<bool> Handle(
-     RealizarPagamentoCommand request,
-     CancellationToken cancellationToken)
-    {
-        _raizAgregacao = request.RaizAgregacao;
+	public async Task<bool> Handle(
+		RealizarPagamentoCommand request,
+		CancellationToken cancellationToken)
+	{
+		_raizAgregacao = request.RaizAgregacao;
 
-        // 1️⃣ Validação do command
-        if (!ValidarRequisicaoAsync(request))
-            return false;
+		// 1️⃣ Validação do command
+		if (!ValidarRequisicaoAsync(request))
+			return false;
 
-        // 2️⃣ Matrícula obrigatória
-        if (request.MatriculaCursoId == Guid.Empty)
-        {
-            await _mediatorHandler.PublicarNotificacaoDominio(
-                new DomainNotificacaoRaiz(
-                    _raizAgregacao,
-                    nameof(Pagamento),
-                    "Matrícula inválida para realização de pagamento."));
-            return false;
-        }
+		// 2️⃣ Matrícula obrigatória
+		if (request.MatriculaCursoId == Guid.Empty)
+		{
+			await mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(
+					_raizAgregacao,
+					nameof(Pagamento),
+					"Matrícula inválida para realização de pagamento."));
+			return false;
+		}
 
-        // 3️⃣ Busca pagamento (PODE ser null)
-        var resultado = await ObterPagamentoMatriculaCurso(request.MatriculaCursoId);
+		// 3️⃣ Busca pagamento (PODE ser null)
+		var resultado = await ObterPagamentoMatriculaCurso(request.MatriculaCursoId);
 
-        if (!resultado.Sucesso)
-            return false;
+		if (!resultado.Sucesso)
+			return false;
 
-        var pagamento = resultado.Pagamento;
+		var pagamento = resultado.Pagamento;
 
-        // 4️⃣ BLOQUEIO SOMENTE se já estiver APROVADO
-        if (pagamento is not null && pagamento.PossuiPagamentoAprovado())
-        {
-            await _mediatorHandler.PublicarNotificacaoDominio(
-                new DomainNotificacaoRaiz(
-                    _raizAgregacao,
-                    nameof(Pagamento),
-                    "Pagamento desta matrícula já se encontra aprovado."));
-            return false;
-        }
+		// 4️⃣ BLOQUEIO SOMENTE se já estiver APROVADO
+		if (pagamento is not null && pagamento.PossuiPagamentoAprovado())
+		{
+			await mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(
+					_raizAgregacao,
+					nameof(Pagamento),
+					"Pagamento desta matrícula já se encontra aprovado."));
+			return false;
+		}
 
-        // 5️⃣ Validação de valor
-        var valorReferencia = pagamento?.Valor ?? request.Valor;
+		// 5️⃣ Validação de valor
+		var valorReferencia = pagamento?.Valor ?? request.Valor;
 
-        if (!ValidarValorPagamentoMatriculaCurso(request.Valor, valorReferencia))
-            return false;
+		if (!ValidarValorPagamentoMatriculaCurso(request.Valor, valorReferencia))
+			return false;
 
-        // 6️⃣ Dados do cartão
-        var dadosCartao = new DadosCartao(
-            request.NumeroCartao,
-            request.NomeTitularCartao,
-            request.ValidadeCartao,
-            request.CvvCartao);
+		// 6️⃣ Dados do cartão
+		var dadosCartao = new DadosCartao(
+			request.NumeroCartao,
+			request.NomeTitularCartao,
+			request.ValidadeCartao,
+			request.CvvCartao);
 
-        // 7️⃣ Criação ou reaproveitamento
-        if (pagamento == null)
-        {
-            pagamento = new Pagamento(
-                request.MatriculaCursoId,
-                request.Valor,
-                DateTime.Now.Date);
+		// 7️⃣ Criação ou reaproveitamento
+		if (pagamento is null)
+		{
+			pagamento = new Pagamento(
+				request.MatriculaCursoId,
+				request.Valor,
+				DateTime.Now.Date);
 
-            await _faturamentoRepository.AdicionarAsync(pagamento);
-        }
+			await faturamentoRepository.AdicionarAsync(pagamento);
+		}
 
-        // 8️⃣ Confirma pagamento (DOMÍNIO decide)
-        pagamento.ConfirmarPagamento(
-            DateTime.Now,
-            Guid.NewGuid().ToString(),
-            dadosCartao);
+		// 8️⃣ Confirma pagamento (DOMÍNIO decide)
+		pagamento.ConfirmarPagamento(
+			DateTime.Now,
+			Guid.NewGuid().ToString(),
+			dadosCartao);
 
-        // 9️⃣ Commit
-        var clienteResult = await AlterarStatusMatricula(request.MatriculaCursoId);
-        if (!clienteResult.ValidationResult.IsValid)
-        {
-            await _mediatorHandler.PublicarNotificacaoDominio(
-                new DomainNotificacaoRaiz(
-                    _raizAgregacao,
-                    nameof(Pagamento),
-                    "ERRO AO ALTERAR O STATUS DA MATRICULA."));
-            return false;
-        }
-        await _faturamentoRepository.UnitOfWork.Commit();
+		// 9️⃣ Commit
+		var clienteResult = await AlterarStatusMatricula(request.MatriculaCursoId);
+		if (!clienteResult.ValidationResult.IsValid)
+		{
+			await mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(
+					_raizAgregacao,
+					nameof(Pagamento),
+					"ERRO AO ALTERAR O STATUS DA MATRICULA."));
+			return false;
+		}
 
-        // 🔟 Evento de domínio
-        await _mediatorHandler.PublicarEventoRaiz(
-            new PagamentoConfirmadoEvent(
-                request.MatriculaCursoId,
-                request.AlunoId,
-                request.CursoId,
-                true));
+		await faturamentoRepository.UnitOfWork.Commit();
 
-        return true;
-    }
+		// 🔟 Evento de domínio
+		await mediatorHandler.PublicarEventoRaiz(
+			new PagamentoConfirmadoEvent(
+				request.MatriculaCursoId,
+				request.AlunoId,
+				request.CursoId,
+				true));
 
-    private bool ValidarRequisicaoAsync(RealizarPagamentoCommand request)
-    {
-        request.DefinirValidacao(new RealizarPagamentoCommandValidator().Validate(request));
-        if (!request.EhValido())
-        {
-            foreach (var erro in request.Erros)
-            {
-                _mediatorHandler.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Pagamento), erro)).GetAwaiter().GetResult();
-            }
-            return false;
-        }
+		return true;
+	}
 
-        return true;
-    }
+	private bool ValidarRequisicaoAsync(RealizarPagamentoCommand request)
+	{
+		request.DefinirValidacao(new RealizarPagamentoCommandValidator().Validate(request));
+		if (!request.EhValido())
+		{
+			foreach (var erro in request.Erros)
+				mediatorHandler
+					.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Pagamento), erro))
+					.GetAwaiter().GetResult();
+			return false;
+		}
 
-    private async Task<(bool Sucesso, Pagamento? Pagamento)>
-    ObterPagamentoMatriculaCurso(Guid matriculaId)
-    {
-        var pagamento =
-            await _faturamentoRepository.ObterPorMatriculaIdAsync(matriculaId);
+		return true;
+	}
 
-        if (pagamento != null && pagamento.PossuiPagamentoAprovado())
-        {
-            await _mediatorHandler.PublicarNotificacaoDominio(
-                new DomainNotificacaoRaiz(
-                    _raizAgregacao,
-                    nameof(Pagamento),
-                    "Pagamento desta matrícula já se encontra paga"
-                )
-            );
+	private async Task<(bool Sucesso, Pagamento? Pagamento)>
+		ObterPagamentoMatriculaCurso(Guid matriculaId)
+	{
+		var pagamento =
+			await faturamentoRepository.ObterPorMatriculaIdAsync(matriculaId);
 
-            return (false, pagamento);
-        }
+		if (pagamento is not null && pagamento.PossuiPagamentoAprovado())
+		{
+			await mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(
+					_raizAgregacao,
+					nameof(Pagamento),
+					"Pagamento desta matrícula já se encontra paga"
+				)
+			);
 
-        return (true, pagamento);
-    }
+			return (false, pagamento);
+		}
 
-    private bool ValidarValorPagamentoMatriculaCurso(decimal valorInformado, decimal valorMatricula)
-    {
-        if (valorInformado != valorMatricula)
-        {
-            _mediatorHandler.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Pagamento), "Valor de pagamento diverge do valor desta matricula")).GetAwaiter().GetResult();
-            return false;
-        }
+		return (true, pagamento);
+	}
 
-        return true;
-    }
+	private bool ValidarValorPagamentoMatriculaCurso(decimal valorInformado, decimal valorMatricula)
+	{
+		if (valorInformado != valorMatricula)
+		{
+			mediatorHandler.PublicarNotificacaoDominio(new DomainNotificacaoRaiz(_raizAgregacao, nameof(Pagamento),
+				"Valor de pagamento diverge do valor desta matricula")).GetAwaiter().GetResult();
+			return false;
+		}
 
-    private async Task<ResponseMessage> AlterarStatusMatricula(Guid matriculaId)
-    {
+		return true;
+	}
 
-        var alterarMatricula = new AlterarStatusMatriculaIntegrationEvent(matriculaId, StatusMatricula.PagamentoRealizado);
+	private async Task<ResponseMessage> AlterarStatusMatricula(Guid matriculaId)
+	{
+		var alterarMatricula =
+			new AlterarStatusMatriculaIntegrationEvent(matriculaId, StatusMatricula.PagamentoRealizado);
 
-        try
-        {
-            return await _bus.RequestAsync<AlterarStatusMatriculaIntegrationEvent, ResponseMessage>(alterarMatricula);
-        }
-        catch
-        {
-            throw;
-        }
-    }
+		return await bus.RequestAsync<AlterarStatusMatriculaIntegrationEvent, ResponseMessage>(alterarMatricula);
+	}
 }

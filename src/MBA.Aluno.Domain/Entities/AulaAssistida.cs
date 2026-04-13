@@ -1,60 +1,56 @@
 ﻿using MBA.Core.DomainObjects;
 using MBA.Core.DomainValidations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MBA.Aluno.Domain.Entities
+namespace MBA.Aluno.Domain.Entities;
+
+public class AulaAssistida : Entity, IAggregateRoot
 {
-    public class AulaAssistida : Entity, IAggregateRoot
-    {
+	public Guid MatriculaCursoId { get; private set; }
+	public Guid AulaId { get; set; }
+	public DateTime DataTermino { get; set; }
 
-        public Guid MatriculaCursoId { get; private set; }
-        public Guid AulaId { get; set; }
-        public DateTime DataTermino { get; set; }
+	public AulaAssistida() { }
 
-        public AulaAssistida() { }
+	public AulaAssistida(Guid matriculaCursoId, Guid aulaId, DateTime dataTermino)
+	{
+		MatriculaCursoId = matriculaCursoId;
+		AulaId = aulaId;
+		DataTermino = dataTermino;
 
-        public AulaAssistida(Guid matriculaCursoId, Guid aulaId, DateTime dataTermino)
-        {
-            MatriculaCursoId = matriculaCursoId;
-            AulaId = aulaId;
-            DataTermino = dataTermino;
+		ValidarAulaAssistida();
+	}
 
-            ValidarAulaAssistida();
-        }
+	public void AlterarAulaId(Guid aulaId)
+	{
+		ValidarAulaAssistida(aulaId: aulaId);
+		AulaId = aulaId;
+	}
 
-        public void AlterarAulaId(Guid aulaId)
-        {
-            ValidarAulaAssistida(_aulaId: aulaId);
-            AulaId = aulaId;
-        }
+	public void AlterarDataTermino(DateTime dataTermino)
+	{
+		ValidarAulaAssistida(dataTermino: dataTermino);
+		DataTermino = dataTermino;
+	}
 
-        public void AlterarDataTermino(DateTime dataTermino)
-        {
-            ValidarAulaAssistida(_dataTermino: dataTermino);
-            DataTermino = dataTermino;
-        }
+	public void ValidarAulaAssistida(Guid? matriculaCursoId = null, Guid? aulaId = null, DateTime? dataTermino = null)
+	{
+		if (matriculaCursoId != null && matriculaCursoId != Guid.Empty)
+			MatriculaCursoId = matriculaCursoId.Value;
 
-        public void ValidarAulaAssistida(Guid? _matriculaCursoId = null, Guid? _aulaId = null, DateTime? _dataTermino = null)
-        {
-            var matriculaCursoId = _matriculaCursoId ?? MatriculaCursoId;
-            var aulaId = _aulaId ?? AulaId;
-            var dataTermino = _dataTermino ?? DataTermino;
+		if (aulaId != null && aulaId != Guid.Empty)
+			AulaId = aulaId.Value;
 
-            Validacoes.ValidarSeVazio(matriculaCursoId, "O ID da matrícula do curso não pode estar vazio.");
-            Validacoes.ValidarSeVazio(aulaId, "O ID da aula não pode estar vazio.");
-            Validacoes.ValidarData(dataTermino, "A data da matrícula é inválida.");
-        }
+		if (dataTermino.HasValue)
+			DataTermino = dataTermino.Value;
 
+		Validacoes.ValidarSeVazio(MatriculaCursoId, "O ID da matrícula do curso não pode estar vazio.");
+		Validacoes.ValidarSeVazio(AulaId, "O ID da aula não pode estar vazio.");
+		Validacoes.ValidarData(DataTermino, "A data da matrícula é inválida.");
+	}
 
 
-        public override string ToString()
-        {
-            return $"mtricula {MatriculaCursoId}, aula {AulaId}, realizada na data {DataTermino}";
-        }
-
-    }
+	public override string ToString()
+	{
+		return $"mtricula {MatriculaCursoId}, aula {AulaId}, realizada na data {DataTermino}";
+	}
 }

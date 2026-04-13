@@ -1,5 +1,4 @@
 using MBA.Auth.Api.Configuration;
-using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 

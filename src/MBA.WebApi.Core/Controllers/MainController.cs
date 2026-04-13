@@ -1,142 +1,135 @@
-﻿using FluentValidation.Results;
-using MBA.Core.Autentications;
+#nullable enable
+using FluentValidation.Results;
+
+using MBA.Core.Authentications;
 using MBA.Core.DomainHadlers;
 using MBA.Core.DomainObjects;
 using MBA.Core.Enumerators;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+
 using System.Net;
 
-namespace MBA.WebApi.Core.Controllers
+namespace MBA.WebApi.Core.Controllers;
+
+[ApiController]
+public abstract class MainController(
+	IAppIdentityUser appIdentityUser,
+	INotificationHandler<DomainNotificacaoRaiz> notifications,
+	IMediatorHandler mediatorHandler) : ControllerBase
 {
-    [ApiController]
-    public abstract class MainController(IAppIdentityUser appIdentityUser,
-       INotificationHandler<DomainNotificacaoRaiz> notifications,
-       IMediatorHandler mediatorHandler) : ControllerBase
-    {
-        private readonly IAppIdentityUser _appIdentityUser = appIdentityUser;
-        protected readonly DomainNotificacaoHandler _notifications = (DomainNotificacaoHandler)notifications;
-        protected readonly IMediatorHandler _mediatorHandler = mediatorHandler;
+	protected readonly DomainNotificacaoHandler Notifications = (DomainNotificacaoHandler)notifications;
+	protected readonly IMediatorHandler MediatorHandler = mediatorHandler;
 
-        protected bool OperacaoValida() => !_notifications.TemNotificacao();
-        public Guid UserId => _appIdentityUser.ObterUsuarioId();
-        public bool EstahAutenticado => _appIdentityUser.EstahAutenticado();
-        public string Email => _appIdentityUser.ObterEmail();
-        public bool EhAdministrador => _appIdentityUser.EhAdministrador();
+	protected bool OperacaoValida()
+	{
+		return !Notifications.TemNotificacao();
+	}
 
-        protected ICollection<string> Erros = [];
+	public Guid UserId => appIdentityUser.ObterUsuarioId();
+	public bool EstahAutenticado => appIdentityUser.EstahAutenticado();
+	public string Email => appIdentityUser.ObterEmail();
+	public bool EhAdministrador => appIdentityUser.EhAdministrador();
 
-        protected ActionResult CustomResponse(object result = null)
-        {
-            if (OperacaoValida())
-            {
-                return Ok(result);
-            }
+	protected ICollection<string> Erros = [];
 
-            return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
-            {
-                { "Mensagens", Erros.ToArray() }
-            }));
-        }
+	protected ActionResult CustomResponse(object? result = null)
+	{
+		if (OperacaoValida()) return Ok(result);
 
-        protected ActionResult CustomResponse(ModelStateDictionary modelState)
-        {
-            var erros = modelState.Values.SelectMany(e => e.Errors);
-            foreach (var erro in erros)
-            {
-                AdicionarErroProcessamento(erro.ErrorMessage);
-            }
+		return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+		{
+			{ "Mensagens", Erros.ToArray() }
+		}));
+	}
 
-            return CustomResponse();
-        }
+	protected ActionResult CustomResponse(ModelStateDictionary modelState)
+	{
+		var erros = modelState.Values.SelectMany(e => e.Errors);
+		foreach (var erro in erros) AdicionarErroProcessamento(erro.ErrorMessage);
 
-        protected ActionResult CustomResponse(ValidationResult validationResult)
-        {
-            foreach (var erro in validationResult.Errors)
-            {
-                AdicionarErroProcessamento(erro.ErrorMessage);
-            }
+		return CustomResponse();
+	}
 
-            return CustomResponse();
-        }
+	protected ActionResult CustomResponse(ValidationResult validationResult)
+	{
+		foreach (var erro in validationResult.Errors) AdicionarErroProcessamento(erro.ErrorMessage);
 
-        protected void AdicionarErroProcessamento(string erro)
-        {
-            Erros.Add(erro);
-        }
+		return CustomResponse();
+	}
 
-        protected void LimparErrosProcessamento()
-        {
-            Erros.Clear();
-        }
+	protected void AdicionarErroProcessamento(string erro)
+	{
+		Erros.Add(erro);
+	}
 
-        protected ActionResult GenerateModelStateResponse(ResponseTypeEnum responseType, HttpStatusCode statusCode, ModelStateDictionary modelState)
-        {
-            return new JsonResult(new
-            {
-                success = false,
-                type = responseType.ToString(),
-                errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
-            })
-            {
-                StatusCode = (int)statusCode
-            };
-        }
+	protected void LimparErrosProcessamento()
+	{
+		Erros.Clear();
+	}
 
-        protected ActionResult GenerateResponse(object? result = null,
-            ResponseTypeEnum responseType = ResponseTypeEnum.Success,
-            HttpStatusCode statusCode = HttpStatusCode.OK,
-            IList<string> errors = null)
-        {
-            if (OperacaoValida() && ((int)statusCode >= 200 && (int)statusCode <= 299))
-            {
-                return new JsonResult(new
-                {
-                    success = true,
-                    type = responseType.ToString(),
-                    result
-                })
-                {
-                    StatusCode = (int)statusCode
-                };
-            }
+	protected ActionResult GenerateModelStateResponse(ResponseTypeEnum responseType, HttpStatusCode statusCode,
+		ModelStateDictionary modelState)
+	{
+		return new JsonResult(new
+		{
+			success = false,
+			type = responseType.ToString(),
+			errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+		})
+		{
+			StatusCode = (int)statusCode
+		};
+	}
 
-            errors ??= [];
-            if (_notifications.TemNotificacao())
-            {
-                var notificationErrors = _notifications.ObterNotificacoes().Select(n => $"({n.Chave}: {n.RaizAgregacao}) Mensagem: {n.Valor}").ToList();
-                foreach (string erro in notificationErrors)
-                {
-                    errors.Add(erro);
-                }
-            }
+	protected ActionResult GenerateResponse(object? result = null,
+		ResponseTypeEnum responseType = ResponseTypeEnum.Success,
+		HttpStatusCode statusCode = HttpStatusCode.OK,
+		IList<string>? errors = null)
+	{
+		if (OperacaoValida() && (int)statusCode >= 200 && (int)statusCode <= 299)
+			return new JsonResult(new
+			{
+				success = true,
+				type = responseType.ToString(),
+				result
+			})
+			{
+				StatusCode = (int)statusCode
+			};
 
-            return new JsonResult(new
-            {
-                success = false,
-                type = responseType.ToString(),
-                errors
-            })
-            {
-                StatusCode = (int)statusCode
-            };
-        }
+		errors ??= [];
+		if (Notifications.TemNotificacao())
+		{
+			var notificationErrors = Notifications.ObterNotificacoes()
+				.Select(n => $"({n.Chave}: {n.RaizAgregacao}) Mensagem: {n.Valor}").ToList();
+			foreach (var erro in notificationErrors) errors.Add(erro);
+		}
 
-        protected ActionResult GenerateDomainExceptionResponse(object? result = null,
-           ResponseTypeEnum responseType = ResponseTypeEnum.Success,
-           HttpStatusCode statusCode = HttpStatusCode.OK,
-           DomainException exception = null)
-        {
-            List<string> errors = [];
-            if (exception != null)
-            {
-                errors.AddRange(exception.Errors ?? [exception.Message]);
-            }
+		return new JsonResult(new
+		{
+			success = false,
+			type = responseType.ToString(),
+			errors
+		})
+		{
+			StatusCode = (int)statusCode
+		};
+	}
 
-            return GenerateResponse(result, responseType, statusCode, errors);
-        }
-    }
+	protected ActionResult GenerateDomainExceptionResponse(object? result = null,
+		ResponseTypeEnum responseType = ResponseTypeEnum.Success,
+		HttpStatusCode statusCode = HttpStatusCode.OK,
+		DomainException? exception = null)
+	{
+		List<string> errors = [];
+		if (exception != null) errors.AddRange(exception.Errors);
+
+		return GenerateResponse(result, responseType, statusCode, errors);
+	}
 }

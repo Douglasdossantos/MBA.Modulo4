@@ -1,16 +1,15 @@
-﻿using MBA.MessageBus;
+﻿using MBA.Bff.Api.Handlers;
 using MBA.Core.Utils;
-using MBA.Bff.Api.Handlers;
+using MBA.MessageBus;
 
-namespace MBA.Bff.Api.Configuration
+namespace MBA.Bff.Api.Configuration;
+
+public static class MessageBusConfig
 {
-    public static class MessageBusConfig
-    {
-        public static void AddMessageBusConfiguration(this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            services.AddMessageBus(configuration.GetMessageQueueConnection("MessageBus"))
-                .AddHostedService<AlterarStatusMatriculaIntegrationHandler>();
-        }
-    }
+	public static void AddMessageBusConfiguration(this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		services.AddMessageBus(configuration.GetMessageQueueConnection("MessageBus"))
+			.AddHostedService<AlterarStatusMatriculaIntegrationHandler>();
+	}
 }

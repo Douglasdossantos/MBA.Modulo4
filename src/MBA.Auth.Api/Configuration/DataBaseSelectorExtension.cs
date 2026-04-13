@@ -1,28 +1,27 @@
 ﻿using MBA.Auth.Api.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace MBA.Auth.Api.Configuration
+namespace MBA.Auth.Api.Configuration;
+
+public static class DataBaseSelectorExtension
 {
-    public static class DataBaseSelectorExtension
-    {
-        public static void AddDatabaseSelector(this WebApplicationBuilder builder)
-        {
-            var provider = builder.Environment.EnvironmentName;
+	public static void AddDatabaseSelector(this WebApplicationBuilder builder)
+	{
+		var provider = builder.Environment.EnvironmentName;
 
-            switch (provider)
-            {
-                case "Development":
-                        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-                    break;
+		switch (provider)
+		{
+			case "Development":
+				builder.Services.AddDbContext<ApplicationDbContext>(options =>
+					options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+				break;
 
-                default:
-                    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+			default:
+				var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(connectionString));
-                    break;
-            }
-        }
-    }
+				builder.Services.AddDbContext<ApplicationDbContext>(options =>
+					options.UseSqlServer(connectionString));
+				break;
+		}
+	}
 }

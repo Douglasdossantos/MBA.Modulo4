@@ -1,48 +1,43 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace MBA.Auth.Api.Controllers
+namespace MBA.Auth.Api.Controllers;
+
+[ApiController]
+public abstract class MainController : Controller
 {
-    [ApiController]
-    public abstract class MainController : Controller
-    {
-        protected ICollection<string>Erros = new List<string>();
-        protected ActionResult CustomResponse(object result = null)
-        {
-            if (OperacaoValida())
-            {
-                return Ok(result);
-            }
+	protected ICollection<string> Erros = new List<string>();
 
-            return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
-            {
-                {"Messagens", Erros.ToArray() }
-            }));
-        }
+	protected ActionResult CustomResponse(object? result = null)
+	{
+		if (OperacaoValida()) return Ok(result);
 
-        protected bool OperacaoValida()
-        {
-            return !Erros.Any();
-        }
+		return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+		{
+			{ "Messagens", Erros.ToArray() }
+		}));
+	}
 
-        protected ActionResult CustomResponse(ModelStateDictionary modelState)
-        {
-            var erros = modelState.Values.SelectMany(E => E.Errors);
-            foreach (var erro in erros)
-            {
-                AdicionarErroProcessamento(erro.ErrorMessage);
-            }
+	protected bool OperacaoValida()
+	{
+		return !Erros.Any();
+	}
 
-            return CustomResponse();
-        }
+	protected ActionResult CustomResponse(ModelStateDictionary modelState)
+	{
+		var erros = modelState.Values.SelectMany(e => e.Errors);
+		foreach (var erro in erros) AdicionarErroProcessamento(erro.ErrorMessage);
 
-        protected void AdicionarErroProcessamento(string erro)
-        {
-            Erros.Add(erro);
-        }
-        protected void LimparErrosprocessamento()
-        {
-            Erros.Clear();
-        }
-    }
+		return CustomResponse();
+	}
+
+	protected void AdicionarErroProcessamento(string erro)
+	{
+		Erros.Add(erro);
+	}
+
+	protected void LimparErrosprocessamento()
+	{
+		Erros.Clear();
+	}
 }
