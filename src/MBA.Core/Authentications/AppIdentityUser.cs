@@ -38,16 +38,29 @@ public class AppIdentityUser : IAppIdentityUser
 		return claim ?? string.Empty;
 	}
 
+	private const string AdministradorRole = "Administrador";
+	private const string AdministradorClaimType = "Administrador";
+	private const string AdministradorClaimValue = "ADM";
+	private const string RoleClaimType = "role";
+
 	public bool EhAdministrador()
 	{
 		if (!EstahAutenticado()) return false;
 
-		var claim = _accessor.HttpContext?.User.FindFirst("nivel")?.Value;
+		var user = _accessor.HttpContext?.User;
+		if (user is null) return false;
 
-		if (string.IsNullOrEmpty(claim))
-			claim = _accessor.HttpContext?.User.FindFirst("nivel")?.Value;
+		if (user.IsInRole(AdministradorRole) ||
+			user.HasClaim(c =>
+				(c.Type == RoleClaimType || c.Type == ClaimTypes.Role) &&
+				string.Equals(c.Value, AdministradorRole, StringComparison.OrdinalIgnoreCase)))
+		{
+			return true;
+		}
 
-		return claim is not null && string.Equals(claim, "Admin", StringComparison.OrdinalIgnoreCase);
+		return user.HasClaim(c =>
+			string.Equals(c.Type, AdministradorClaimType, StringComparison.OrdinalIgnoreCase) &&
+			string.Equals(c.Value, AdministradorClaimValue, StringComparison.OrdinalIgnoreCase));
 	}
 
 	public bool EstahAutenticado()

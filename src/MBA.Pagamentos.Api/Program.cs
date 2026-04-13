@@ -3,7 +3,10 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Pagamentos.Api.Configurations;
 using MBA.Pagamentos.Api.MigrationHelper;
+using MBA.Pagamentos.Api.Services;
 using MBA.Pagamentos.Application.Configurations;
+using MBA.Pagamentos.Application.Services;
+using MBA.WebApi.Core.Extensions;
 
 using SQLitePCL;
 
@@ -26,6 +29,15 @@ var appSettings = configuration.GetSection(nameof(AppSettings)).Get<AppSettings>
 builder.Services.AddMessageBusConfiguration(builder.Configuration);
 
 builder.Services.AddScoped<IAppIdentityUser, AppIdentityUser>();
+builder.Services.AddTransient<AuthorizationForwardingHandler>();
+
+builder.Services.AddHttpClient<IAlunoService, AlunoService>(client =>
+{
+	client.BaseAddress = new Uri(appSettings!.ServicosExternos.AlunoUrl);
+	client.Timeout = TimeSpan.FromSeconds(10);
+})
+.AddHttpMessageHandler<AuthorizationForwardingHandler>()
+.AddPolicyHandler(PollyExtensions.EsperarTentar());
 
 builder.Services.AddHttpContextAccessor()
 	.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(

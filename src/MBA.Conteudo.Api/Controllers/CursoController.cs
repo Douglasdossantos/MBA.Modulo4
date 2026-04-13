@@ -11,6 +11,7 @@ using MBA.WebApi.Core.Identidade;
 
 using MediatR;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using System.Net;
@@ -150,6 +151,28 @@ public class CursoController(
 		{
 			return GenerateResponse(null, ResponseTypeEnum.GenericError, HttpStatusCode.InternalServerError,
 				[ex.Message]);
+		}
+	}
+
+	[AllowAnonymous]
+	[HttpGet("{cursoId:guid}/aulas/total")]
+	public async Task<IActionResult> ObterTotalAulas(Guid cursoId)
+	{
+		try
+		{
+			var total = await cursoAppService.ObterTotalAulasAsync(cursoId);
+			return GenerateResponse(new { CursoId = cursoId, Total = total },
+				ResponseTypeEnum.Success, HttpStatusCode.OK);
+		}
+		catch (DomainException exDomain)
+		{
+			return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError,
+				HttpStatusCode.NotFound, exDomain);
+		}
+		catch (Exception ex)
+		{
+			return GenerateResponse(null, ResponseTypeEnum.GenericError,
+				HttpStatusCode.InternalServerError, [ex.Message]);
 		}
 	}
 }

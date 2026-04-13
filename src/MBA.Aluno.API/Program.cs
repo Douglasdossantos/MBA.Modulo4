@@ -16,7 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerConfiguration();
 
-builder.Services.ResolveDependencies();
+builder.Services.ResolveDependencies(builder.Configuration);
 
 builder.Services.AddMessageBusConfiguration(builder.Configuration);
 

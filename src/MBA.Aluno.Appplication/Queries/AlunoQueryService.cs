@@ -49,4 +49,16 @@ public class AlunoQueryService : IAlunoQuery
 
 		return matriculaDto;
 	}
+
+	public async Task<MatriculaStatusDto?> ObterStatusMatriculaAsync(Guid matriculaId, CancellationToken cancellationToken)
+	{
+		var matricula = await _matriculaRepository.ObterPorIdAsync(matriculaId);
+		if (matricula is null) return null;
+
+		return MatriculaStatusDto.FromMatricula(
+			matricula.Id,
+			matricula.AlunoId,
+			matricula.CursoId,
+			matricula.Status);
+	}
 }

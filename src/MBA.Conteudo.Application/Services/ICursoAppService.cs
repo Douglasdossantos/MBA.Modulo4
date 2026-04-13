@@ -12,4 +12,5 @@ public interface ICursoAppService
 	Task<CursoDto> ObterPorIdAsync(Guid cursoId);
 	Task<IEnumerable<CursoDto>> ObterTodosAsync();
 	Task<IEnumerable<CursoDto>> ObterAtivosAsync();
+	Task<int> ObterTotalAulasAsync(Guid cursoId);
 }

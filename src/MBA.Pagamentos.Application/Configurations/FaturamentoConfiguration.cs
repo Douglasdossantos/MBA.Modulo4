@@ -5,6 +5,8 @@ using MBA.Core.Messages.FaturamentoCommands;
 using MBA.Core.Messages.FaturamentoEvents;
 using MBA.Pagamentos.Application.Commands.RealizarPagamento;
 using MBA.Pagamentos.Application.Events.GerarLinkPagamento;
+using MBA.Pagamentos.Application.Queries.Dtos;
+using MBA.Pagamentos.Application.Queries.ObterPagamento;
 using MBA.Pagamentos.Data.Contexts;
 using MBA.Pagamentos.Data.Repositories;
 using MBA.Pagamentos.Domain.Interfaces;
@@ -46,6 +48,8 @@ public static class FaturamentoConfiguration
 		services.AddScoped<INotificationHandler<GerarLinkPagamentoEvent>, GerarLinkPagamentoEventHandler>();
 
 		services.AddScoped<IRequestHandler<RealizarPagamentoCommand, bool>, RealizarPagamentoCommandHandler>();
+		services.AddScoped<IRequestHandler<ObterPagamentoPorMatriculaQuery, PagamentoStatusDto?>, ObterPagamentoQueryHandler>();
+		services.AddScoped<IRequestHandler<ObterPagamentoPorIdQuery, PagamentoStatusDto?>, ObterPagamentoQueryHandler>();
 
 		return services;
 	}

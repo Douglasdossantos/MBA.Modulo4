@@ -7,6 +7,7 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.AlunoCommands;
 using MBA.WebApi.Core.Controllers;
+using MBA.WebApi.Core.Identidade;
 
 using MediatR;
 
@@ -211,6 +212,32 @@ public class AlunoController( //ICursoAppService cursoAppService,
 
 
 		return GenerateResponse(evolucao);
+	}
+
+	[HttpGet("matricula/{matriculaId:guid}/status")]
+	[ClaimsAuthorize("Administrador", "PG")]
+	[ClaimsAuthorize("Alunos", "PG")]
+	public async Task<IActionResult> ObterStatusMatricula(Guid matriculaId, CancellationToken cancellationToken)
+	{
+		try
+		{
+			var status = await alunoQuery.ObterStatusMatriculaAsync(matriculaId, cancellationToken);
+			if (status is null)
+				return GenerateResponse(null, ResponseTypeEnum.NotFound, HttpStatusCode.NotFound,
+					["Matrícula não encontrada."]);
+
+			return GenerateResponse(status, ResponseTypeEnum.Success, HttpStatusCode.OK);
+		}
+		catch (DomainException exDomain)
+		{
+			return GenerateDomainExceptionResponse(null, ResponseTypeEnum.DomainError,
+				HttpStatusCode.BadRequest, exDomain);
+		}
+		catch (Exception ex)
+		{
+			return GenerateResponse(null, ResponseTypeEnum.GenericError,
+				HttpStatusCode.InternalServerError, [ex.Message]);
+		}
 	}
 
 	[HttpGet("{alunoId}/PorId")]

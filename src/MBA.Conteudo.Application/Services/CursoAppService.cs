@@ -73,6 +73,12 @@ public class CursoAppService(IConteudoRepository cursoRepository) : ICursoAppSer
 		return cursos.Select(MapearParaCursoDto);
 	}
 
+	public async Task<int> ObterTotalAulasAsync(Guid cursoId)
+	{
+		var curso = await cursoRepository.ObterPorIdAsync(cursoId);
+		return curso?.QuantidadeAulas() ?? 0;
+	}
+
 	#region Mapeamento Manual
 
 	private CursoDto MapearParaCursoDto(Curso curso)

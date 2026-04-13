@@ -4,6 +4,12 @@ public sealed class AppSettings
 {
 	public JwtSettings JwtSettings { get; set; } = new();
 	public DatabaseSettings DatabaseSettings { get; set; } = new();
+	public ServicosExternosSettings ServicosExternos { get; set; } = new();
+}
+
+public sealed class ServicosExternosSettings
+{
+	public string AlunoUrl { get; set; } = string.Empty;
 }
 
 public sealed class DatabaseSettings

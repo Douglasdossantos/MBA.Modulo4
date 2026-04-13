@@ -2,5 +2,5 @@ namespace MBA.WebApp.MVC.Models;
 
 public class ResponseErrorMessages
 {
-	public List<string> Messagens { get; set; } = [];
+	public List<string> Mensagens { get; set; } = [];
 }
