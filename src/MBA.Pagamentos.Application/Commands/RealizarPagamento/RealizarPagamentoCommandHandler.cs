@@ -105,13 +105,21 @@ public class RealizarPagamentoCommandHandler(
 
 		await faturamentoRepository.UnitOfWork.Commit();
 
-		// 🔟 Evento de domínio
+		// Evento de domínio (MediatR — in-process)
 		await mediatorHandler.PublicarEventoRaiz(
 			new PagamentoConfirmadoEvent(
 				request.MatriculaCursoId,
 				request.AlunoId,
 				request.CursoId,
 				true));
+
+		// Evento de integração (broker — entre bounded contexts)
+		await bus.PublishAsync(
+			new PagamentoConfirmadoIntegrationEvent(
+				request.MatriculaCursoId,
+				request.AlunoId,
+				request.CursoId),
+			cancellationToken);
 
 		return true;
 	}
