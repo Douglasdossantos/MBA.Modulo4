@@ -1,4 +1,5 @@
-﻿using MBA.Aluno.Domain.Entities;
+using MBA.Aluno.Application.Services;
+using MBA.Aluno.Domain.Entities;
 using MBA.Aluno.Domain.Interface;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
@@ -13,20 +14,19 @@ public class MatricularAlunoCommandHandler : IRequestHandler<MatricularAlunoComm
 {
 	private readonly IMatriculaRepository _matriculaRepository;
 	private readonly IAlunoRepository _alunoRepository;
-
 	private readonly IMediatorHandler _mediatorHandler;
+	private readonly IConteudoService _conteudoService;
 
-	//private readonly ICursoRepository _cursoRepository;
 	private Guid _raizAgregacao;
 
 	public MatricularAlunoCommandHandler(IMatriculaRepository matriculaRepository,
 		IMediatorHandler mediatorHandler,
-		//ICursoRepository cursoRepository,
+		IConteudoService conteudoService,
 		IAlunoRepository alunoRepository)
 	{
 		_matriculaRepository = matriculaRepository;
 		_mediatorHandler = mediatorHandler;
-		//_cursoRepository = cursoRepository;
+		_conteudoService = conteudoService;
 		_alunoRepository = alunoRepository;
 	}
 
@@ -35,8 +35,8 @@ public class MatricularAlunoCommandHandler : IRequestHandler<MatricularAlunoComm
 	{
 		_raizAgregacao = request.RaizAgregacao;
 		if (!ValidarRequisicao(request)) return false;
-		if (!ObterAluno(request.AlunoId)) return false;
-		//if (!ObterCurso(request.CursoId, out Curso curso)) { return false; }
+		if (!await ObterAlunoAsync(request.AlunoId, cancellationToken)) return false;
+		if (!await ValidarCursoAtivoAsync(request.CursoId, cancellationToken)) return false;
 		if (!await ValidarAlunoJaMatriculado(request.AlunoId, request.CursoId)) return false;
 
 		var matricula = new Matricula(request.CursoId, request.AlunoId, DateTime.Now,
@@ -62,23 +62,58 @@ public class MatricularAlunoCommandHandler : IRequestHandler<MatricularAlunoComm
 	}
 
 
-	private bool ObterAluno(Guid alunoId)
+	private async Task<bool> ObterAlunoAsync(Guid alunoId, CancellationToken cancellationToken)
 	{
-		var aluno = _alunoRepository.ObterPorIdAsync(alunoId).Result;
+		var aluno = await _alunoRepository.ObterPorIdAsync(alunoId);
 		if (aluno is null)
 		{
-			_mediatorHandler.PublicarNotificacaoDominio(
+			await _mediatorHandler.PublicarNotificacaoDominio(
 				new DomainNotificacaoRaiz(_raizAgregacao, nameof(Aluno), "Aluno não encontrado.")
-			).GetAwaiter().GetResult();
+			);
 			return false;
 		}
 
 		if (!aluno.Ativo)
 		{
-			_mediatorHandler.PublicarNotificacaoDominio(
+			await _mediatorHandler.PublicarNotificacaoDominio(
 				new DomainNotificacaoRaiz(_raizAgregacao, nameof(Aluno), "Aluno inativo não pode ser matriculado.")
-			).GetAwaiter().GetResult();
-			return false; // <- interrompe fluxo
+			);
+			return false;
+		}
+
+		return true;
+	}
+
+	private async Task<bool> ValidarCursoAtivoAsync(Guid cursoId, CancellationToken cancellationToken)
+	{
+		CursoDto? curso;
+		try
+		{
+			curso = await _conteudoService.ObterCursoAsync(cursoId, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			await _mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(_raizAgregacao, "Curso",
+					$"Não foi possível validar o curso na Conteúdo API: {ex.Message}")
+			);
+			return false;
+		}
+
+		if (curso is null)
+		{
+			await _mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(_raizAgregacao, "Curso", "Curso não encontrado.")
+			);
+			return false;
+		}
+
+		if (!curso.EstaDisponivel)
+		{
+			await _mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(_raizAgregacao, "Curso", "Curso inativo ou indisponível.")
+			);
+			return false;
 		}
 
 		return true;
@@ -96,28 +131,4 @@ public class MatricularAlunoCommandHandler : IRequestHandler<MatricularAlunoComm
 
 		return true;
 	}
-
-	/*private bool ObterCurso(Guid cursoId, out Curso curso)
-	{
-		curso = _cursoRepository.ObterPorIdAsync(cursoId).Result;
-		if (curso == null)
-		{
-			_mediatorHandler.PublicarNotificacaoDominio(
-				new DomainNotificacaoRaiz(_raizAgregacao, nameof(Curso), "Curso não encontrado.")
-			).GetAwaiter().GetResult();
-			return false;
-		}
-
-		if (!curso.Ativo)
-		{
-			_mediatorHandler.PublicarNotificacaoDominio(
-				new DomainNotificacaoRaiz(_raizAgregacao, nameof(Curso), "Não pode matricular alunos em cursos inativos.")
-			).GetAwaiter().GetResult();
-			return false;
-		}
-
-		return true;
-	}
-
-	*/
 }
