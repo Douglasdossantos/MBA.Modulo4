@@ -6,8 +6,11 @@ using MBA.Core.Messages;
 using MBA.Core.Messages.FaturamentoCommands;
 using MBA.Core.Messages.FaturamentoEvents;
 using MBA.Core.SharedDto;
+using MBA.Core.SharedDto.Aluno;
+using MBA.Core.SharedDto.Aluno.Enum;
 using MBA.MessageBus;
 using MBA.Pagamentos.Application.Commands.RealizarPagamento;
+using MBA.Pagamentos.Application.Services;
 using MBA.Pagamentos.Domain.Entities;
 using MBA.Pagamentos.Domain.Interfaces;
 using MBA.Pagamentos.Domain.ValueObjects;
@@ -32,10 +35,23 @@ public class RealizarPagamentoCommandHandlerTests
 		unitOfWorkMock.Setup(u => u.Commit()).ReturnsAsync(true);
 		_faturamentoRepositoryMock.Setup(r => r.UnitOfWork).Returns(unitOfWorkMock.Object);
 
+		var alunoServiceMock = new Mock<IAlunoService>();
+		alunoServiceMock
+			.Setup(s => s.ObterStatusMatriculaAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync((Guid matriculaId, CancellationToken _) => new MatriculaStatusDto
+			{
+				Id = matriculaId,
+				AlunoId = Guid.NewGuid(),
+				CursoId = Guid.NewGuid(),
+				Status = StatusMatricula.PendentePagamento.ToString(),
+				PodeSerPaga = true
+			});
+
 		_handler = new RealizarPagamentoCommandHandler(
 			_faturamentoRepositoryMock.Object,
 			messageBusMock.Object,
-			_mediatorHandlerMock.Object
+			_mediatorHandlerMock.Object,
+			alunoServiceMock.Object
 		);
 	}
 

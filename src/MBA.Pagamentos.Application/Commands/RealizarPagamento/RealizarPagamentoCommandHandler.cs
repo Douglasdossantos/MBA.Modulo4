@@ -6,6 +6,7 @@ using MBA.Core.Messages.FaturamentoEvents;
 using MBA.Core.Messages.Integration;
 using MBA.Core.SharedDto.Aluno.Enum;
 using MBA.MessageBus;
+using MBA.Pagamentos.Application.Services;
 using MBA.Pagamentos.Domain.Entities;
 using MBA.Pagamentos.Domain.Interfaces;
 using MBA.Pagamentos.Domain.ValueObjects;
@@ -18,7 +19,8 @@ namespace MBA.Pagamentos.Application.Commands.RealizarPagamento;
 public class RealizarPagamentoCommandHandler(
 	IFaturamentoRepository faturamentoRepository,
 	IMessageBus bus,
-	IMediatorHandler mediatorHandler) : IRequestHandler<RealizarPagamentoCommand, bool>
+	IMediatorHandler mediatorHandler,
+	IAlunoService alunoService) : IRequestHandler<RealizarPagamentoCommand, bool>
 {
 	private Guid _raizAgregacao;
 
@@ -40,6 +42,39 @@ public class RealizarPagamentoCommandHandler(
 					_raizAgregacao,
 					nameof(Pagamento),
 					"Matrícula inválida para realização de pagamento."));
+			return false;
+		}
+
+		// 2.1️⃣ Cliente declarou que o pagamento NÃO pode ser realizado → rejeita cedo
+		if (!request.PagamentoPodeSerRealizado)
+		{
+			await mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(
+					_raizAgregacao,
+					nameof(Pagamento),
+					"O pagamento não pode ser realizado para esta matrícula."));
+			return false;
+		}
+
+		// 2.2️⃣ Valida na Aluno API se a matrícula realmente está em PendentePagamento
+		var statusMatricula = await alunoService.ObterStatusMatriculaAsync(request.MatriculaCursoId, cancellationToken);
+		if (statusMatricula is null)
+		{
+			await mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(
+					_raizAgregacao,
+					nameof(Pagamento),
+					"Matrícula não encontrada."));
+			return false;
+		}
+
+		if (!statusMatricula.PodeSerPaga)
+		{
+			await mediatorHandler.PublicarNotificacaoDominio(
+				new DomainNotificacaoRaiz(
+					_raizAgregacao,
+					nameof(Pagamento),
+					$"Matrícula em status {statusMatricula.Status}; não pode receber pagamento."));
 			return false;
 		}
 
