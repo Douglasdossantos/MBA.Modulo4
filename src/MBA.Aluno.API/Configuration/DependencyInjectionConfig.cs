@@ -1,4 +1,5 @@
-﻿using MBA.Aluno.Application.Interfaces;
+﻿using MBA.Aluno.Application.Commands.RegistrarAulaAssistida;
+using MBA.Aluno.Application.Interfaces;
 using MBA.Aluno.Application.Queries;
 using MBA.Aluno.Application.Services;
 using MBA.Aluno.Data.Repositories;
@@ -7,6 +8,7 @@ using MBA.Core.Authentications;
 using MBA.Core.DomainHadlers;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
+using MBA.Core.Messages.AlunoCommands;
 
 using MediatR;
 
@@ -31,5 +33,9 @@ public static class DependencyInjectionConfig
 		// Matricula
 		services.AddScoped<IMatriculaRepository, MatriculaRepository>();
 		services.AddScoped<IAlunoQuery, AlunoQueryService>();
+
+		// Aula assistida
+		services.AddScoped<IAulaAssistidaRepository, AulaAssistidaRepository>();
+		services.AddScoped<IRequestHandler<RegistrarAulaAssistidaCommand, bool>, RegistrarAulaAssistidaCommandHandler>();
 	}
 }
