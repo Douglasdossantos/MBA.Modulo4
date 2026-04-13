@@ -8,9 +8,9 @@ public class MainController : Controller
 {
 	protected bool ResponsePossuiErros(ResponseResult? resposta)
 	{
-		if (resposta?.Errors.Messagens != null && resposta.Errors.Messagens.Any())
+		if (resposta?.Errors.Mensagens != null && resposta.Errors.Mensagens.Any())
 		{
-			foreach (var mensage in resposta.Errors.Messagens) ModelState.AddModelError(string.Empty, mensage);
+			foreach (var mensagem in resposta.Errors.Mensagens) ModelState.AddModelError(string.Empty, mensagem);
 			return true;
 		}
 
