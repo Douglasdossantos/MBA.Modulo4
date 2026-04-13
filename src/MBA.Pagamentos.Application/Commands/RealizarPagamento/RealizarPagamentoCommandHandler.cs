@@ -112,6 +112,14 @@ public class RealizarPagamentoCommandHandler(IFaturamentoRepository faturamentoR
                 request.CursoId,
                 true));
 
+        // 1️⃣1️⃣ Evento de integração (broker)
+        await _bus.PublishAsync(
+            new PagamentoConfirmadoIntegrationEvent(
+                request.MatriculaCursoId,
+                request.AlunoId,
+                request.CursoId),
+            cancellationToken);
+
         return true;
     }
 
