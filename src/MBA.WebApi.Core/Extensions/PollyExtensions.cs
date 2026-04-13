@@ -1,4 +1,5 @@
-﻿using Polly;
+using Polly;
+using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
 using Polly.Retry;
 
@@ -18,5 +19,14 @@ public static class PollyExtensions
 			]);
 
 		return retry;
+	}
+
+	public static AsyncCircuitBreakerPolicy<HttpResponseMessage> CircuitBreaker()
+	{
+		return HttpPolicyExtensions
+			.HandleTransientHttpError()
+			.CircuitBreakerAsync(
+				handledEventsAllowedBeforeBreaking: 5,
+				durationOfBreak: TimeSpan.FromSeconds(30));
 	}
 }
