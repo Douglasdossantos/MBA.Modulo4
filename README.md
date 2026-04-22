@@ -1,5 +1,16 @@
 # Plataforma Educacional Distribuída — MBA FullStack Módulo 4
 
+## Grupo de Alunos:
+
+JoseRicardo @JoseRicardo 
+Leonardo_Silva - @Leonardo_Silva 
+DouglasCosta - @DouglasCosta 
+Geraldo -  @Geraldo 
+Silvio - @Silvio 
+Diego Lobo - @Diego Lobo
+Alberto - @Alberto
+
+
 ## 1. Visão Geral
 
 Este repositório contém a entrega do **Módulo 4 do MBA DevXpert Full Stack .NET**, que propõe a evolução de uma aplicação monolítica para uma **plataforma educacional distribuída** baseada em microsserviços, bounded contexts bem definidos, comunicação síncrona via HTTP e assíncrona via broker.
