@@ -2,13 +2,13 @@
 
 ## Grupo de Alunos:
 
-JoseRicardo @JoseRicardo 
-Leonardo_Silva - @Leonardo_Silva 
-DouglasCosta - @DouglasCosta 
-Geraldo -  @Geraldo 
-Silvio - @Silvio 
-Diego Lobo - @Diego Lobo
-Alberto - @Alberto
+- JoseRicardo @JoseRicardo 
+- Leonardo_Silva - @Leonardo_Silva 
+- DouglasCosta - @DouglasCosta 
+- Geraldo -  @Geraldo 
+- Silvio - @Silvio 
+- Diego Lobo - @Diego Lobo 
+- Alberto - @Alberto
 
 
 ## 1. Visão Geral
