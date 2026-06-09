@@ -10,8 +10,13 @@ public class DomainException : Exception
 	}
 
 	public DomainException(IEnumerable<string> mensagens)
+		: this(mensagens?.ToList() ?? [])
 	{
-		var list = mensagens.ToList();
-		Errors = list.AsReadOnly();
+	}
+
+	private DomainException(List<string> mensagens)
+		: base(string.Join(Environment.NewLine, mensagens))
+	{
+		Errors = mensagens.AsReadOnly();
 	}
 }
