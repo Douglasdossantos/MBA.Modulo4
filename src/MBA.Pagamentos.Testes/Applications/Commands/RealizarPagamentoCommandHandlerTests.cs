@@ -5,6 +5,7 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.FaturamentoCommands;
 using MBA.Core.Messages.FaturamentoEvents;
+using MBA.Core.Messages.Integration;
 using MBA.Core.SharedDto;
 using MBA.Core.SharedDto.Aluno;
 using MBA.Core.SharedDto.Aluno.Enum;
@@ -14,6 +15,8 @@ using MBA.Pagamentos.Application.Services;
 using MBA.Pagamentos.Domain.Entities;
 using MBA.Pagamentos.Domain.Interfaces;
 using MBA.Pagamentos.Domain.ValueObjects;
+
+using FluentValidation.Results;
 
 using Moq;
 
@@ -29,6 +32,12 @@ public class RealizarPagamentoCommandHandlerTests
 	{
 		_faturamentoRepositoryMock = new Mock<IFaturamentoRepository>();
 		var messageBusMock = new Mock<IMessageBus>();
+		messageBusMock
+			.Setup(b => b.RequestAsync<AlterarStatusMatriculaIntegrationEvent, ResponseMessage>(
+				It.IsAny<AlterarStatusMatriculaIntegrationEvent>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync(new ResponseMessage(new ValidationResult()));
+
 		_mediatorHandlerMock = new Mock<IMediatorHandler>();
 
 		var unitOfWorkMock = new Mock<IUnitOfWork>();

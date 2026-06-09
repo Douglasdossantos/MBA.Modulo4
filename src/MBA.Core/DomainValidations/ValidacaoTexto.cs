@@ -31,9 +31,7 @@ public static class ValidacaoTexto
 	public static void DeveAtenderRegex<T>(string valor, string expressaoRegular, string mensagem,
 		ResultadoValidacao<T> resultado) where T : class
 	{
-		var regex = new Regex(expressaoRegular);
-		var match = regex.Match(valor);
-		if (!match.Success)
+		if (valor is null || !Regex.IsMatch(valor, expressaoRegular))
 			resultado.AdicionarErro(mensagem);
 	}
 }
