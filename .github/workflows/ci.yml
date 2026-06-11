@@ -1,0 +1,33 @@
+# CI — build + testes em cada push/PR na master (Módulo 5 DevXpert).
+# Roda no runner Linux (ubuntu-latest): é justamente o ambiente onde o alinhamento de pacotes do T-01
+# importou — pacotes .NET 10 em projetos net8.0 quebrariam aqui.
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-test:
+    name: Build & Test (.NET 8)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore MBA.Modulo4.sln
+
+      - name: Build (Release)
+        run: dotnet build MBA.Modulo4.sln --configuration Release --no-restore
+
+      - name: Test (Release)
+        run: dotnet test MBA.Modulo4.sln --configuration Release --no-build --verbosity normal
