@@ -6,6 +6,7 @@ using MBA.Pagamentos.Api.MigrationHelper;
 using MBA.Pagamentos.Api.Services;
 using MBA.Pagamentos.Application.Configurations;
 using MBA.Pagamentos.Application.Services;
+using MBA.Pagamentos.Data.Contexts;
 using MBA.WebApi.Core.Extensions;
 
 using SQLitePCL;
@@ -49,6 +50,9 @@ builder.Services.AddHttpContextAccessor()
 	.ConfigurarFaturamentoApplication(appSettings.DatabaseSettings.ConnectionStringFaturamento,
 		builder.Environment.IsProduction());
 
+builder.Services.AddDefaultHealthChecks()
+	.AddDbContextCheck<FaturamentoDbContext>("pagamentos-db", tags: [HealthCheckExtensions.ReadyTag]);
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -64,4 +68,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapDefaultHealthChecks();
 app.Run();
