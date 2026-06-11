@@ -1,4 +1,6 @@
 using MBA.Aluno.API.Configuration;
+using MBA.Aluno.Data.Context;
+using MBA.WebApi.Core.Extensions;
 
 using SQLitePCL;
 
@@ -31,10 +33,15 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
 	typeof(MBA.Aluno.Application.Services.AlunoAppService).Assembly
 ));
 
+builder.Services.AddDefaultHealthChecks()
+	.AddDbContextCheck<AlunoDbContext>("aluno-db", tags: [HealthCheckExtensions.ReadyTag]);
+
 var app = builder.Build();
 
 app.UseSwaggerConfiguration();
 
 app.UseApiConfiguration(app.Environment);
+
+app.MapDefaultHealthChecks();
 
 app.Run();
