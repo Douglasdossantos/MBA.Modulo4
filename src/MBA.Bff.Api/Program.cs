@@ -1,4 +1,5 @@
 using MBA.Bff.Api.Configuration;
+using MBA.WebApi.Core.Extensions;
 using MBA.WebApi.Core.Identidade;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,9 @@ builder.Services.RegisterServices(builder.Configuration);
 
 builder.Services.AddMessageBusConfiguration(builder.Configuration);
 
+// BFF é orquestrador (sem DbContext) — só liveness; readiness sem dependência própria.
+builder.Services.AddDefaultHealthChecks();
+
 
 var app = builder.Build();
 
@@ -23,5 +27,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseApiConfiguration(app.Environment);
+
+app.MapDefaultHealthChecks();
 
 app.Run();
