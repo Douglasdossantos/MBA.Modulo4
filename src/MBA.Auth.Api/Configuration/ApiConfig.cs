@@ -1,4 +1,6 @@
-﻿using MBA.Auth.Api.MigrationHelp;
+﻿using MBA.Auth.Api.Data;
+using MBA.Auth.Api.MigrationHelp;
+using MBA.WebApi.Core.Extensions;
 using MBA.WebApi.Core.Identidade;
 
 namespace MBA.Auth.Api.Configuration;
@@ -9,6 +11,10 @@ public static class ApiConfig
 	{
 		services.AddControllers();
 		services.AddEndpointsApiExplorer();
+
+		services.AddDefaultHealthChecks()
+			.AddDbContextCheck<ApplicationDbContext>("auth-db", tags: [HealthCheckExtensions.ReadyTag]);
+
 		return services;
 	}
 
@@ -27,6 +33,7 @@ public static class ApiConfig
 		app.UseAuthConfiguration();
 
 		app.MapControllers();
+		app.MapDefaultHealthChecks();
 
 		return app;
 	}
