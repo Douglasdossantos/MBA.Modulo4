@@ -1,0 +1,14 @@
+# Cluster Kind local (1 nó). O extraPortMapping expõe o NodePort do front (MVC) no host:8080
+# para acesso pelo navegador. Os NodePorts dos serviços entram nos manifests de cada um (T-16+).
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: mba
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080   # NodePort do webapp-mvc (definido no Service do MVC)
+        hostPort: 8080
+        protocol: TCP
+      - containerPort: 30093   # NodePort do bff-api (Swagger/API)
+        hostPort: 8093
+        protocol: TCP
