@@ -7,21 +7,22 @@ public static class DataBaseSelectorExtension
 {
 	public static void AddDatabaseSelector(this WebApplicationBuilder builder)
 	{
-		var provider = builder.Environment.EnvironmentName;
+		var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-		switch (provider)
+		// T-14: provider explícito via env var (DATABASE_PROVIDER=SqlServer|Sqlite) vence; sem ela,
+		// mantém o fallback por ambiente (não-Development => SQL Server).
+		var useSqlServer = System.Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
 		{
-			case "Development":
-				builder.Services.AddDbContext<ApplicationDbContext>(options =>
-					options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-				break;
+			"SqlServer" => true,
+			"Sqlite" => false,
+			_ => builder.Environment.EnvironmentName != "Development"
+		};
 
-			default:
-				var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-				builder.Services.AddDbContext<ApplicationDbContext>(options =>
-					options.UseSqlServer(connectionString));
-				break;
-		}
+		if (useSqlServer)
+			builder.Services.AddDbContext<ApplicationDbContext>(options =>
+				options.UseSqlServer(connectionString));
+		else
+			builder.Services.AddDbContext<ApplicationDbContext>(options =>
+				options.UseSqlite(connectionString));
 	}
 }
