@@ -30,24 +30,31 @@ public static class DataBaseSelectorExtension
 			conteudoDbName ?? string.Empty);
 		var conteudoSqliteConnection = $"Data Source={conteudoDbPath}";
 
-		switch (provider)
+		// T-14: provider explícito via env var (DATABASE_PROVIDER=SqlServer|Sqlite) vence; sem ela,
+		// mantém o fallback por ambiente (não-Development => SQL Server).
+		var useSqlServer = System.Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
 		{
-			case "Development":
-				builder.Services.AddDbContext<AlunoDbContext>(options =>
-					options.UseSqlite(sqliteConnection));
-				builder.Services.AddDbContext<ConteudoContext>(options =>
-					options.UseSqlite(conteudoSqliteConnection));
-				break;
+			"SqlServer" => true,
+			"Sqlite" => false,
+			_ => provider != "Development"
+		};
 
-			default:
-				var connectionString = builder.Configuration.GetConnectionString("ConnectionStringAluno");
-				var conteudoConnectionString = builder.Configuration.GetConnectionString("ConnectionStringConteudo");
+		if (useSqlServer)
+		{
+			var connectionString = builder.Configuration.GetConnectionString("ConnectionStringAluno");
+			var conteudoConnectionString = builder.Configuration.GetConnectionString("ConnectionStringConteudo");
 
-				builder.Services.AddDbContext<AlunoDbContext>(options =>
-					options.UseSqlServer(connectionString));
-				builder.Services.AddDbContext<ConteudoContext>(options =>
-					options.UseSqlServer(conteudoConnectionString));
-				break;
+			builder.Services.AddDbContext<AlunoDbContext>(options =>
+				options.UseSqlServer(connectionString));
+			builder.Services.AddDbContext<ConteudoContext>(options =>
+				options.UseSqlServer(conteudoConnectionString));
+		}
+		else
+		{
+			builder.Services.AddDbContext<AlunoDbContext>(options =>
+				options.UseSqlite(sqliteConnection));
+			builder.Services.AddDbContext<ConteudoContext>(options =>
+				options.UseSqlite(conteudoSqliteConnection));
 		}
 
 		builder.Services.AddScoped<IConteudoRepository, ConteudoRepository>();

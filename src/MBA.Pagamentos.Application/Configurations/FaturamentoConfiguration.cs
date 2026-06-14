@@ -57,9 +57,18 @@ public static class FaturamentoConfiguration
 	private static IServiceCollection ConfigurarRepositorios(this IServiceCollection services, string stringConexao,
 		bool ehProducao)
 	{
+		// T-14: provider explícito via env var (DATABASE_PROVIDER=SqlServer|Sqlite) vence; sem ela,
+		// mantém o fallback atual (Production => SQL Server).
+		var useSqlServer = System.Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
+		{
+			"SqlServer" => true,
+			"Sqlite" => false,
+			_ => ehProducao
+		};
+
 		services.AddDbContext<FaturamentoDbContext>(o =>
 		{
-			if (ehProducao)
+			if (useSqlServer)
 			{
 				o.UseSqlServer(stringConexao);
 			}
