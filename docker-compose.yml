@@ -7,6 +7,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: mba-rabbitmq
+    restart: unless-stopped
     ports:
       - "${RABBITMQ_PORT:-5672}:5672"
       - "${RABBITMQ_MGMT_PORT:-15672}:15672"
@@ -26,6 +27,8 @@ services:
 
   # =========================================================
   # APIs
+  # Cada serviço expõe /health/live (liveness). O healthcheck do compose usa curl (instalado na imagem
+  # de runtime). depends_on: service_healthy => quem depende só sobe quando a dependência está saudável.
   # =========================================================
 
   auth-api:
@@ -35,6 +38,7 @@ services:
       args:
         PROJECT_NAME: MBA.Auth.Api
     container_name: mba-auth-api
+    restart: unless-stopped
     command: ["MBA.Auth.Api.dll"]
     ports:
       - "${AUTH_API_PORT:-5020}:8080"
@@ -52,6 +56,12 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     networks:
       - mba-network
 
@@ -62,6 +72,7 @@ services:
       args:
         PROJECT_NAME: MBA.Conteudo.Api
     container_name: mba-conteudo-api
+    restart: unless-stopped
     command: ["MBA.Conteudo.Api.dll"]
     ports:
       - "${CONTEUDO_API_PORT:-5137}:8080"
@@ -78,6 +89,12 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     networks:
       - mba-network
 
@@ -88,6 +105,7 @@ services:
       args:
         PROJECT_NAME: MBA.Aluno.API
     container_name: mba-aluno-api
+    restart: unless-stopped
     command: ["MBA.Aluno.API.dll"]
     ports:
       - "${ALUNO_API_PORT:-5236}:8080"
@@ -107,6 +125,12 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     networks:
       - mba-network
 
@@ -117,6 +141,7 @@ services:
       args:
         PROJECT_NAME: MBA.Pagamentos.Api
     container_name: mba-pagamentos-api
+    restart: unless-stopped
     command: ["MBA.Pagamentos.Api.dll"]
     ports:
       - "${PAGAMENTOS_API_PORT:-5190}:8080"
@@ -134,6 +159,12 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     networks:
       - mba-network
 
@@ -144,6 +175,7 @@ services:
       args:
         PROJECT_NAME: MBA.Bff.Api
     container_name: mba-bff-api
+    restart: unless-stopped
     command: ["MBA.Bff.Api.dll"]
     ports:
       - "${BFF_API_PORT:-5293}:8080"
@@ -164,13 +196,19 @@ services:
       rabbitmq:
         condition: service_healthy
       auth-api:
-        condition: service_started
+        condition: service_healthy
       conteudo-api:
-        condition: service_started
+        condition: service_healthy
       aluno-api:
-        condition: service_started
+        condition: service_healthy
       pagamentos-api:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     networks:
       - mba-network
 
@@ -181,6 +219,7 @@ services:
       args:
         PROJECT_NAME: MBA.WebApp.MVC
     container_name: mba-webapp-mvc
+    restart: unless-stopped
     command: ["MBA.WebApp.MVC.dll"]
     ports:
       - "${WEBAPP_MVC_PORT:-5132}:8080"
@@ -194,9 +233,15 @@ services:
       AppSettings__BFF: "http://bff-api:8080"
     depends_on:
       bff-api:
-        condition: service_started
+        condition: service_healthy
       auth-api:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     networks:
       - mba-network
 

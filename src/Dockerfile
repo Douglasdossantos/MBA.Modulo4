@@ -8,8 +8,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 
-# Create data directory for SQLite databases
-RUN mkdir -p /app/data
+# curl: usado pelo healthcheck do docker-compose (a imagem aspnet não traz). + pasta de dados do SQLite.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /app/data
 
 # --- Build stage ---
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
