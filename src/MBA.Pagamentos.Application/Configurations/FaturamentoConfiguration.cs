@@ -10,13 +10,10 @@ using MBA.Pagamentos.Application.Queries.ObterPagamento;
 using MBA.Pagamentos.Data.Contexts;
 using MBA.Pagamentos.Data.Repositories;
 using MBA.Pagamentos.Domain.Interfaces;
-
 using MediatR;
-
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -48,8 +45,11 @@ public static class FaturamentoConfiguration
 		services.AddScoped<INotificationHandler<GerarLinkPagamentoEvent>, GerarLinkPagamentoEventHandler>();
 
 		services.AddScoped<IRequestHandler<RealizarPagamentoCommand, bool>, RealizarPagamentoCommandHandler>();
-		services.AddScoped<IRequestHandler<ObterPagamentoPorMatriculaQuery, PagamentoStatusDto?>, ObterPagamentoQueryHandler>();
-		services.AddScoped<IRequestHandler<ObterPagamentoPorIdQuery, PagamentoStatusDto?>, ObterPagamentoQueryHandler>();
+		services
+			.AddScoped<IRequestHandler<ObterPagamentoPorMatriculaQuery, PagamentoStatusDto?>,
+				ObterPagamentoQueryHandler>();
+		services
+			.AddScoped<IRequestHandler<ObterPagamentoPorIdQuery, PagamentoStatusDto?>, ObterPagamentoQueryHandler>();
 
 		return services;
 	}
@@ -59,7 +59,7 @@ public static class FaturamentoConfiguration
 	{
 		// T-14: provider explícito via env var (DATABASE_PROVIDER=SqlServer|Sqlite) vence; sem ela,
 		// mantém o fallback atual (Production => SQL Server).
-		var useSqlServer = System.Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
+		var useSqlServer = Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
 		{
 			"SqlServer" => true,
 			"Sqlite" => false,

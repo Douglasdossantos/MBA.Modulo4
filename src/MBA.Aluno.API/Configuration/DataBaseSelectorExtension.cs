@@ -32,7 +32,7 @@ public static class DataBaseSelectorExtension
 
 		// T-14: provider explícito via env var (DATABASE_PROVIDER=SqlServer|Sqlite) vence; sem ela,
 		// mantém o fallback por ambiente (não-Development => SQL Server).
-		var useSqlServer = System.Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
+		var useSqlServer = Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
 		{
 			"SqlServer" => true,
 			"Sqlite" => false,

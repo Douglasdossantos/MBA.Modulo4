@@ -33,7 +33,7 @@ COPY MBA.Conteudo.Api/MBA.Conteudo.Api.csproj MBA.Conteudo.Api/
 
 COPY MBA.Aluno.Domain/MBA.Aluno.Domain.csproj MBA.Aluno.Domain/
 COPY MBA.Aluno.Data/MBA.Aluno.Data.csproj MBA.Aluno.Data/
-COPY MBA.Aluno.Appplication/MBA.Aluno.Application.csproj MBA.Aluno.Appplication/
+COPY MBA.Aluno.Application/MBA.Aluno.Application.csproj MBA.Aluno.Application/
 COPY MBA.Aluno.API/MBA.Aluno.API.csproj MBA.Aluno.API/
 
 COPY MBA.Pagamentos.Domain/MBA.Pagamentos.Domain.csproj MBA.Pagamentos.Domain/

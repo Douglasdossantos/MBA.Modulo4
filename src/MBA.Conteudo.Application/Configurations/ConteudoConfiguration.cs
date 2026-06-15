@@ -49,7 +49,7 @@ public static class ConteudoConfiguration
 	{
 		// T-14: provider explícito via env var (DATABASE_PROVIDER=SqlServer|Sqlite) vence; sem ela,
 		// mantém o fallback atual (Production => SQL Server).
-		var useSqlServer = System.Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
+		var useSqlServer = Environment.GetEnvironmentVariable("DATABASE_PROVIDER") switch
 		{
 			"SqlServer" => true,
 			"Sqlite" => false,

@@ -12,7 +12,7 @@ namespace MBA.Conteudo.Data.Migrations
 {
     [DbContext(typeof(ConteudoContext))]
     [Migration("20260324032411_foi")]
-    partial class foi
+    partial class Foi
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

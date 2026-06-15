@@ -28,7 +28,7 @@ public static class ValidacaoTexto
 			resultado.AdicionarErro(mensagem);
 	}
 
-	public static void DeveAtenderRegex<T>(string valor, string expressaoRegular, string mensagem,
+	public static void DeveAtenderRegex<T>(string? valor, string expressaoRegular, string mensagem,
 		ResultadoValidacao<T> resultado) where T : class
 	{
 		if (valor is null || !Regex.IsMatch(valor, expressaoRegular))

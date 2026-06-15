@@ -49,7 +49,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.Pagamentos.Data", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.Pagamentos.Application", "src\MBA.Pagamentos.Application\MBA.Pagamentos.Application.csproj", "{4B8AFB91-5ECA-4838-983D-2701F10B50F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.Aluno.Application", "src\MBA.Aluno.Appplication\MBA.Aluno.Application.csproj", "{BEE624DE-0D96-4A4F-9950-1988F3575565}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.Aluno.Application", "src\MBA.Aluno.Application\MBA.Aluno.Application.csproj", "{BEE624DE-0D96-4A4F-9950-1988F3575565}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MBA.Aluno.Domain", "src\MBA.Aluno.Domain\MBA.Aluno.Domain.csproj", "{46E7EEC8-6222-4271-86D7-327C02C2FB40}"
 EndProject
