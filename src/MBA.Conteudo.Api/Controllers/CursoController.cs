@@ -8,12 +8,9 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.WebApi.Core.Controllers;
 using MBA.WebApi.Core.Identidade;
-
 using MediatR;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using System.Net;
 
 namespace MBA.Conteudo.Api.Controllers;
@@ -161,8 +158,7 @@ public class CursoController(
 		try
 		{
 			var total = await cursoAppService.ObterTotalAulasAsync(cursoId);
-			return GenerateResponse(new { CursoId = cursoId, Total = total },
-				ResponseTypeEnum.Success, HttpStatusCode.OK);
+			return GenerateResponse(new { CursoId = cursoId, Total = total });
 		}
 		catch (DomainException exDomain)
 		{

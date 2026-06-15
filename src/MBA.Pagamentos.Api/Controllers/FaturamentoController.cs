@@ -10,11 +10,8 @@ using MBA.Pagamentos.Application.Queries.Dtos;
 using MBA.Pagamentos.Application.Queries.ObterPagamento;
 using MBA.WebApi.Core.Controllers;
 using MBA.WebApi.Core.Identidade;
-
 using MediatR;
-
 using Microsoft.AspNetCore.Mvc;
-
 using System.Net;
 
 namespace MBA.Pagamentos.Api.Controllers;
@@ -106,12 +103,10 @@ public class FaturamentoController(
 		var pagamento = await _mediator.Send(new ObterPagamentoPorMatriculaQuery(matriculaId), cancellationToken);
 
 		if (pagamento is null)
-		{
 			return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.NotFound,
 				["Pagamento não encontrado para a matrícula informada."]);
-		}
 
-		return GenerateResponse(pagamento, ResponseTypeEnum.Success, HttpStatusCode.OK);
+		return GenerateResponse(pagamento);
 	}
 
 	[ClaimsAuthorize("Administrador", "PG")]
@@ -124,11 +119,9 @@ public class FaturamentoController(
 		var pagamento = await _mediator.Send(new ObterPagamentoPorIdQuery(id), cancellationToken);
 
 		if (pagamento is null)
-		{
 			return GenerateResponse(null, ResponseTypeEnum.ValidationError, HttpStatusCode.NotFound,
 				["Pagamento não encontrado."]);
-		}
 
-		return GenerateResponse(pagamento, ResponseTypeEnum.Success, HttpStatusCode.OK);
+		return GenerateResponse(pagamento);
 	}
 }

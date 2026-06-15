@@ -5,7 +5,6 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.Core.Messages.AlunoCommands;
 using MBA.Core.SharedDto.Aluno.Enum;
-
 using MediatR;
 
 namespace MBA.Aluno.Application.Commands.Matricular;
@@ -64,9 +63,11 @@ public class MatricularAlunoCommandHandler : IRequestHandler<MatricularAlunoComm
 
 	private async Task<bool> ObterAlunoAsync(Guid alunoId, CancellationToken cancellationToken)
 	{
+		cancellationToken.ThrowIfCancellationRequested();
 		var aluno = await _alunoRepository.ObterPorIdAsync(alunoId);
 		if (aluno is null)
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			await _mediatorHandler.PublicarNotificacaoDominio(
 				new DomainNotificacaoRaiz(_raizAgregacao, nameof(Aluno), "Aluno não encontrado.")
 			);
@@ -75,6 +76,7 @@ public class MatricularAlunoCommandHandler : IRequestHandler<MatricularAlunoComm
 
 		if (!aluno.Ativo)
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			await _mediatorHandler.PublicarNotificacaoDominio(
 				new DomainNotificacaoRaiz(_raizAgregacao, nameof(Aluno), "Aluno inativo não pode ser matriculado.")
 			);

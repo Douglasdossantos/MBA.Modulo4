@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MBA.Aluno.Appplication\MBA.Aluno.Application.csproj" />
+    <ProjectReference Include="..\MBA.Aluno.Application\MBA.Aluno.Application.csproj" />
     <ProjectReference Include="..\MBA.Aluno.Data\MBA.Aluno.Data.csproj" />
     <ProjectReference Include="..\MBA.Aluno.Domain\MBA.Aluno.Domain.csproj" />
     <ProjectReference Include="..\MBA.Auth.Api\MBA.Auth.Api.csproj" />

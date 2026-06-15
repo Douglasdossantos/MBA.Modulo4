@@ -8,11 +8,8 @@ using MBA.Core.Messages;
 using MBA.Core.Messages.AlunoCommands;
 using MBA.WebApi.Core.Controllers;
 using MBA.WebApi.Core.Identidade;
-
 using MediatR;
-
 using Microsoft.AspNetCore.Mvc;
-
 using System.Net;
 
 namespace MBA.Aluno.API.Controllers;
@@ -226,7 +223,7 @@ public class AlunoController( //ICursoAppService cursoAppService,
 				return GenerateResponse(null, ResponseTypeEnum.NotFound, HttpStatusCode.NotFound,
 					["Matrícula não encontrada."]);
 
-			return GenerateResponse(status, ResponseTypeEnum.Success, HttpStatusCode.OK);
+			return GenerateResponse(status);
 		}
 		catch (DomainException exDomain)
 		{

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MBA.Conteudo.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class foi : Migration
+    public partial class Foi : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -7,12 +7,9 @@ using MBA.Core.Mediator;
 using MBA.Core.Messages;
 using MBA.WebApi.Core.Controllers;
 using MBA.WebApi.Core.Identidade;
-
 using MediatR;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using System.Net;
 
 namespace MBA.Bff.Api.Controllers;
@@ -37,9 +34,9 @@ public class AdminController(
 			var conteudo = await conteudoService.CadastrarCurso(cadastroCurso, cancellationToken);
 
 			if (conteudo is ContentResult cr)
-				return GenerateResponse(cr.Content, ResponseTypeEnum.Success, HttpStatusCode.OK);
+				return GenerateResponse(cr.Content);
 
-			return GenerateResponse(conteudo, ResponseTypeEnum.Success, HttpStatusCode.OK);
+			return GenerateResponse(conteudo);
 		}
 		catch (DomainException exDomain)
 		{

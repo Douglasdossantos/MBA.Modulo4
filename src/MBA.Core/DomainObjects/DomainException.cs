@@ -10,9 +10,7 @@ public class DomainException : Exception
 	}
 
 	public DomainException(IEnumerable<string> mensagens)
-		: this(mensagens?.ToList() ?? [])
-	{
-	}
+		: this(mensagens.ToList()) { }
 
 	private DomainException(List<string> mensagens)
 		: base(string.Join(Environment.NewLine, mensagens))

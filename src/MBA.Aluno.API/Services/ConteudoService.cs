@@ -1,7 +1,5 @@
 using MBA.Aluno.Application.Services;
-
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
