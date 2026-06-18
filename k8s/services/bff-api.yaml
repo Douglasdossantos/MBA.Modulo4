@@ -1,0 +1,62 @@
+# T-20 — BFF API: Deployment + Service (NodePort 30093 → host:8093 via Kind). Orquestrador, sem DB.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-api
+  namespace: mba
+  labels:
+    app: bff-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bff-api
+  template:
+    metadata:
+      labels:
+        app: bff-api
+    spec:
+      containers:
+        - name: bff-api
+          image: mba-bff-api:latest
+          imagePullPolicy: IfNotPresent
+          args: ["MBA.Bff.Api.dll"]
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+            limits:
+              memory: "384Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-api
+  namespace: mba
+spec:
+  type: NodePort
+  selector:
+    app: bff-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30093
