@@ -1,0 +1,69 @@
+# T-16 — Auth API: Deployment + Service. Imagem local (kind load) ou Docker Hub (override).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api
+  namespace: mba
+  labels:
+    app: auth-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api
+  template:
+    metadata:
+      labels:
+        app: auth-api
+    spec:
+      containers:
+        - name: auth-api
+          image: mba-auth-api:latest
+          imagePullPolicy: IfNotPresent
+          args: ["MBA.Auth.Api.dll"]
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Data Source=/app/data/AuthDB.db"
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+            limits:
+              memory: "384Mi"
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api
+  namespace: mba
+spec:
+  selector:
+    app: auth-api
+  ports:
+    - port: 8080
+      targetPort: 8080
