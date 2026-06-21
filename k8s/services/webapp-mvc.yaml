@@ -1,0 +1,62 @@
+# T-21 — WebApp MVC: Deployment + Service (NodePort 30080 → host:8080 via Kind). Front, sem DB.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-mvc
+  namespace: mba
+  labels:
+    app: webapp-mvc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp-mvc
+  template:
+    metadata:
+      labels:
+        app: webapp-mvc
+    spec:
+      containers:
+        - name: webapp-mvc
+          image: mba-webapp-mvc:latest
+          imagePullPolicy: IfNotPresent
+          args: ["MBA.WebApp.MVC.dll"]
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+            limits:
+              memory: "384Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-mvc
+  namespace: mba
+spec:
+  type: NodePort
+  selector:
+    app: webapp-mvc
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
