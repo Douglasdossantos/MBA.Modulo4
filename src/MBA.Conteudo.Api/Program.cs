@@ -35,4 +35,5 @@ builder.Services.AddDefaultHealthChecks()
 var app = builder.Build();
 app.ExecutarConfiguracaoAmbiente();
 app.MapDefaultHealthChecks();
+app.UseDefaultMetrics();
 app.Run();
