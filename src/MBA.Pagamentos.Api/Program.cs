@@ -69,4 +69,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapDefaultHealthChecks();
+app.UseDefaultMetrics();
 app.Run();
