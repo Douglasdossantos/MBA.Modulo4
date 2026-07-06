@@ -9,10 +9,13 @@ WORKDIR /app
 EXPOSE 8080
 
 # curl: usado pelo healthcheck do docker-compose (a imagem aspnet não traz). + pasta de dados do SQLite.
+# O chown permite que o usuário não-root 'app' (embutido na imagem aspnet) escreva os bancos SQLite;
+# volumes nomeados herdam essa permissão na primeira utilização.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /app/data
+    && mkdir -p /app/data \
+    && chown -R app:app /app/data
 
 # --- Build stage ---
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -61,6 +64,10 @@ RUN dotnet publish "${PROJECT_NAME}/${PROJECT_NAME}.csproj" \
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+
+# Executa como o usuário não-root 'app' da imagem base (hotspot S6471 do SonarQube).
+# A porta 8080 não exige privilégio de root.
+USER app
 
 # The ENTRYPOINT + CMD will be set via docker-compose
 ENTRYPOINT ["dotnet"]
