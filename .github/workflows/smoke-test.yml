@@ -1,0 +1,64 @@
+# Smoke Test — valida o fluxo E2E real da plataforma (Módulo 5 DevXpert).
+# Sobe todo o ambiente docker-compose no runner, executa o script de smoke (registro -> login ->
+# cursos -> matrícula -> pagamento -> confirmação assíncrona) e, em seguida, roda os testes xUnit
+# de caixa-preta (MBA.SmokeTests) contra o MESMO ambiente já no ar. Ao final há teardown garantido.
+# Diferente do ci.yml (build + testes unitários), aqui o objetivo é integração ponta a ponta em runtime.
+name: Smoke Test
+
+# ATENÇÃO - gatilhos automáticos (push/pull_request) desativados de propósito.
+# O smoke test exercita o fluxo E2E real da plataforma e o produto tem defeitos conhecidos que
+# fazem esse fluxo falhar por design:
+#   - Aluno API sem esquema de autenticação JWT registrado (validações internas retornam 401/403);
+#   - Conteúdo API sem endpoint de health (o container fica unhealthy no compose).
+# Enquanto esses defeitos não forem corrigidos, disparar o workflow em cada push/PR deixaria o CI
+# vermelho de forma permanente. Por isso ele fica SOMENTE em workflow_dispatch (execução manual).
+# Quando os defeitos acima forem corrigidos, reative os gatilhos removendo o comentário do bloco abaixo.
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ master ]
+  # pull_request:
+  #   branches: [ master ]
+
+# Evita execuções simultâneas para o mesmo ref: uma nova execução cancela a anterior ainda em andamento.
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-test:
+    name: Smoke Test E2E (docker-compose + xUnit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # O script sobe o ambiente (docker compose up -d --build), roda o fluxo principal e DEIXA
+      # os containers no ar para o passo de testes seguinte. Exit 0 = fluxo principal passou.
+      - name: Executar smoke test (script)
+        run: bash scripts/smoke-test.sh --timeout 90
+
+      # Testes xUnit de caixa-preta contra o ambiente já no ar. As URLs default do projeto batem
+      # com as portas publicadas pelo docker-compose, então não é preciso sobrescrever nada.
+      - name: Executar smoke tests (xUnit)
+        env:
+          EXECUTAR_SMOKE_TESTS: 'true'
+        run: dotnet test src/MBA.SmokeTests -c Release
+
+      # Diagnóstico: só coleta logs quando algum passo anterior falhou. DEVE vir ANTES do teardown,
+      # senão os containers já teriam sido removidos e não haveria log para inspecionar.
+      - name: Coletar logs do docker-compose (em caso de falha)
+        if: failure()
+        run: docker compose logs --tail 200
+
+      # Teardown garantido: remove containers e volumes independentemente do resultado.
+      - name: Derrubar ambiente (teardown)
+        if: always()
+        run: docker compose down -v
