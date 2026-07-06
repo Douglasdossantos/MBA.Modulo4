@@ -375,3 +375,10 @@ FodyWeavers.xsd
 /src/MBA.Conteudo.Api/Data/Conteudo.db-wal
 .sonarqube/
 .scannerwork/
+
+# Documentos de trabalho locais (prompts, planos, anotações) não são versionados;
+# apenas a documentação oficial do projeto entra no repositório.
+*.md
+!README.md
+!*FEEDBACK*.md
+!k8s/README.md
