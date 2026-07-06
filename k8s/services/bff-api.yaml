@@ -19,7 +19,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: bff-api
-          image: mba-bff-api:latest
+          image: mba-bff-api:1.0.0
           imagePullPolicy: IfNotPresent
           args: ["MBA.Bff.Api.dll"]
           ports:

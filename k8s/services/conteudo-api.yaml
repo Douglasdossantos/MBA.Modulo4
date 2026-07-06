@@ -19,7 +19,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: conteudo-api
-          image: mba-conteudo-api:latest
+          image: mba-conteudo-api:1.0.0
           imagePullPolicy: IfNotPresent
           args: ["MBA.Conteudo.Api.dll"]
           ports:

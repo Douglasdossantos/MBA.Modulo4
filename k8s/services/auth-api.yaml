@@ -19,7 +19,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: auth-api
-          image: mba-auth-api:latest
+          image: mba-auth-api:1.0.0
           imagePullPolicy: IfNotPresent
           args: ["MBA.Auth.Api.dll"]
           ports:

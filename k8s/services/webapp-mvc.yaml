@@ -19,7 +19,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: webapp-mvc
-          image: mba-webapp-mvc:latest
+          image: mba-webapp-mvc:1.0.0
           imagePullPolicy: IfNotPresent
           args: ["MBA.WebApp.MVC.dll"]
           ports:
