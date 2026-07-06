@@ -8,6 +8,8 @@ namespace MBA.Aluno.Application.Services;
 
 public class AlunoAppService : IAlunoAppService
 {
+	private const string MensagemAlunoNaoEncontrado = "Aluno não encontrado";
+
 	private readonly IAlunoRepository _alunoRepository;
 
 	public AlunoAppService(IAlunoRepository alunoRepository)
@@ -31,9 +33,9 @@ public class AlunoAppService : IAlunoAppService
 	{
 		if (string.IsNullOrWhiteSpace(dto.Email)) throw new DomainException("Email não pode estar vazio");
 		var temAluno = await _alunoRepository.ObterPorIdAsync(alunoId) ??
-						throw new DomainException("Aluno não encontrado");
+						throw new DomainException(MensagemAlunoNaoEncontrado);
 		var alunoEmail = await _alunoRepository.ObterPorEmailAsync(dto.Email);
-		if (alunoEmail == null) throw new DomainException("Aluno não encontrado");
+		if (alunoEmail == null) throw new DomainException(MensagemAlunoNaoEncontrado);
 		if (!alunoEmail.Id.Equals(alunoId)) throw new DomainException("Esse Email pertence a outro aluno");
 
 		Domain.Entities.Aluno aluno = dto;
@@ -47,7 +49,7 @@ public class AlunoAppService : IAlunoAppService
 	public async Task<AlunoDto> DesativarAlunoAsync(Guid alunoId)
 	{
 		var aluno = await _alunoRepository.ObterPorIdAsync(alunoId) ??
-					throw new DomainException("Aluno não encontrado");
+					throw new DomainException(MensagemAlunoNaoEncontrado);
 
 		aluno.Desativar();
 		await _alunoRepository.AtualizarAsync(aluno);
@@ -71,7 +73,7 @@ public class AlunoAppService : IAlunoAppService
 	public async Task<AlunoDto> ObterPorIdAsync(Guid alunoId)
 	{
 		var aluno = await _alunoRepository.ObterComMatriculasAsync(alunoId)
-					?? throw new DomainException("Aluno não encontrado");
+					?? throw new DomainException(MensagemAlunoNaoEncontrado);
 
 		return aluno;
 	}

@@ -43,8 +43,8 @@ public class AlunoRepository : IAlunoRepository
 
 	public async Task<Domain.Entities.Aluno?> ObterComMatriculasAsync(Guid alunoId)
 	{
-		// Consulta de leitura do aluno com as matrículas carregadas (usada pelo endpoint PorId);
-		// mantida separada do ObterPorIdAsync para não alterar o grafo attachado nos fluxos de update.
+		// Consulta de leitura com as matrículas carregadas, usada pelo endpoint PorId.
+		// Fica separada da consulta simples para não alterar o grafo attachado nos fluxos de update.
 		return await _context.Alunos
 			.AsNoTracking()
 			.Include(a => a.Matriculas)
