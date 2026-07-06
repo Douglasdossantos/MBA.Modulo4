@@ -212,7 +212,6 @@ public class AlunoController( //ICursoAppService cursoAppService,
 	}
 
 	[HttpGet("matricula/{matriculaId:guid}/status")]
-	[ClaimsAuthorize("Administrador", "PG")]
 	[ClaimsAuthorize("Alunos", "PG")]
 	public async Task<IActionResult> ObterStatusMatricula(Guid matriculaId, CancellationToken cancellationToken)
 	{
