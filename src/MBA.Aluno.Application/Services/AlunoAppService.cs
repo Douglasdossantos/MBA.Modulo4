@@ -70,8 +70,8 @@ public class AlunoAppService : IAlunoAppService
 
 	public async Task<AlunoDto> ObterPorIdAsync(Guid alunoId)
 	{
-		var aluno = await _alunoRepository.ObterPorIdAsync(alunoId)
-					?? throw new DomainException("Curso não encontrado");
+		var aluno = await _alunoRepository.ObterComMatriculasAsync(alunoId)
+					?? throw new DomainException("Aluno não encontrado");
 
 		return aluno;
 	}

@@ -41,6 +41,16 @@ public class AlunoRepository : IAlunoRepository
 			.FirstOrDefaultAsync(a => a.Id == alunoId);
 	}
 
+	public async Task<Domain.Entities.Aluno?> ObterComMatriculasAsync(Guid alunoId)
+	{
+		// Consulta de leitura do aluno com as matrículas carregadas (usada pelo endpoint PorId);
+		// mantida separada do ObterPorIdAsync para não alterar o grafo attachado nos fluxos de update.
+		return await _context.Alunos
+			.AsNoTracking()
+			.Include(a => a.Matriculas)
+			.FirstOrDefaultAsync(a => a.Id == alunoId);
+	}
+
 	public async Task<Domain.Entities.Aluno?> ObterPorEmailAsync(string email)
 	{
 		return await _context.Alunos
