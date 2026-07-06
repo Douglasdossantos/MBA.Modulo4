@@ -51,7 +51,7 @@ public static class DbMigrationHelper
 	private static async Task CriarCursoAsync()
 	{
 		var conteudoCurso1 = new ConteudoProgramatico("Aprender a criar sites e sistemas modernos com .NET",
-			"Durante o curso, voc� vai ver como montar uma aplica��o completa: backend em .NET e frontend com Angular.");
+			"Durante o curso, você vai ver como montar uma aplicação completa: backend em .NET e frontend com Angular.");
 
 		var curso1 = new Curso("Curso de Desenvolvimento Full Stack", 3500m, DateTime.Today.AddYears(2),
 			conteudoCurso1);
@@ -61,35 +61,35 @@ public static class DbMigrationHelper
 			new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa2"));
 
 		var conteudoCurso2 = new ConteudoProgramatico(
-			"Aprender na pr�tica como gerenciar projetos usando m�todos �geis como Scrum e Kanban",
-			"Durante o curso, voc� vai entender como montar, organizar e tocar times �geis, entregando valor de forma cont�nua com frameworks �geis.");
+			"Aprender na prática como gerenciar projetos usando métodos ágeis como Scrum e Kanban",
+			"Durante o curso, você vai entender como montar, organizar e tocar times ágeis, entregando valor de forma contínua com frameworks ágeis.");
 
 		var curso2 = new Curso(
-			"Gest�o �gil de Projetos com Scrum e Kanban",
+			"Gestão Ágil de Projetos com Scrum e Kanban",
 			2800m,
 			DateTime.Today.AddYears(2),
 			conteudoCurso2
 		);
 
-		curso2.AdicionarAulaSeedDeDados("1 - O que � o Manifesto �gil e seus princ�pios", 1, 1,
+		curso2.AdicionarAulaSeedDeDados("1 - O que é o Manifesto Ágil e seus princípios", 1, 1,
 			"https://curso.com/aula1", new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa3"));
-		curso2.AdicionarAulaSeedDeDados("2 - Como funciona o Scrum na pr�tica", 2, 2, "https://curso.com/aula2",
+		curso2.AdicionarAulaSeedDeDados("2 - Como funciona o Scrum na prática", 2, 2, "https://curso.com/aula2",
 			new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa4"));
 
 		var conteudoCurso3 = new ConteudoProgramatico(
-			"Preparar voc� para o mercado de an�lise de dados usando as ferramentas mais atuais",
-			"Durante o curso, voc� vai aprender desde como modelar dados at� criar dashboards e an�lises de performance com Power BI.");
+			"Preparar você para o mercado de análise de dados usando as ferramentas mais atuais",
+			"Durante o curso, você vai aprender desde como modelar dados até criar dashboards e análises de performance com Power BI.");
 
 		var curso3 = new Curso(
-			"An�lise de Dados com Power BI e SQL Server",
+			"Análise de Dados com Power BI e SQL Server",
 			3200m,
 			DateTime.Today.AddYears(2),
 			conteudoCurso3
 		);
 
-		curso3.AdicionarAulaSeedDeDados("1 - Introdu��o � An�lise de Dados", 1, 1, "https://curso.com/aula1",
+		curso3.AdicionarAulaSeedDeDados("1 - Introdução à Análise de Dados", 1, 1, "https://curso.com/aula1",
 			new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa5"));
-		curso3.AdicionarAulaSeedDeDados("2 - Fundamentos de SQL Server para an�lise", 3, 2, "https://curso.com/aula2",
+		curso3.AdicionarAulaSeedDeDados("2 - Fundamentos de SQL Server para análise", 3, 2, "https://curso.com/aula2",
 			new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa6"));
 
 		await _conteudoContext.Cursos.AddAsync(curso1);
