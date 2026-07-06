@@ -1,8 +1,10 @@
 using MBA.Conteudo.Api.Configuration;
 using MBA.Conteudo.Api.Settings;
 using MBA.Conteudo.Application.Configurations;
+using MBA.Conteudo.Data;
 using MBA.Core.Mediator;
 using MBA.Core.Messages;
+using MBA.WebApi.Core.Extensions;
 
 using System.Reflection;
 
@@ -26,6 +28,9 @@ builder.Services.AddHttpContextAccessor()
 	.ConfigurarApi()
 	.ConfigurarCors()
 	.AddSwaggerConfig();
+
+builder.Services.AddDefaultHealthChecks()
+	.AddDbContextCheck<ConteudoContext>("conteudo-db", tags: [HealthCheckExtensions.ReadyTag]);
 
 var app = builder.Build();
 app.ExecutarConfiguracaoAmbiente();
