@@ -19,7 +19,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: pagamentos-api
-          image: mba-pagamentos-api:latest
+          image: mba-pagamentos-api:1.0.0
           imagePullPolicy: IfNotPresent
           args: ["MBA.Pagamentos.Api.dll"]
           ports:

@@ -5,6 +5,9 @@
 
 $ErrorActionPreference = "Stop"
 
+# Tag pinada das imagens locais (S6596) - manter em sincronia com k8s/services/*.yaml.
+$imageTag = "1.0.0"
+
 $services = @(
   @{ image = "mba-auth-api";     project = "MBA.Auth.Api" },
   @{ image = "mba-conteudo-api"; project = "MBA.Conteudo.Api" },
@@ -16,8 +19,8 @@ $services = @(
 
 Write-Host "==> 1/4 Build + load das imagens no Kind..." -ForegroundColor Cyan
 foreach ($s in $services) {
-  docker build --build-arg PROJECT_NAME=$($s.project) -t "$($s.image):latest" ./src
-  kind load docker-image "$($s.image):latest" --name mba
+  docker build --build-arg PROJECT_NAME=$($s.project) -t "$($s.image):$imageTag" ./src
+  kind load docker-image "$($s.image):$imageTag" --name mba
 }
 
 Write-Host "==> 2/4 Aplicando os Deployments..." -ForegroundColor Cyan
