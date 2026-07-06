@@ -1,5 +1,4 @@
 ﻿using MBA.Conteudo.Api.MigrationHelp;
-using MBA.WebApi.Core.Extensions;
 
 namespace MBA.Conteudo.Api.Configuration;
 
@@ -36,7 +35,6 @@ public static class AmbienteConfiguration
 		app.UseAuthentication();
 		app.UseAuthorization();
 		app.MapControllers();
-		app.MapDefaultHealthChecks();
 
 		return app;
 	}
