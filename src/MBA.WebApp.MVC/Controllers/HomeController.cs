@@ -16,9 +16,12 @@ public class HomeController : Controller
 		return View();
 	}
 
-	[Route("erro/{id:length(3,3)}")]
+	[Route("erro/{id:int}")]
 	public IActionResult Error(int id)
 	{
+		if (!ModelState.IsValid)
+			return StatusCode(404);
+
 		var modelErro = new ErrorViewModel();
 		if (id == 500)
 		{
@@ -29,13 +32,13 @@ public class HomeController : Controller
 		else if (id == 404)
 		{
 			modelErro.Menssage =
-				"A pagina que est· procurando n„o existe! <br/> Em caso de D˙vidas entre em contato com nosso suporte";
-			modelErro.Titulo = "Ops! P·gina n„o encontrada.";
+				"A pagina que est√° procurando n√£o existe! <br/> Em caso de D√∫vidas entre em contato com nosso suporte";
+			modelErro.Titulo = "Ops! P√°gina n√£o encontrada.";
 			modelErro.ErroCode = id;
 		}
 		else if (id == 403)
 		{
-			modelErro.Menssage = "VocÍ n„o tem permiss„o  para fazer isto";
+			modelErro.Menssage = "Voc√™ n√£o tem permiss√£o  para fazer isto";
 			modelErro.Titulo = "Acesso Negado";
 			modelErro.ErroCode = id;
 		}
