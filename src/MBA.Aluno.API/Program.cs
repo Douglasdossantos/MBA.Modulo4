@@ -1,10 +1,14 @@
 using MBA.Aluno.API.Configuration;
 using MBA.Aluno.Data.Context;
 using MBA.WebApi.Core.Extensions;
+using MBA.WebApi.Core.Identidade;
 
 using SQLitePCL;
 
 using System.Reflection;
+
+// Alias para desambiguar da classe homônima em MBA.WebApi.Core.Identidade.
+using AppSettings = MBA.Aluno.API.Configuration.AppSettings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +17,9 @@ Batteries.Init();
 builder.AddDatabaseSelector();
 
 builder.Services.AddControllers();
+
+builder.Services.AddJwtConfiguration(builder.Configuration);
+builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 

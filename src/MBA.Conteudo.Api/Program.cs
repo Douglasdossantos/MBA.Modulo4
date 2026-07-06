@@ -5,6 +5,7 @@ using MBA.Conteudo.Data;
 using MBA.Core.Mediator;
 using MBA.WebApi.Core.Extensions;
 using MBA.Core.Messages;
+using MBA.WebApi.Core.Extensions;
 
 using System.Reflection;
 

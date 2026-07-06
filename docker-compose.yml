@@ -115,6 +115,9 @@ services:
       # Absolute path trick: Path.Combine ignores previous segments when a component starts with /
       ConnectionStrings__ConnectionStringAluno: "/app/data/AlunoDB.db"
       ConnectionStrings__ConnectionStringConteudo: "/app/data/ConteudoDB.db"
+      # URL interna da Conteúdo API — sem ela vale o default localhost do appsettings,
+      # que dentro do container aponta para o próprio aluno-api e quebra a validação de curso.
+      AppSettings__ServicosExternos__ConteudoUrl: "http://conteudo-api:8080"
       AppSettings__Secret: "9F3KxR7QmL2WJ8ZpE0YB5aTgN1C4H6Md"
       AppSettings__ExpiracaoHoras: "2"
       AppSettings__Emissor: "MBA.Modulo4"
@@ -149,6 +152,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       AppSettings__DatabaseSettings__ConnectionStringFaturamento: "Data Source=/app/data/PagamentoDB.db"
+      # URL interna da Aluno API — sem ela vale o default localhost do appsettings,
+      # que dentro do container aponta para o próprio pagamentos-api e quebra a validação da matrícula.
+      AppSettings__ServicosExternos__AlunoUrl: "http://aluno-api:8080"
       AppSettings__JwtSettings__Secret: "9F3KxR7QmL2WJ8ZpE0YB5aTgN1C4H6Md"
       AppSettings__JwtSettings__ExpirationInHours: "2"
       AppSettings__JwtSettings__Issuer: "MBA.Modulo4"

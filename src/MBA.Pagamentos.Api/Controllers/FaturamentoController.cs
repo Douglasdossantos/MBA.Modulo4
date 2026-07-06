@@ -28,7 +28,6 @@ public class FaturamentoController(
 	private readonly INotificationHandler<DomainNotificacaoRaiz> _notifications = notifications;
 	private readonly IMediator _mediator = mediator;
 
-	[ClaimsAuthorize("Administrador", "PG")]
 	[ClaimsAuthorize("Alunos", "PG")]
 	[HttpPost("{alunoId}/registrar-pagamento")]
 	public async Task<IActionResult> RealizarPagamento(Guid alunoId, RealizarPagamentoViewModel pagamentoViewModel)

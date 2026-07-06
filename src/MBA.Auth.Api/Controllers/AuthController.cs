@@ -208,7 +208,8 @@ public class AuthController(
 			new Claim("Alunos", "CC"), //CONCLUIR CURSO
 			new Claim("Alunos", "SC"), //SOLICITAR CERTIFICADO
 			new Claim("Alunos", "PG"), //PAGAMENTO
-			new Claim("Alunos", "GT") //BUSCAR INFORMAÇÕES
+			new Claim("Alunos", "GT"), //BUSCAR INFORMAÇÕES
+			new Claim("Cursos", "VI") // VISUALIZAR CURSOS (catálogo e validação de matrícula)
 		};
 		return [.. claimsToAdd];
 	}

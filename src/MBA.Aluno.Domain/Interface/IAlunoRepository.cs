@@ -6,6 +6,7 @@ namespace MBA.Aluno.Domain.Interface;
 public interface IAlunoRepository : IRepository<Entities.Aluno>
 {
 	Task<Entities.Aluno?> ObterPorIdAsync(Guid alunoId);
+	Task<Entities.Aluno?> ObterComMatriculasAsync(Guid alunoId);
 	Task<Entities.Aluno?> ObterPorEmailAsync(string email);
 	Task<bool> ExisteEmailAsync(string email);
 	Task AdicionarAsync(Entities.Aluno aluno);

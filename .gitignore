@@ -373,3 +373,5 @@ FodyWeavers.xsd
 /src/MBA.Conteudo.Api/Data/Conteudo.db
 /src/MBA.Conteudo.Api/Data/Conteudo.db-shm
 /src/MBA.Conteudo.Api/Data/Conteudo.db-wal
+.sonarqube/
+.scannerwork/

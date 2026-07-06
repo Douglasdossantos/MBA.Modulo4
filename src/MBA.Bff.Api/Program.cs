@@ -5,7 +5,7 @@ using MBA.WebApi.Core.Identidade;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddApiConfiguration(builder.Configuration);
+builder.Services.AddApiConfiguration(builder.Configuration, builder.Environment);
 
 builder.Services.AddSwaggerConfiguration();
 builder.Services.AddJwtConfiguration(builder.Configuration);
