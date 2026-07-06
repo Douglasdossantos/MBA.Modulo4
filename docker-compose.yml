@@ -152,6 +152,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       AppSettings__DatabaseSettings__ConnectionStringFaturamento: "Data Source=/app/data/PagamentoDB.db"
+      # URL interna da Aluno API — sem ela vale o default localhost do appsettings,
+      # que dentro do container aponta para o próprio pagamentos-api e quebra a validação da matrícula.
+      AppSettings__ServicosExternos__AlunoUrl: "http://aluno-api:8080"
       AppSettings__JwtSettings__Secret: "9F3KxR7QmL2WJ8ZpE0YB5aTgN1C4H6Md"
       AppSettings__JwtSettings__ExpirationInHours: "2"
       AppSettings__JwtSettings__Issuer: "MBA.Modulo4"
