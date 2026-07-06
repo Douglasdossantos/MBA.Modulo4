@@ -42,7 +42,8 @@ public class FluxoMatriculaPagamentoTests : IClassFixture<SmokeTestFixture>
 
         var corpoRegistro = new
         {
-            nomeUsuario = "Smoke Teste Automatizado",
+            // Identity só aceita letras e dígitos no nome de usuário (sem espaços).
+            nomeUsuario = $"SmokeTeste{Guid.NewGuid():N}",
             email,
             senha,
             senhaConfirmacao = senha,
@@ -92,11 +93,13 @@ public class FluxoMatriculaPagamentoTests : IClassFixture<SmokeTestFixture>
         _saida.WriteLine($"[3-Cursos] cursoId = {cursoId}; nome = {nomeCurso}; valor = {valorCurso}");
 
         // ---------------------------------------------------------------------
-        // Passo 4 - Matricular (Aluno API). Endpoint sem auth efetiva. Status inicial: PendentePagamento.
+        // Passo 4 - Matricular (Aluno API) com o token do ALUNO: a validação de curso
+        // repassa o Authorization do chamador para a Conteúdo API (forwarding).
+        // Status inicial: PendentePagamento.
         // ---------------------------------------------------------------------
         var corpoMatricula = new { cursoId, alunoId };
         var (respostaMatricula, corpoMatriculaTexto) =
-            await EnviarAsync(_fixture.Aluno, HttpMethod.Post, "/api/Aluno/matricular-aluno", token: null, corpoMatricula);
+            await EnviarAsync(_fixture.Aluno, HttpMethod.Post, "/api/Aluno/matricular-aluno", tokenAluno, corpoMatricula);
 
         _saida.WriteLine($"[4-Matricula] POST /api/Aluno/matricular-aluno => {(int)respostaMatricula.StatusCode}");
         respostaMatricula.IsSuccessStatusCode.Should().BeTrue(
