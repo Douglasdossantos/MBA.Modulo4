@@ -1,0 +1,71 @@
+# T-18 — Aluno API: Deployment + Service. (hospeda também o contexto de Conteúdo p/ leitura)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aluno-api
+  namespace: mba
+  labels:
+    app: aluno-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aluno-api
+  template:
+    metadata:
+      labels:
+        app: aluno-api
+    spec:
+      containers:
+        - name: aluno-api
+          image: mba-aluno-api:latest
+          imagePullPolicy: IfNotPresent
+          args: ["MBA.Aluno.API.dll"]
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          env:
+            - name: ConnectionStrings__ConnectionStringAluno
+              value: "/app/data/AlunoDB.db"
+            - name: ConnectionStrings__ConnectionStringConteudo
+              value: "/app/data/ConteudoDB.db"
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+            limits:
+              memory: "384Mi"
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aluno-api
+  namespace: mba
+spec:
+  selector:
+    app: aluno-api
+  ports:
+    - port: 8080
+      targetPort: 8080

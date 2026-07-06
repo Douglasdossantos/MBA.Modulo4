@@ -51,4 +51,6 @@ app.UseApiConfiguration(app.Environment);
 
 app.MapDefaultHealthChecks();
 
+app.UseDefaultMetrics();
+
 app.Run();

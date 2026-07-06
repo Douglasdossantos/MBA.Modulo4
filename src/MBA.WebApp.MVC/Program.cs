@@ -1,4 +1,5 @@
 using MBA.WebApp.MVC.Configuration;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,5 +28,8 @@ app.UseMvcConfiguration(app.Environment);
 
 app.MapHealthChecks("/health/live");
 app.MapHealthChecks("/health/ready");
+
+app.UseHttpMetrics();
+app.MapMetrics();
 
 app.Run();

@@ -3,6 +3,7 @@ using MBA.Conteudo.Api.Settings;
 using MBA.Conteudo.Application.Configurations;
 using MBA.Conteudo.Data;
 using MBA.Core.Mediator;
+using MBA.WebApi.Core.Extensions;
 using MBA.Core.Messages;
 using MBA.WebApi.Core.Extensions;
 
@@ -34,4 +35,6 @@ builder.Services.AddDefaultHealthChecks()
 
 var app = builder.Build();
 app.ExecutarConfiguracaoAmbiente();
+app.MapDefaultHealthChecks();
+app.UseDefaultMetrics();
 app.Run();

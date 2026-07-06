@@ -1,4 +1,5 @@
 using MBA.Auth.Api.Configuration;
+using MBA.WebApi.Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,5 +15,7 @@ var app = builder.Build();
 app.UseSwaggerConfiguration();
 
 app.UseApiConfiguration(app.Environment);
+
+app.UseDefaultMetrics();
 
 app.Run();

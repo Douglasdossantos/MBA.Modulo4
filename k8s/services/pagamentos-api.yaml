@@ -1,0 +1,75 @@
+# T-19 — Pagamentos API: Deployment + Service.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pagamentos-api
+  namespace: mba
+  labels:
+    app: pagamentos-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pagamentos-api
+  template:
+    metadata:
+      labels:
+        app: pagamentos-api
+    spec:
+      containers:
+        - name: pagamentos-api
+          image: mba-pagamentos-api:latest
+          imagePullPolicy: IfNotPresent
+          args: ["MBA.Pagamentos.Api.dll"]
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          env:
+            - name: AppSettings__DatabaseSettings__ConnectionStringFaturamento
+              value: "Data Source=/app/data/PagamentoDB.db"
+            - name: AppSettings__JwtSettings__ExpirationInHours
+              value: "2"
+            - name: AppSettings__JwtSettings__Issuer
+              value: "MBA.Modulo4"
+            - name: AppSettings__JwtSettings__Audience
+              value: "http://bff-api:8080"
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+            limits:
+              memory: "384Mi"
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pagamentos-api
+  namespace: mba
+spec:
+  selector:
+    app: pagamentos-api
+  ports:
+    - port: 8080
+      targetPort: 8080
