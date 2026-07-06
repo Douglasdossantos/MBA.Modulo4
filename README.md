@@ -75,7 +75,7 @@ Projetos de suporte:
 
 ## 4. Pré-requisitos
 
-- **.NET 9 SDK** (obrigatório — verificar `global.json` / `TargetFramework net9.0`).
+- **.NET 8 SDK** (obrigatório — todos os projetos usam `TargetFramework net8.0`).
 - **RabbitMQ 3.x** acessível em `localhost:5672` com credenciais `guest/guest` (padrão Development). Recomendado via Docker: `docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management`.
 - **SQLite** (usado em Development — arquivos `.db` gerados automaticamente em cada serviço). **SQL Server** opcional para Production (controlado por `Database__Provider=SqlServer`).
 - IDE de sua preferência: **Visual Studio 2022 17.10+**, **JetBrains Rider** ou **VS Code + C# Dev Kit**.
@@ -152,6 +152,38 @@ dotnet run --project src/MBA.Bff.Api
 ```
 
 Swagger disponível em cada serviço na rota `/swagger` (Development).
+
+### 7.1. Ambiente completo via Docker Compose
+
+```bash
+docker compose up -d --build
+```
+
+Sobe o RabbitMQ e todos os serviços em containers non-root, com healthchecks em
+`/health/live` e `/health/ready` em todas as APIs. As URLs internas entre serviços
+(Aluno → Conteúdo, Pagamentos → Aluno) já estão configuradas por variável de ambiente.
+
+### 7.2. Smoke Test (fluxo E2E automatizado)
+
+Valida o fluxo completo — registro, login, catálogo, matrícula, pagamento e
+confirmação assíncrona via RabbitMQ — contra o ambiente Docker:
+
+```bash
+# Script bash: sobe o ambiente via docker compose e executa o fluxo
+bash scripts/smoke-test.sh               # sobe o ambiente e deixa no ar ao final
+bash scripts/smoke-test.sh --skip-up     # usa um ambiente já em execução
+bash scripts/smoke-test.sh --down        # derruba o ambiente (down -v) ao final
+bash scripts/smoke-test.sh --timeout 90  # tempo máximo (s) do polling da confirmação
+
+# Testes xUnit de smoke (skipados por padrão para não afetar o CI; exigem ambiente no ar)
+EXECUTAR_SMOKE_TESTS=true dotnet test src/MBA.SmokeTests -c Release
+```
+
+O script termina com os blocos `RELATORIO` (PASS/FAIL/WARN por passo) e `FINDINGS`
+(divergências detectadas em runtime); exit 0 indica fluxo íntegro. As URLs dos serviços
+podem ser sobrescritas pelas variáveis `SMOKE_AUTH_URL`, `SMOKE_CONTEUDO_URL`,
+`SMOKE_ALUNO_URL`, `SMOKE_PAGAMENTOS_URL` e `SMOKE_BFF_URL`. No GitHub Actions, o
+workflow `smoke-test.yml` executa o mesmo fluxo sob demanda (workflow_dispatch).
 
 ## 8. Fluxos Principais
 
