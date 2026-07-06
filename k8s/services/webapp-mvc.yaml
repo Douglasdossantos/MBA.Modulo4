@@ -16,6 +16,7 @@ spec:
       labels:
         app: webapp-mvc
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: webapp-mvc
           image: mba-webapp-mvc:latest
@@ -44,8 +45,10 @@ spec:
             requests:
               memory: "192Mi"
               cpu: "100m"
+              ephemeral-storage: "100Mi"
             limits:
               memory: "384Mi"
+              ephemeral-storage: "256Mi"
 ---
 apiVersion: v1
 kind: Service

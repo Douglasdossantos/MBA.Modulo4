@@ -16,6 +16,7 @@ spec:
       labels:
         app: aluno-api
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: aluno-api
           image: mba-aluno-api:latest
@@ -52,8 +53,10 @@ spec:
             requests:
               memory: "192Mi"
               cpu: "100m"
+              ephemeral-storage: "100Mi"
             limits:
               memory: "384Mi"
+              ephemeral-storage: "512Mi"
       volumes:
         - name: data
           emptyDir: {}

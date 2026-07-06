@@ -16,6 +16,7 @@ spec:
       labels:
         app: pagamentos-api
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: pagamentos-api
           image: mba-pagamentos-api:latest
@@ -56,8 +57,10 @@ spec:
             requests:
               memory: "192Mi"
               cpu: "100m"
+              ephemeral-storage: "100Mi"
             limits:
               memory: "384Mi"
+              ephemeral-storage: "512Mi"
       volumes:
         - name: data
           emptyDir: {}
