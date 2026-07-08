@@ -83,7 +83,7 @@ Além do ambiente local de desenvolvimento, a plataforma roda **publicada e 100%
 
 | Aplicação | DEV | Staging |
 |---|---|---|
-| Web (loja) | [dev-mba-store.dots.dev.br](https://dev-mba-store.dots.dev.br) | [stg-mba-store.dots.dev.br](https://stg-mba-store.dots.dev.br) |
+| Web (Portal do Aluno) | [dev-mba-store.dots.dev.br](https://dev-mba-store.dots.dev.br) | [stg-mba-store.dots.dev.br](https://stg-mba-store.dots.dev.br) |
 | BFF | [dev-mba-store-bff.dots.dev.br](https://dev-mba-store-bff.dots.dev.br/swagger) | [stg-mba-store-bff.dots.dev.br](https://stg-mba-store-bff.dots.dev.br/swagger) |
 | Identidade (Auth) | [dev-mba-auth-api.dots.dev.br](https://dev-mba-auth-api.dots.dev.br/swagger) | [stg-mba-auth-api.dots.dev.br](https://stg-mba-auth-api.dots.dev.br/swagger) |
 | Alunos | [dev-mba-aluno-api.dots.dev.br](https://dev-mba-aluno-api.dots.dev.br/swagger) | [stg-mba-aluno-api.dots.dev.br](https://stg-mba-aluno-api.dots.dev.br/swagger) |
