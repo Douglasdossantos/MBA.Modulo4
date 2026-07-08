@@ -22,7 +22,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: pagamentos-api
-          image: ghcr.io/douglasdossantos/mba-pagamentos-api:dev-585b6a8
+          image: ghcr.io/douglasdossantos/mba-pagamentos-api:dev-e3f44c5
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
