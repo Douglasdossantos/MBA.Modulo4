@@ -77,20 +77,20 @@ Projetos de suporte:
 
 ## 4. Ambientes Publicados, CI/CD e GitOps
 
-Além do ambiente local de desenvolvimento, a plataforma roda **publicada e 100% automatizada** em dois ambientes num cluster **Kubernetes (k3s)** hospedado na Hetzner, com todos os segredos gerenciados pelo **Infisical** e a esteira de deploy operando no modelo **GitOps pull-based** com **Argo CD**.
+Além do ambiente local de desenvolvimento, a plataforma roda **publicada e 100% automatizada** em três ambientes num cluster **Kubernetes (k3s)** hospedado na Hetzner, com todos os segredos gerenciados pelo **Infisical** e a esteira de deploy operando no modelo **GitOps pull-based** com **Argo CD**.
 
 ### 4.1. Ambientes e URLs públicas
 
-| Aplicação | DEV | Staging |
-|---|---|---|
-| Web (Portal do Aluno) | [dev-mba-store.dots.dev.br](https://dev-mba-store.dots.dev.br) | [stg-mba-store.dots.dev.br](https://stg-mba-store.dots.dev.br) |
-| BFF | [dev-mba-store-bff.dots.dev.br](https://dev-mba-store-bff.dots.dev.br/swagger) | [stg-mba-store-bff.dots.dev.br](https://stg-mba-store-bff.dots.dev.br/swagger) |
-| Identidade (Auth) | [dev-mba-auth-api.dots.dev.br](https://dev-mba-auth-api.dots.dev.br/swagger) | [stg-mba-auth-api.dots.dev.br](https://stg-mba-auth-api.dots.dev.br/swagger) |
-| Alunos | [dev-mba-aluno-api.dots.dev.br](https://dev-mba-aluno-api.dots.dev.br/swagger) | [stg-mba-aluno-api.dots.dev.br](https://stg-mba-aluno-api.dots.dev.br/swagger) |
-| Conteúdo | [dev-mba-conteudo-api.dots.dev.br](https://dev-mba-conteudo-api.dots.dev.br/swagger) | [stg-mba-conteudo-api.dots.dev.br](https://stg-mba-conteudo-api.dots.dev.br/swagger) |
-| Financeiro (Pagamentos) | [dev-mba-financeiro-api.dots.dev.br](https://dev-mba-financeiro-api.dots.dev.br/swagger) | [stg-mba-financeiro-api.dots.dev.br](https://stg-mba-financeiro-api.dots.dev.br/swagger) |
+| Aplicação | DEV | Staging | Produção |
+|---|---|---|---|
+| Web (Portal do Aluno) | [dev-mba-store.dots.dev.br](https://dev-mba-store.dots.dev.br) | [stg-mba-store.dots.dev.br](https://stg-mba-store.dots.dev.br) | [mba-store.dots.dev.br](https://mba-store.dots.dev.br) |
+| BFF | [dev-mba-store-bff.dots.dev.br](https://dev-mba-store-bff.dots.dev.br/swagger) | [stg-mba-store-bff.dots.dev.br](https://stg-mba-store-bff.dots.dev.br/swagger) | [mba-store-bff.dots.dev.br](https://mba-store-bff.dots.dev.br/swagger) |
+| Identidade (Auth) | [dev-mba-auth-api.dots.dev.br](https://dev-mba-auth-api.dots.dev.br/swagger) | [stg-mba-auth-api.dots.dev.br](https://stg-mba-auth-api.dots.dev.br/swagger) | [mba-auth-api.dots.dev.br](https://mba-auth-api.dots.dev.br/swagger) |
+| Alunos | [dev-mba-aluno-api.dots.dev.br](https://dev-mba-aluno-api.dots.dev.br/swagger) | [stg-mba-aluno-api.dots.dev.br](https://stg-mba-aluno-api.dots.dev.br/swagger) | [mba-aluno-api.dots.dev.br](https://mba-aluno-api.dots.dev.br/swagger) |
+| Conteúdo | [dev-mba-conteudo-api.dots.dev.br](https://dev-mba-conteudo-api.dots.dev.br/swagger) | [stg-mba-conteudo-api.dots.dev.br](https://stg-mba-conteudo-api.dots.dev.br/swagger) | [mba-conteudo-api.dots.dev.br](https://mba-conteudo-api.dots.dev.br/swagger) |
+| Financeiro (Pagamentos) | [dev-mba-financeiro-api.dots.dev.br](https://dev-mba-financeiro-api.dots.dev.br/swagger) | [stg-mba-financeiro-api.dots.dev.br](https://stg-mba-financeiro-api.dots.dev.br/swagger) | [mba-financeiro-api.dots.dev.br](https://mba-financeiro-api.dots.dev.br/swagger) |
 
-Cada ambiente vive num namespace próprio do cluster (`mba-modulo4-dev` e `mba-modulo4`), com RabbitMQ dedicado e bancos SQL Server isolados por serviço e por ambiente (`mba-{serviço}-{dev|staging}`).
+Cada ambiente vive num namespace próprio do cluster (`mba-modulo4-dev`, `mba-modulo4` e `mba-modulo4-prd`), com RabbitMQ dedicado e bancos SQL Server isolados por serviço e por ambiente (`mba-{serviço}-{dev|staging|prd}`).
 
 ### 4.2. Segredos com Infisical (zero segredo no repositório)
 
@@ -114,7 +114,9 @@ merge na develop ──► GitHub Actions
                                           ▼
                             namespace mba-modulo4-dev (ambiente DEV)
 
-merge na master ──► mesmo fluxo com tags stg-<sha> e k8s/staging/ ──► ambiente Staging
+merge na master ──► mesmo fluxo com tags stg-<sha> em k8s/staging/ E k8s/prd/
+                    └──► ambientes Staging e Produção (produção promove a MESMA
+                         imagem validada no staging — sem rebuild)
 ```
 
 - **O GitHub nunca acessa o cluster**: o Argo CD observa o repositório e **puxa** as mudanças (GitOps pull-based). Nenhuma credencial de cluster existe fora dele.
@@ -128,7 +130,7 @@ merge na master ──► mesmo fluxo com tags stg-<sha> e k8s/staging/ ──�
 - Painéis de operação, protegidos por **Cloudflare Access** (login por One-Time PIN no e-mail autorizado):
   - **Argo CD** (estado dos deploys, diff, histórico e rollback): `k3s-argocd.dots.dev.br`
   - **Headlamp** (pods, logs, eventos e recursos do cluster): `k3s-panel.dots.dev.br`
-- Schema e seed dos bancos são criados automaticamente em Development/Staging no startup (`EnsureCreated` no SQL Server); Production fica de fora por design.
+- Schema e seed dos bancos são criados automaticamente em Development/Staging no startup (`EnsureCreated` no SQL Server); **Production não cria schema nem seed por design** — os bancos `mba-*-prd` foram inicializados uma única vez, de forma controlada, e a aplicação em produção apenas os consome.
 
 ### 4.5. Swagger aberto de propósito
 
