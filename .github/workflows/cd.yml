@@ -1,7 +1,8 @@
 # CD/GitOps — builda as 6 imagens no GHCR e atualiza os manifests do ambiente correspondente.
 # develop => imagens :dev-<sha> + bump em k8s/dev/     (ambiente DEV publicado no k3s)
-# master  => imagens :stg-<sha> + bump em k8s/staging/ e k8s/prd/ (Staging e Produção
-#            no k3s — produção promove a MESMA imagem validada no staging)
+# master  => imagens :stg-<sha> + bump em k8s/staging/ (Staging, automático); a promoção
+#            de Produção (k8s/prd/) exige APROVAÇÃO MANUAL: o job "promote-prd" usa o
+#            environment "producao" (required reviewers) e promove a MESMA imagem do staging.
 # O Argo CD (rodando no k3s) observa o repositório e aplica as mudanças — o GitHub nunca
 # acessa o cluster (GitOps pull-based). Usa o GITHUB_TOKEN nativo: nenhum secret manual.
 name: CD
@@ -84,14 +85,12 @@ jobs:
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
           if [ "${GITHUB_REF_NAME}" = "develop" ]; then
-            TAG="dev-${SHORT_SHA}"; DIRS="k8s/dev"
+            TAG="dev-${SHORT_SHA}"; DIR="k8s/dev"
           else
-            TAG="stg-${SHORT_SHA}"; DIRS="k8s/staging k8s/prd"
+            TAG="stg-${SHORT_SHA}"; DIR="k8s/staging"
           fi
-          for DIR in ${DIRS}; do
-            for IMG in mba-auth-api mba-aluno-api mba-conteudo-api mba-pagamentos-api mba-bff-api mba-webapp-mvc; do
-              sed -i "s|image: ghcr.io/douglasdossantos/${IMG}:.*|image: ghcr.io/douglasdossantos/${IMG}:${TAG}|" ${DIR}/*.yaml
-            done
+          for IMG in mba-auth-api mba-aluno-api mba-conteudo-api mba-pagamentos-api mba-bff-api mba-webapp-mvc; do
+            sed -i "s|image: ghcr.io/douglasdossantos/${IMG}:.*|image: ghcr.io/douglasdossantos/${IMG}:${TAG}|" ${DIR}/*.yaml
           done
           git diff --stat
 
@@ -102,4 +101,39 @@ jobs:
           git add k8s/
           git diff --cached --quiet && { echo "nada a commitar"; exit 0; }
           git commit -m "chore(cd): Atualizando imagens ${GITHUB_REF_NAME} para ${GITHUB_SHA::7} [skip ci]"
+          git push
+
+  promote-prd:
+    name: Promover Produção (aprovação manual)
+    runs-on: ubuntu-latest
+    needs: bump-manifests
+    if: github.ref_name == 'master'
+    # O environment "producao" tem required reviewers: este job fica em "Waiting"
+    # até um revisor humano validar o Staging no ar e aprovar em Actions >
+    # "Review deployments". Só então k8s/prd/ recebe a MESMA imagem já validada
+    # no staging (promoção sem rebuild) e o Argo CD publica a Produção.
+    environment: producao
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Promover a imagem validada no staging para k8s/prd
+        run: |
+          TAG="stg-${GITHUB_SHA::7}"
+          for IMG in mba-auth-api mba-aluno-api mba-conteudo-api mba-pagamentos-api mba-bff-api mba-webapp-mvc; do
+            sed -i "s|image: ghcr.io/douglasdossantos/${IMG}:.*|image: ghcr.io/douglasdossantos/${IMG}:${TAG}|" k8s/prd/*.yaml
+          done
+          git diff --stat
+
+      - name: Commit e push da promoção
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/prd/
+          git diff --cached --quiet && { echo "Produção já está em ${GITHUB_SHA::7}"; exit 0; }
+          git commit -m "chore(cd): Promovendo Produção para ${GITHUB_SHA::7} [skip ci]"
           git push
