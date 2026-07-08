@@ -23,7 +23,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: auth-api
-          image: ghcr.io/douglasdossantos/mba-auth-api:dev-00000000
+          image: ghcr.io/douglasdossantos/mba-auth-api:dev-b47b4fb
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

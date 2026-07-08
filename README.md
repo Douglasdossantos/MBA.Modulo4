@@ -19,7 +19,7 @@ A solução modela o ciclo de vida completo de um aluno em uma plataforma de cur
 
 A comunicação entre os contextos ocorre de duas formas complementares. As operações **síncronas** (consulta de dados entre contextos e orquestração no BFF) são feitas via HTTP, idealmente com `IHttpClientFactory` + `Refit` + políticas de resiliência Polly (retry exponencial + circuit breaker). As operações **assíncronas de integração** (ex.: confirmação de pagamento acionando a ativação de uma matrícula) são publicadas em **RabbitMQ** através do abstrator `IMessageBus` (EasyNetQ), permitindo que cada serviço evolua de forma independente sem acoplamento direto entre APIs.
 
-> **Publicado e automatizado:** a plataforma está no ar em dois ambientes (DEV e Staging) num cluster Kubernetes (k3s), com CI/CD GitOps completo (GitHub Actions + GHCR + Argo CD), segredos 100% fora do repositório via Infisical e ingresso seguro por Cloudflare Tunnel. Detalhes e URLs na **seção 4**.
+> **Publicado e automatizado:** a plataforma está no ar em três ambientes (DEV, Staging e Produção) num cluster Kubernetes (k3s), com CI/CD GitOps completo (GitHub Actions + GHCR + Argo CD), segredos 100% fora do repositório via Infisical e ingresso seguro por Cloudflare Tunnel. Detalhes e URLs na **seção 4**.
 
 ## 2. Arquitetura de Serviços
 
