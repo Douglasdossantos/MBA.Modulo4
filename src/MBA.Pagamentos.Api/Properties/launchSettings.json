@@ -9,6 +9,12 @@
     }
   },
   "profiles": {
+    "Infisical (dev)": {
+      "commandName": "Executable",
+      "executablePath": "infisical",
+      "commandLineArgs": "run --env=dev --domain=https://infisical.dots.dev.br --path=/ -- dotnet run --project src/MBA.Pagamentos.Api --launch-profile http",
+      "workingDirectory": "..\\.."
+    },
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,

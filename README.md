@@ -81,6 +81,24 @@ Projetos de suporte:
 - IDE de sua preferência: **Visual Studio 2022 17.10+**, **JetBrains Rider** ou **VS Code + C# Dev Kit**.
 - **Git** para clonar o repositório.
 
+> ## ⚠️ ATENÇÃO — LEIA ANTES DE RODAR ⚠️
+>
+> ### OS SEGREDOS (CHAVE JWT, RABBITMQ, CONNECTION STRINGS) **NÃO FICAM MAIS NO REPOSITÓRIO.**
+> ### ELES VÊM DO **INFISICAL**. PARA A APLICAÇÃO SUBIR, VOCÊ PRECISA DE **UMA** DAS OPÇÕES:
+>
+> **OPÇÃO 1 (recomendada) — INSTALAR O INFISICAL CLI:**
+> 1. `winget install infisical`
+> 2. `infisical login --domain=https://infisical.dots.dev.br`
+> 3. No Visual Studio, selecione o profile **`Infisical (dev)`** e rode (F5).
+>    Ou no terminal: `infisical run --env=dev -- dotnet run --project src/MBA.<Serviço>`
+>
+> **OPÇÃO 2 — CONFIGURAR MANUALMENTE (sem Infisical):** preencha as chaves via
+> `dotnet user-secrets set "AppSettings:Secret" "<valor>"` (e demais) ou no
+> `appsettings.Development.json`.
+>
+> **SEM UMA DESSAS, A APLICAÇÃO PARA NO STARTUP** com uma mensagem explicando exatamente o que falta
+> (validação fail-fast). Não é bug — é proteção para não rodar com segredo faltando.
+
 ## 5. Configuração
 
 ### 5.1. Connection Strings

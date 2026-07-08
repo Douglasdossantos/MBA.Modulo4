@@ -10,6 +10,10 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Fail-fast: sem este segredo (que vem do Infisical) a aplicação não sobe e explica como corrigir.
+builder.Configuration.ValidarSegredosObrigatorios(
+	"AppSettings:JwtSettings:Secret");
+
 var configuration = builder.Configuration;
 builder.Services.Configure<AppSettings>(configuration.GetSection(nameof(AppSettings)));
 var appSettings = configuration.GetSection(nameof(AppSettings)).Get<AppSettings>()
@@ -23,8 +27,10 @@ builder.Services.AddHttpContextAccessor()
 	))
 	.AddScoped<IMediatorHandler, MediatorHandler>()
 	.ConfigurarJwt(appSettings.JwtSettings)
+	// Development => SQLite; qualquer outro ambiente (Staging/Production) => SQL Server,
+	// alinhado ao DataBaseSelector do Auth/Aluno.
 	.ConfigurarConteudoApplication(appSettings.DatabaseSettings.ConnectionStringConteudo,
-		builder.Environment.IsProduction())
+		!builder.Environment.IsDevelopment())
 	.ConfigurarApi()
 	.ConfigurarCors()
 	.AddSwaggerConfig();
