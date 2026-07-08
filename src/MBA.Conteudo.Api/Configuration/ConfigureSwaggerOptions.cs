@@ -7,6 +7,9 @@ namespace MBA.Conteudo.Api.Configuration;
 
 public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
+	private const string BannerSwaggerExposto =
+		"AVISO IMPORTANTE — SWAGGER EXPOSTO DE PROPÓSITO: Esta é uma aplicação acadêmica (MBA DevXpert, Módulo 4) avaliada por professores, e TODOS os ambientes (inclusive produção) expõem esta documentação para facilitar a consulta e a correção do trabalho. A equipe SABE que em uma aplicação real o Swagger NÃO deve ficar público em produção. Para ocultá-lo, basta definir a variável de ambiente SWAGGER_ENABLED=false e reiniciar o serviço.";
+
 	private readonly IApiVersionDescriptionProvider _provider;
 
 	public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider)
@@ -26,7 +29,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 		{
 			Title = "API - desenvolvedor.io",
 			Version = description.ApiVersion.ToString(),
-			Description = "Esta API faz parte do curso REST com ASP.NET Core WebAPI.",
+			Description = BannerSwaggerExposto + "\n\nEsta API faz parte do curso REST com ASP.NET Core WebAPI.",
 			Contact = new OpenApiContact { Name = "Eduardo Pires", Email = "contato@desenvolvedor.io" },
 			License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
 		};

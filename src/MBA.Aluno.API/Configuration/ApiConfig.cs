@@ -16,12 +16,7 @@ public static class ApiConfig
 
 	public static IApplicationBuilder UseApiConfiguration(this WebApplication app, IWebHostEnvironment env)
 	{
-		if (app.Environment.IsDevelopment())
-		{
-			app.UseSwagger();
-			app.UseSwaggerUI();
-		}
-
+		// Swagger é habilitado centralmente em Program.cs (gate SWAGGER_ENABLED); não duplicar aqui.
 		app.UseHttpsRedirection();
 
 		app.UseAuthentication();
