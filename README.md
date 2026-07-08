@@ -19,6 +19,8 @@ A solução modela o ciclo de vida completo de um aluno em uma plataforma de cur
 
 A comunicação entre os contextos ocorre de duas formas complementares. As operações **síncronas** (consulta de dados entre contextos e orquestração no BFF) são feitas via HTTP, idealmente com `IHttpClientFactory` + `Refit` + políticas de resiliência Polly (retry exponencial + circuit breaker). As operações **assíncronas de integração** (ex.: confirmação de pagamento acionando a ativação de uma matrícula) são publicadas em **RabbitMQ** através do abstrator `IMessageBus` (EasyNetQ), permitindo que cada serviço evolua de forma independente sem acoplamento direto entre APIs.
 
+> **Publicado e automatizado:** a plataforma está no ar em dois ambientes (DEV e Staging) num cluster Kubernetes (k3s), com CI/CD GitOps completo (GitHub Actions + GHCR + Argo CD), segredos 100% fora do repositório via Infisical e ingresso seguro por Cloudflare Tunnel. Detalhes e URLs na **seção 4**.
+
 ## 2. Arquitetura de Serviços
 
 | Serviço | Projeto | Responsabilidade principal | Porta HTTPS (dev) | Porta HTTP (dev) |
@@ -73,7 +75,66 @@ Projetos de suporte:
 - **Síncrono (HTTP):** BFF → Auth/Aluno/Conteúdo/Pagamentos. Aluno → Conteúdo (validar curso ativo na matrícula). Pagamentos → Aluno (validar `PagamentoPodeSerRealizado`).
 - **Assíncrono (RabbitMQ):** Pagamentos publica `PagamentoConfirmadoEvent` / `PagamentoRecusadoEvent`; Aluno consome e atualiza o status da matrícula.
 
-## 4. Pré-requisitos
+## 4. Ambientes Publicados, CI/CD e GitOps
+
+Além do ambiente local de desenvolvimento, a plataforma roda **publicada e 100% automatizada** em dois ambientes num cluster **Kubernetes (k3s)** hospedado na Hetzner, com todos os segredos gerenciados pelo **Infisical** e a esteira de deploy operando no modelo **GitOps pull-based** com **Argo CD**.
+
+### 4.1. Ambientes e URLs públicas
+
+| Aplicação | DEV | Staging |
+|---|---|---|
+| Web (loja) | [dev-mba-store.dots.dev.br](https://dev-mba-store.dots.dev.br) | [stg-mba-store.dots.dev.br](https://stg-mba-store.dots.dev.br) |
+| BFF | [dev-mba-store-bff.dots.dev.br](https://dev-mba-store-bff.dots.dev.br/swagger) | [stg-mba-store-bff.dots.dev.br](https://stg-mba-store-bff.dots.dev.br/swagger) |
+| Identidade (Auth) | [dev-mba-auth-api.dots.dev.br](https://dev-mba-auth-api.dots.dev.br/swagger) | [stg-mba-auth-api.dots.dev.br](https://stg-mba-auth-api.dots.dev.br/swagger) |
+| Alunos | [dev-mba-aluno-api.dots.dev.br](https://dev-mba-aluno-api.dots.dev.br/swagger) | [stg-mba-aluno-api.dots.dev.br](https://stg-mba-aluno-api.dots.dev.br/swagger) |
+| Conteúdo | [dev-mba-conteudo-api.dots.dev.br](https://dev-mba-conteudo-api.dots.dev.br/swagger) | [stg-mba-conteudo-api.dots.dev.br](https://stg-mba-conteudo-api.dots.dev.br/swagger) |
+| Financeiro (Pagamentos) | [dev-mba-financeiro-api.dots.dev.br](https://dev-mba-financeiro-api.dots.dev.br/swagger) | [stg-mba-financeiro-api.dots.dev.br](https://stg-mba-financeiro-api.dots.dev.br/swagger) |
+
+Cada ambiente vive num namespace próprio do cluster (`mba-modulo4-dev` e `mba-modulo4`), com RabbitMQ dedicado e bancos SQL Server isolados por serviço e por ambiente (`mba-{serviço}-{dev|staging}`).
+
+### 4.2. Segredos com Infisical (zero segredo no repositório)
+
+- Chave JWT, credenciais do RabbitMQ e connection strings **não existem mais no código nem no histórico de configuração**: vivem num cofre **Infisical self-hosted** (`infisical.dots.dev.br`), separadas por ambiente.
+- No cluster, o **Infisical Secrets Operator** sincroniza o cofre para Secrets do Kubernetes e dispara **rolling restart automático** dos Deployments quando um segredo muda (annotation `secrets.infisical.com/auto-reload`).
+- Cada API valida os segredos obrigatórios no startup (**fail-fast**): sem eles, a aplicação nem sobe e explica exatamente o que falta e como configurar.
+- No desenvolvimento local, o profile `Infisical (dev)` injeta os segredos no F5 via Infisical CLI (ver seção 5).
+
+### 4.3. Esteira CI/CD (GitOps pull-based)
+
+```
+merge na develop ──► GitHub Actions
+                      ├─ CI: build + testes (.NET 8)
+                      └─ CD: builda as 6 imagens ──► GHCR (ghcr.io, imagens privadas)
+                            └─ atualiza k8s/dev/ com a nova tag [skip ci]
+                                          │
+                                          ▼
+                               Argo CD (roda DENTRO do k3s)
+                               detecta o commit e sincroniza
+                                          │
+                                          ▼
+                            namespace mba-modulo4-dev (ambiente DEV)
+
+merge na master ──► mesmo fluxo com tags stg-<sha> e k8s/staging/ ──► ambiente Staging
+```
+
+- **O GitHub nunca acessa o cluster**: o Argo CD observa o repositório e **puxa** as mudanças (GitOps pull-based). Nenhuma credencial de cluster existe fora dele.
+- As imagens são publicadas no **GitHub Container Registry** usando apenas o `GITHUB_TOKEN` nativo do Actions (zero secrets manuais na esteira) e puxadas pelo cluster via `imagePullSecret`.
+- Sync automático com `prune` e `selfHeal`: o estado do cluster converge sempre para o que está no git. **Rollback = `git revert`**.
+
+### 4.4. Infraestrutura e segurança de rede
+
+- **k3s** (Kubernetes) num servidor Hetzner; a API do cluster é restrita por firewall.
+- Ingresso público **exclusivamente via Cloudflare Tunnel** (containers `cloudflared` dentro do cluster fazem conexão de saída): nenhuma porta de aplicação aberta no servidor, TLS e proteção DDoS na borda da Cloudflare.
+- Painéis de operação, protegidos por **Cloudflare Access** (login por One-Time PIN no e-mail autorizado):
+  - **Argo CD** (estado dos deploys, diff, histórico e rollback): `k3s-argocd.dots.dev.br`
+  - **Headlamp** (pods, logs, eventos e recursos do cluster): `k3s-panel.dots.dev.br`
+- Schema e seed dos bancos são criados automaticamente em Development/Staging no startup (`EnsureCreated` no SQL Server); Production fica de fora por design.
+
+### 4.5. Swagger aberto de propósito
+
+**Todos os ambientes (inclusive produção) expõem o Swagger** para facilitar a consulta e a correção deste trabalho acadêmico. A equipe sabe que documentação interativa não deve ficar pública em uma aplicação real — por isso cada Swagger carrega um aviso explicando a decisão, e ocultá-lo é uma única variável de ambiente: `SWAGGER_ENABLED=false`.
+
+## 5. Pré-requisitos
 
 - **.NET 8 SDK** (obrigatório — todos os projetos usam `TargetFramework net8.0`).
 - **RabbitMQ 3.x** acessível em `localhost:5672` com credenciais `guest/guest` (padrão Development). Recomendado via Docker: `docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management`.
@@ -99,9 +160,9 @@ Projetos de suporte:
 > **SEM UMA DESSAS, A APLICAÇÃO PARA NO STARTUP** com uma mensagem explicando exatamente o que falta
 > (validação fail-fast). Não é bug — é proteção para não rodar com segredo faltando.
 
-## 5. Configuração
+## 6. Configuração
 
-### 5.1. Connection Strings
+### 6.1. Connection Strings
 
 Cada serviço mantém sua própria connection string em `appsettings.Development.json`:
 
@@ -110,14 +171,9 @@ Cada serviço mantém sua própria connection string em `appsettings.Development
 - Conteúdo API: `AppSettings:DatabaseSettings:ConnectionStringConteudo` → `Data Source=Data\ConteudoDB.db`
 - Pagamentos API: SQLite resolvido em runtime por `SqlitePathResolver` (Development).
 
-Para alternar para SQL Server em Production, use o profile `sql server` ou defina as variáveis:
+O provider de banco é decidido pelo ambiente: **Development = SQLite; Staging/Production = SQL Server** (com as connection strings vindas do Infisical). Para forçar SQL Server localmente, defina a variável `DATABASE_PROVIDER=SqlServer` — em builds DEBUG a connection string é substituída automaticamente por `(localdb)\MSSQLLocalDB`, protegendo quem não tem acesso ao servidor publicado.
 
-```bash
-export ASPNETCORE_ENVIRONMENT=Production
-export Database__Provider=SqlServer
-```
-
-### 5.2. RabbitMQ
+### 6.2. RabbitMQ
 
 Todas as APIs que publicam ou consomem eventos usam a mesma connection string em `MessageQueueConnection:MessageBus`:
 
@@ -125,11 +181,13 @@ Todas as APIs que publicam ou consomem eventos usam a mesma connection string em
 host=localhost:5672;publisherConfirms=true;timeout=30;username=guest;password=guest
 ```
 
-### 5.3. JWT
+> O `guest/guest` vale apenas para o RabbitMQ local. Nos ambientes publicados a credencial é forte, exclusiva por ambiente e vem do Infisical.
 
-Chave simétrica compartilhada entre Auth/Aluno/Conteúdo/Pagamentos em `AppSettings` (ex.: `Secret`, `ExpiracaoHoras`, `Emissor`, `ValidoEm`). Em produção, substituir por variável de ambiente / secrets manager.
+### 6.3. JWT
 
-### 5.4. URLs do BFF
+Chave simétrica compartilhada entre Auth/Aluno/Conteúdo/Pagamentos em `AppSettings` (ex.: `Secret`, `ExpiracaoHoras`, `Emissor`, `ValidoEm`). A chave foi **rotacionada e removida do repositório**: em todos os cenários ela vem do Infisical (localmente via profile `Infisical (dev)`; no cluster via Secrets Operator).
+
+### 6.4. URLs do BFF
 
 `AppServicesSettings` no `appsettings.Development.json` do BFF mapeia os serviços (ajustar se as portas forem alteradas):
 
@@ -141,7 +199,7 @@ AutenticacaoUrl  = https://localhost:7163/
 FaturamentoUrl   = https://localhost:7171/
 ```
 
-## 6. Ordem de Subida
+## 7. Ordem de Subida
 
 A ordem recomendada para o ambiente local é:
 
@@ -154,7 +212,7 @@ A ordem recomendada para o ambiente local é:
 
 Migrations e seeds são executados automaticamente no startup (quando aplicável) via `CarregamentoDadosAsync()` e helpers de `DatabaseSelector`.
 
-## 7. Comandos Rápidos
+## 8. Comandos Rápidos
 
 ```bash
 # Restaurar e compilar toda a solution
@@ -171,7 +229,7 @@ dotnet run --project src/MBA.Bff.Api
 
 Swagger disponível em cada serviço na rota `/swagger` (Development).
 
-### 7.1. Ambiente completo via Docker Compose
+### 8.1. Ambiente completo via Docker Compose
 
 ```bash
 docker compose up -d --build
@@ -181,7 +239,7 @@ Sobe o RabbitMQ e todos os serviços em containers non-root, com healthchecks em
 `/health/live` e `/health/ready` em todas as APIs. As URLs internas entre serviços
 (Aluno → Conteúdo, Pagamentos → Aluno) já estão configuradas por variável de ambiente.
 
-### 7.2. Smoke Test (fluxo E2E automatizado)
+### 8.2. Smoke Test (fluxo E2E automatizado)
 
 Valida o fluxo completo — registro, login, catálogo, matrícula, pagamento e
 confirmação assíncrona via RabbitMQ — contra o ambiente Docker:
@@ -203,9 +261,9 @@ podem ser sobrescritas pelas variáveis `SMOKE_AUTH_URL`, `SMOKE_CONTEUDO_URL`,
 `SMOKE_ALUNO_URL`, `SMOKE_PAGAMENTOS_URL` e `SMOKE_BFF_URL`. No GitHub Actions, o
 workflow `smoke-test.yml` executa o mesmo fluxo sob demanda (workflow_dispatch).
 
-## 8. Fluxos Principais
+## 9. Fluxos Principais
 
-### 8.1. Cadastro + Matrícula + Pagamento + Ativação
+### 9.1. Cadastro + Matrícula + Pagamento + Ativação
 
 ```
   Usuário        BFF            Auth         Aluno        Conteúdo     Pagamentos     RabbitMQ
@@ -227,13 +285,13 @@ workflow `smoke-test.yml` executa o mesmo fluxo sob demanda (workflow_dispatch).
     |             |              |             |(PagamentoRealizado)       |            |
 ```
 
-### 8.2. Progresso e Conclusão
+### 9.2. Progresso e Conclusão
 
 1. Aluno assiste uma aula → BFF/Aluno API recebe `RegistrarAulaAssistidaCommand` → grava `ProgressoAula`.
 2. `AlunoQueryService` calcula `totalAulas`, `totalAssistidas` e `aulasFaltantes` com base em Conteúdo API + ProgressoAula local.
 3. Quando `aulasFaltantes == 0`, `ConcluirCursoCommandHandler` marca a matrícula como concluída e (opcionalmente) emite evento de conclusão.
 
-## 9. Estrutura de Pastas
+## 10. Estrutura de Pastas
 
 Cada bounded context segue a convenção:
 
@@ -254,7 +312,7 @@ src/
   MBA.MessageBus      -> IMessageBus (EasyNetQ wrapper)
 ```
 
-## 10. Troubleshooting
+## 11. Troubleshooting
 
 - **RabbitMQ offline** → publicação falha silenciosamente e consumers não sobem. Suba o container antes das APIs e confira o painel em `http://localhost:15672` (`guest/guest`).
 - **Porta em uso** → ajuste `applicationUrl` em `Properties/launchSettings.json` do serviço em conflito (e atualize `AppServicesSettings` do BFF).
@@ -263,6 +321,6 @@ src/
 - **Fluxo de pagamento não ativa matrícula** → verifique (a) se `PagamentoConfirmadoEvent` foi publicado em `IMessageBus.PublishAsync`, (b) se o consumer da Aluno API está registrado como `HostedService`/subscriber e (c) se a fila existe no RabbitMQ.
 - **BFF retorna `BaseAddress is null`** → verifique se `AppServicesSettings.AutenticacaoUrl` (e demais URLs) estão preenchidas também no `appsettings.json` base, não apenas em Development.
 
-## 11. Licença e Créditos
+## 12. Licença e Créditos
 
 Projeto acadêmico do **MBA DevXpert Full Stack .NET — Módulo 4**. Não aceita contribuições externas. Dúvidas ou feedbacks pelo recurso de *Issues*. O arquivo `FEEDBACK.md` é de uso exclusivo do instrutor.
