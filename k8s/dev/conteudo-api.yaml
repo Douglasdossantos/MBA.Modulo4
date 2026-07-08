@@ -22,7 +22,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: conteudo-api
-          image: ghcr.io/douglasdossantos/mba-conteudo-api:dev-b47b4fb
+          image: ghcr.io/douglasdossantos/mba-conteudo-api:dev-585b6a8
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
