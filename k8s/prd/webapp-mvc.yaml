@@ -1,10 +1,10 @@
-# WebApp MVC — DEV publicado (k3s). Front sem banco e sem segredo próprio (usa cookie, não valida JWT).
+# WebApp MVC — produção (k3s). Front sem banco e sem segredo próprio (usa cookie, não valida JWT).
 # Único serviço exposto publicamente, via cloudflared (tunnel k3s-mba) apontando para este Service.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: webapp-mvc
-  namespace: mba-modulo4-dev
+  namespace: mba-modulo4-prd
   labels:
     app: webapp-mvc
 spec:
@@ -20,7 +20,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: webapp-mvc
-          image: ghcr.io/douglasdossantos/mba-webapp-mvc:dev-b47b4fb
+          image: ghcr.io/douglasdossantos/mba-webapp-mvc:stg-2f79f1a
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -52,7 +52,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: webapp-mvc
-  namespace: mba-modulo4-dev
+  namespace: mba-modulo4-prd
 spec:
   selector:
     app: webapp-mvc

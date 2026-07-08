@@ -22,7 +22,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: bff-api
-          image: ghcr.io/douglasdossantos/mba-bff-api:dev-de2cc52
+          image: ghcr.io/douglasdossantos/mba-bff-api:dev-b47b4fb
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

@@ -1,32 +1,43 @@
-# WebApp MVC — DEV publicado (k3s). Front sem banco e sem segredo próprio (usa cookie, não valida JWT).
-# Único serviço exposto publicamente, via cloudflared (tunnel k3s-mba) apontando para este Service.
+# Pagamentos API — produção (k3s). A connection string (AppSettings__DatabaseSettings__ConnectionStringFaturamento),
+# o JWT e o MessageBus vêm do Secret gerenciado pelo Infisical Operator.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp-mvc
-  namespace: mba-modulo4-dev
+  name: pagamentos-api
+  namespace: mba-modulo4-prd
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
   labels:
-    app: webapp-mvc
+    app: pagamentos-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: webapp-mvc
+      app: pagamentos-api
   template:
     metadata:
       labels:
-        app: webapp-mvc
+        app: pagamentos-api
     spec:
       automountServiceAccountToken: false
       containers:
-        - name: webapp-mvc
-          image: ghcr.io/douglasdossantos/mba-webapp-mvc:dev-b47b4fb
+        - name: pagamentos-api
+          image: ghcr.io/douglasdossantos/mba-pagamentos-api:stg-2f79f1a
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: mba-config
+            - secretRef:
+                name: mba-secrets
+          env:
+            - name: AppSettings__JwtSettings__ExpirationInHours
+              value: "2"
+            - name: AppSettings__JwtSettings__Issuer
+              value: "MBA.Modulo4"
+            - name: AppSettings__JwtSettings__Audience
+              value: "http://bff-api:8080"
           livenessProbe:
             httpGet:
               path: /health/live
@@ -46,16 +57,16 @@ spec:
               ephemeral-storage: "100Mi"
             limits:
               memory: "384Mi"
-              ephemeral-storage: "256Mi"
+              ephemeral-storage: "512Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapp-mvc
-  namespace: mba-modulo4-dev
+  name: pagamentos-api
+  namespace: mba-modulo4-prd
 spec:
   selector:
-    app: webapp-mvc
+    app: pagamentos-api
   ports:
     - port: 8080
       targetPort: 8080

@@ -1,32 +1,37 @@
-# WebApp MVC — DEV publicado (k3s). Front sem banco e sem segredo próprio (usa cookie, não valida JWT).
-# Único serviço exposto publicamente, via cloudflared (tunnel k3s-mba) apontando para este Service.
+# Auth API — produção (k3s). Sem SQLite: a ConnectionStrings__DefaultConnection (SQL Server)
+# vem do Secret gerenciado pelo Infisical Operator. Imagem buildada no servidor e importada
+# no containerd do k3s (o ENTRYPOINT da imagem já embute a DLL — sem args aqui).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp-mvc
-  namespace: mba-modulo4-dev
+  name: auth-api
+  namespace: mba-modulo4-prd
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
   labels:
-    app: webapp-mvc
+    app: auth-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: webapp-mvc
+      app: auth-api
   template:
     metadata:
       labels:
-        app: webapp-mvc
+        app: auth-api
     spec:
       automountServiceAccountToken: false
       containers:
-        - name: webapp-mvc
-          image: ghcr.io/douglasdossantos/mba-webapp-mvc:dev-b47b4fb
+        - name: auth-api
+          image: ghcr.io/douglasdossantos/mba-auth-api:stg-2f79f1a
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: mba-config
+            - secretRef:
+                name: mba-secrets
           livenessProbe:
             httpGet:
               path: /health/live
@@ -46,16 +51,16 @@ spec:
               ephemeral-storage: "100Mi"
             limits:
               memory: "384Mi"
-              ephemeral-storage: "256Mi"
+              ephemeral-storage: "512Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapp-mvc
-  namespace: mba-modulo4-dev
+  name: auth-api
+  namespace: mba-modulo4-prd
 spec:
   selector:
-    app: webapp-mvc
+    app: auth-api
   ports:
     - port: 8080
       targetPort: 8080

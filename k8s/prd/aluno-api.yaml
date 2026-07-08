@@ -1,32 +1,36 @@
-# WebApp MVC — DEV publicado (k3s). Front sem banco e sem segredo próprio (usa cookie, não valida JWT).
-# Único serviço exposto publicamente, via cloudflared (tunnel k3s-mba) apontando para este Service.
+# Aluno API — produção (k3s). Connection strings (Aluno + leitura do Conteúdo) vêm do
+# Secret gerenciado pelo Infisical Operator.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp-mvc
-  namespace: mba-modulo4-dev
+  name: aluno-api
+  namespace: mba-modulo4-prd
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
   labels:
-    app: webapp-mvc
+    app: aluno-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: webapp-mvc
+      app: aluno-api
   template:
     metadata:
       labels:
-        app: webapp-mvc
+        app: aluno-api
     spec:
       automountServiceAccountToken: false
       containers:
-        - name: webapp-mvc
-          image: ghcr.io/douglasdossantos/mba-webapp-mvc:dev-b47b4fb
+        - name: aluno-api
+          image: ghcr.io/douglasdossantos/mba-aluno-api:stg-2f79f1a
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: mba-config
+            - secretRef:
+                name: mba-secrets
           livenessProbe:
             httpGet:
               path: /health/live
@@ -46,16 +50,16 @@ spec:
               ephemeral-storage: "100Mi"
             limits:
               memory: "384Mi"
-              ephemeral-storage: "256Mi"
+              ephemeral-storage: "512Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapp-mvc
-  namespace: mba-modulo4-dev
+  name: aluno-api
+  namespace: mba-modulo4-prd
 spec:
   selector:
-    app: webapp-mvc
+    app: aluno-api
   ports:
     - port: 8080
       targetPort: 8080

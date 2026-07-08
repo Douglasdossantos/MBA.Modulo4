@@ -1,6 +1,7 @@
 # CD/GitOps — builda as 6 imagens no GHCR e atualiza os manifests do ambiente correspondente.
 # develop => imagens :dev-<sha> + bump em k8s/dev/     (ambiente DEV publicado no k3s)
-# master  => imagens :stg-<sha> + bump em k8s/staging/ (ambiente Staging no k3s)
+# master  => imagens :stg-<sha> + bump em k8s/staging/ e k8s/prd/ (Staging e Produção
+#            no k3s — produção promove a MESMA imagem validada no staging)
 # O Argo CD (rodando no k3s) observa o repositório e aplica as mudanças — o GitHub nunca
 # acessa o cluster (GitOps pull-based). Usa o GITHUB_TOKEN nativo: nenhum secret manual.
 name: CD
@@ -83,12 +84,14 @@ jobs:
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
           if [ "${GITHUB_REF_NAME}" = "develop" ]; then
-            TAG="dev-${SHORT_SHA}"; DIR="k8s/dev"
+            TAG="dev-${SHORT_SHA}"; DIRS="k8s/dev"
           else
-            TAG="stg-${SHORT_SHA}"; DIR="k8s/staging"
+            TAG="stg-${SHORT_SHA}"; DIRS="k8s/staging k8s/prd"
           fi
-          for IMG in mba-auth-api mba-aluno-api mba-conteudo-api mba-pagamentos-api mba-bff-api mba-webapp-mvc; do
-            sed -i "s|image: ghcr.io/douglasdossantos/${IMG}:.*|image: ghcr.io/douglasdossantos/${IMG}:${TAG}|" ${DIR}/*.yaml
+          for DIR in ${DIRS}; do
+            for IMG in mba-auth-api mba-aluno-api mba-conteudo-api mba-pagamentos-api mba-bff-api mba-webapp-mvc; do
+              sed -i "s|image: ghcr.io/douglasdossantos/${IMG}:.*|image: ghcr.io/douglasdossantos/${IMG}:${TAG}|" ${DIR}/*.yaml
+            done
           done
           git diff --stat
 
