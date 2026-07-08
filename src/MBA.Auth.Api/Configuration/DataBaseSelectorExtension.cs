@@ -19,8 +19,16 @@ public static class DataBaseSelectorExtension
 		};
 
 		if (useSqlServer)
+		{
+#if DEBUG
+			// Outros devs do time não têm acesso ao SQL Server publicado. Em Debug local o SQL Server
+			// vira LocalDB automaticamente. As imagens Docker são publish -c Release, então este guard
+			// não existe no binário publicado (diretiva de compilação, não checagem de runtime).
+			connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=mba-auth-localdb;Trusted_Connection=True;MultipleActiveResultSets=true";
+#endif
 			builder.Services.AddDbContext<ApplicationDbContext>(options =>
 				options.UseSqlServer(connectionString));
+		}
 		else
 			builder.Services.AddDbContext<ApplicationDbContext>(options =>
 				options.UseSqlite(connectionString));

@@ -70,7 +70,14 @@ public static class FaturamentoConfiguration
 		{
 			if (useSqlServer)
 			{
-				o.UseSqlServer(stringConexao);
+#if DEBUG
+					// Devs locais não têm acesso ao SQL Server publicado; em build DEBUG apontamos
+					// automaticamente para o LocalDB. As imagens Docker são geradas com
+					// `publish -c Release`, então este guard não existe no artefato publicado.
+					stringConexao =
+						"Server=(localdb)\\MSSQLLocalDB;Database=mba-pagamentos-localdb;Trusted_Connection=True;MultipleActiveResultSets=true";
+#endif
+					o.UseSqlServer(stringConexao);
 			}
 			else
 			{
