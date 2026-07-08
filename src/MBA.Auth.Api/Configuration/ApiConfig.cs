@@ -20,13 +20,11 @@ public static class ApiConfig
 
 	public static IApplicationBuilder UseApiConfiguration(this WebApplication app, IWebHostEnvironment env)
 	{
-		if (app.Environment.IsDevelopment())
-		{
-			app.UseSwagger();
-			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"); });
+		// Swagger é configurado exclusivamente por UseSwaggerConfiguration (Program.cs), com a regra SWAGGER_ENABLED.
 
+		// Staging também cria o schema e semeia (o gate fino por ambiente/provider fica no helper).
+		if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 			DbMigrationHelper.AutocarregamentoDadosAsync(app).Wait();
-		}
 
 		app.UseHttpsRedirection();
 

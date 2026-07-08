@@ -19,9 +19,16 @@ public static class DbMigrationHelpers
 
 		var context = scope.ServiceProvider.GetRequiredService<AlunoDbContext>();
 
-		if (env.IsDevelopment() || env.IsEnvironment("Docker"))
+		if (env.IsDevelopment() || env.IsStaging() || env.IsEnvironment("Docker"))
 		{
-			await context.Database.MigrateAsync();
+			// As migrations existentes são específicas de SQLite (Sqlite:Autoincrement). No SQL Server
+			// elas gerariam colunas Id sem IDENTITY, quebrando os inserts. Por isso, no SQL Server, o
+			// schema é criado direto do modelo (EnsureCreated gera IDENTITY correto); no SQLite mantém Migrate.
+			if (context.Database.IsSqlServer())
+				await context.Database.EnsureCreatedAsync();
+			else
+				await context.Database.MigrateAsync();
+
 			await EnsureSeedProducts(context);
 		}
 	}

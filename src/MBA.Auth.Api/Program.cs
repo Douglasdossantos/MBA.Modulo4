@@ -3,6 +3,11 @@ using MBA.WebApi.Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Fail-fast: sem estes segredos (que vêm do Infisical) a aplicação não sobe e explica como corrigir.
+builder.Configuration.ValidarSegredosObrigatorios(
+	"AppSettings:Secret",
+	"MessageQueueConnection:MessageBus");
+
 builder.AddDatabaseSelector();
 
 builder.Services.AddIdentityConfiguration(builder.Configuration);

@@ -1,0 +1,65 @@
+# BFF API — DEV publicado (k3s). Orquestrador, sem banco. JWT vem do Secret gerenciado.
+# ClusterIP simples: o ingresso público é só do MVC, via cloudflared.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-api
+  namespace: mba-modulo4-dev
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+  labels:
+    app: bff-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bff-api
+  template:
+    metadata:
+      labels:
+        app: bff-api
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: bff-api
+          image: ghcr.io/douglasdossantos/mba-bff-api:dev-de2cc52
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+              ephemeral-storage: "100Mi"
+            limits:
+              memory: "384Mi"
+              ephemeral-storage: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-api
+  namespace: mba-modulo4-dev
+spec:
+  selector:
+    app: bff-api
+  ports:
+    - port: 8080
+      targetPort: 8080

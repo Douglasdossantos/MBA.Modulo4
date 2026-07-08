@@ -44,6 +44,14 @@ public static class DataBaseSelectorExtension
 			var connectionString = builder.Configuration.GetConnectionString("ConnectionStringAluno");
 			var conteudoConnectionString = builder.Configuration.GetConnectionString("ConnectionStringConteudo");
 
+#if DEBUG
+			// Devs sem acesso ao SQL Server publicado: em build DEBUG força LocalDB automaticamente.
+			// As imagens Docker são geradas com publish -c Release, então este guard NÃO existe no
+			// publicado (produção/staging usam as connection strings reais vindas do Infisical).
+			connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=mba-aluno-localdb;Trusted_Connection=True;MultipleActiveResultSets=true";
+			conteudoConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=mba-conteudo-localdb;Trusted_Connection=True;MultipleActiveResultSets=true";
+#endif
+
 			builder.Services.AddDbContext<AlunoDbContext>(options =>
 				options.UseSqlServer(connectionString));
 			builder.Services.AddDbContext<ConteudoContext>(options =>

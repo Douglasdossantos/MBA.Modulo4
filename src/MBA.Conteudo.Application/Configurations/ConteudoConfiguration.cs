@@ -60,6 +60,11 @@ public static class ConteudoConfiguration
 		{
 			if (useSqlServer)
 			{
+#if DEBUG
+				// Devs locais podem não ter acesso ao SQL Server publicado; em DEBUG caímos para o LocalDB.
+				// As imagens Docker são geradas com publish -c Release, então este guard não existe no publicado.
+				stringConexao = "Server=(localdb)\\MSSQLLocalDB;Database=mba-conteudo-localdb;Trusted_Connection=True;MultipleActiveResultSets=true";
+#endif
 				o.UseSqlServer(stringConexao);
 			}
 			else

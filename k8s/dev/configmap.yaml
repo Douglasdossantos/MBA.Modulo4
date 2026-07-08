@@ -1,0 +1,31 @@
+# DEV publicado no k3s — config compartilhada NÃO-secreta.
+# ASPNETCORE_ENVIRONMENT=Development liga Swagger e seeds; DATABASE_PROVIDER=SqlServer (override
+# T-14) força SQL Server mesmo em Development, apontando para as bases mba-*-dev via segredos do
+# Infisical (env dev-cloud). O dev LOCAL continua sem essas envs => SQLite por padrão.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mba-config
+  namespace: mba-modulo4-dev
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  ASPNETCORE_URLS: "http://+:8080"
+  DATABASE_PROVIDER: "SqlServer"
+  SWAGGER_ENABLED: "true"
+
+  # JWT (partes não-secretas, comuns aos serviços que usam AppSettings__*)
+  AppSettings__ExpiracaoHoras: "2"
+  AppSettings__Emissor: "MBA.Modulo4"
+  AppSettings__ValidoEm: "http://bff-api:8080"
+
+  # URLs internas (Services do cluster) — usadas pelo BFF e pelo MVC
+  AppServicesSettings__AutenticacaoUrl: "http://auth-api:8080"
+  AppServicesSettings__AlunoUrl: "http://aluno-api:8080"
+  AppServicesSettings__ConteudoUrl: "http://conteudo-api:8080"
+  AppServicesSettings__PagamentoUrl: "http://pagamentos-api:8080"
+  AppServicesSettings__FaturamentoUrl: "http://pagamentos-api:8080"
+  AppSettings__AutenticacaoUrl: "http://auth-api:8080"
+  AppSettings__AlunosUrl: "http://aluno-api:8080"
+  AppSettings__ConteudoUrl: "http://conteudo-api:8080"
+  AppSettings__PagamentosUrl: "http://pagamentos-api:8080"
+  AppSettings__BFF: "http://bff-api:8080"

@@ -10,9 +10,18 @@ public static class DbMigrationHelper
 	public static async Task CarregamentoDadosAsync(this IServiceProvider serviceProvider)
 	{
 		using var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+		var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
 
 		_faturamentoContext = scope.ServiceProvider.GetRequiredService<FaturamentoDbContext>();
 
-		await _faturamentoContext.Database.MigrateAsync();
+		if (env.IsDevelopment() || env.IsStaging())
+		{
+			// As migrations existentes são específicas de SQLite. No SQL Server o schema é criado
+			// direto do modelo (EnsureCreated); no SQLite mantém Migrate.
+			if (_faturamentoContext.Database.IsSqlServer())
+				await _faturamentoContext.Database.EnsureCreatedAsync();
+			else
+				await _faturamentoContext.Database.MigrateAsync();
+		}
 	}
 }

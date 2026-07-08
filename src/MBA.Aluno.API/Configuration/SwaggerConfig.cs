@@ -12,6 +12,12 @@ public static class SwaggerConfig
 			{
 				Title = "DevStore Enterprise Aluno API",
 				Description =
+					"AVISO IMPORTANTE — SWAGGER EXPOSTO DE PROPÓSITO: Esta é uma aplicação acadêmica " +
+					"(MBA DevXpert, Módulo 4) avaliada por professores, e TODOS os ambientes (inclusive " +
+					"produção) expõem esta documentação para facilitar a consulta e a correção do trabalho. " +
+					"A equipe SABE que em uma aplicação real o Swagger NÃO deve ficar público em produção. " +
+					"Para ocultá-lo, basta definir a variável de ambiente SWAGGER_ENABLED=false e reiniciar o serviço." +
+					"\n\n" +
 					"essa API pertence ao Modulo 4 do MBA DEVXPERT FULL STACK .NET, Plataforma Educacional Distribuída com Microsserviços REST",
 				Contact = new OpenApiContact { Name = "Douglas dos santos", Email = "grupo@email.com" },
 				License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://opensource.org/Licenses/MIT") }

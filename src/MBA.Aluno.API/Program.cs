@@ -12,6 +12,11 @@ using AppSettings = MBA.Aluno.API.Configuration.AppSettings;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Fail-fast: sem estes segredos (que vêm do Infisical) a aplicação não sobe e explica como corrigir.
+builder.Configuration.ValidarSegredosObrigatorios(
+	"AppSettings:Secret",
+	"MessageQueueConnection:MessageBus");
+
 Batteries.Init();
 
 builder.AddDatabaseSelector();
@@ -45,7 +50,12 @@ builder.Services.AddDefaultHealthChecks()
 
 var app = builder.Build();
 
-app.UseSwaggerConfiguration();
+// Swagger LIGADO em todos os ambientes por decisão acadêmica (ver banner em SwaggerConfig).
+// Único gate: ocultar apenas quando SWAGGER_ENABLED estiver definido exatamente como "false".
+if (app.Configuration["SWAGGER_ENABLED"] != "false")
+{
+	app.UseSwaggerConfiguration();
+}
 
 app.UseApiConfiguration(app.Environment);
 

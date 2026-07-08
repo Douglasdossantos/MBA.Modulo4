@@ -12,6 +12,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.23" />
+    <!-- Alinha a familia Wilson na v8 (o Microsoft.Data.SqlClient do SQL Server puxa Tokens 8.x;
+         sem este pino o Jwt fica em 7.1.2 e o assembly nao carrega em runtime). -->
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
