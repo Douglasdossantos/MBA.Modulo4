@@ -1,0 +1,24 @@
+# Argo CD Application — ambiente de Produção (GitOps pull-based).
+# Observa k8s/prd/ na branch master e mantém o namespace mba-modulo4-prd sincronizado.
+# Produção promove a MESMA imagem do staging (:stg-<sha>), bumpada pelo CD da master.
+# Aplicar uma vez com: kubectl apply -f k8s/argocd/mba-prd.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mba-prd
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Douglasdossantos/MBA.Modulo4.git
+    targetRevision: master
+    path: k8s/prd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mba-modulo4-prd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
