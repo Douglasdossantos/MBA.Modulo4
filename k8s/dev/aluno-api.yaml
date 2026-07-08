@@ -1,0 +1,65 @@
+# Aluno API — DEV publicado (k3s). Connection strings (Aluno + leitura do Conteúdo) vêm do
+# Secret gerenciado pelo Infisical Operator.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aluno-api
+  namespace: mba-modulo4-dev
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+  labels:
+    app: aluno-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aluno-api
+  template:
+    metadata:
+      labels:
+        app: aluno-api
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: aluno-api
+          image: mba-aluno-api:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+              ephemeral-storage: "100Mi"
+            limits:
+              memory: "384Mi"
+              ephemeral-storage: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aluno-api
+  namespace: mba-modulo4-dev
+spec:
+  selector:
+    app: aluno-api
+  ports:
+    - port: 8080
+      targetPort: 8080

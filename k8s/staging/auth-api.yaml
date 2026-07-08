@@ -1,0 +1,66 @@
+# Auth API — staging (k3s). Sem SQLite: a ConnectionStrings__DefaultConnection (SQL Server)
+# vem do Secret gerenciado pelo Infisical Operator. Imagem buildada no servidor e importada
+# no containerd do k3s (o ENTRYPOINT da imagem já embute a DLL — sem args aqui).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api
+  namespace: mba-modulo4
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+  labels:
+    app: auth-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api
+  template:
+    metadata:
+      labels:
+        app: auth-api
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: auth-api
+          image: mba-auth-api:staging
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+              ephemeral-storage: "100Mi"
+            limits:
+              memory: "384Mi"
+              ephemeral-storage: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api
+  namespace: mba-modulo4
+spec:
+  selector:
+    app: auth-api
+  ports:
+    - port: 8080
+      targetPort: 8080
