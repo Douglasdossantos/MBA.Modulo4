@@ -6,17 +6,26 @@ public static class AmbienteConfiguration
 {
 	public static WebApplication ExecutarConfiguracaoAmbiente(this WebApplication app)
 	{
-		if (app.Environment.IsDevelopment())
+		// Swagger exposto em TODOS os ambientes (aplicação acadêmica), salvo quando SWAGGER_ENABLED == "false".
+		if (app.Configuration["SWAGGER_ENABLED"] != "false")
 		{
 			app.UseSwagger();
 			app.UseSwaggerUI();
-			app.UseCors("Dev");
+		}
 
-			DbMigrationHelper.AutocarregamentoDadosAsync(app).Wait();
+		if (app.Environment.IsDevelopment())
+		{
+			app.UseCors("Dev");
 		}
 		else
 		{
 			app.UseCors("Prod");
+		}
+
+		// Em Development e Staging o schema é criado e os dados semeados automaticamente.
+		if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+		{
+			DbMigrationHelper.AutocarregamentoDadosAsync(app).Wait();
 		}
 
 		app.UseStaticFiles();

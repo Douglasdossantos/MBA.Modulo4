@@ -23,7 +23,7 @@ public static class DbMigrationHelper
 
 		_conteudoContext = scope.ServiceProvider.GetRequiredService<ConteudoContext>();
 
-		if (env.IsDevelopment())
+		if (env.IsDevelopment() || env.IsStaging())
 		{
 			// Ensure the folder for the Sqlite database exists (e.g. "Data")
 			try
@@ -37,7 +37,13 @@ public static class DbMigrationHelper
 				// ignore directory creation errors; migration will surface meaningful errors
 			}
 
-			await _conteudoContext.Database.MigrateAsync();
+			// As migrations existentes são específicas de SQLite. No SQL Server (Staging/Prod) o schema
+			// é criado direto do modelo (EnsureCreated); no SQLite mantém Migrate.
+			if (_conteudoContext.Database.IsSqlServer())
+				await _conteudoContext.Database.EnsureCreatedAsync();
+			else
+				await _conteudoContext.Database.MigrateAsync();
+
 			await PopularDatabaseAsync();
 		}
 	}

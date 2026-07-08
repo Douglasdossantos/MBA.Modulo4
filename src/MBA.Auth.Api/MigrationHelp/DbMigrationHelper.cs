@@ -26,9 +26,18 @@ public static class DbMigrationHelper
 		_identityContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 		_userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuarios>>();
 
-		if (env.IsDevelopment())
+		// Staging (ambiente publicado de laboratório) também cria o schema e semeia os dados;
+		// Production fica de fora de propósito.
+		if (env.IsDevelopment() || env.IsStaging())
 		{
-			await _identityContext.Database.MigrateAsync();
+			// As migrations existentes são específicas de SQLite (Sqlite:Autoincrement). No SQL Server
+			// elas gerariam colunas Id sem IDENTITY, quebrando os inserts. Por isso, no SQL Server, o
+			// schema é criado direto do modelo (EnsureCreated gera IDENTITY correto); no SQLite mantém Migrate.
+			if (_identityContext.Database.IsSqlServer())
+				await _identityContext.Database.EnsureCreatedAsync();
+			else
+				await _identityContext.Database.MigrateAsync();
+
 			await PopularDatabaseAsync();
 		}
 	}
