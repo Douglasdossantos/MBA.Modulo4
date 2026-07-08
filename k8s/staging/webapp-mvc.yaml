@@ -20,7 +20,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: webapp-mvc
-          image: ghcr.io/douglasdossantos/mba-webapp-mvc:stg-00000000
+          image: ghcr.io/douglasdossantos/mba-webapp-mvc:stg-232d6d1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

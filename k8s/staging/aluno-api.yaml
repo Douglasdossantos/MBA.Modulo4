@@ -22,7 +22,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: aluno-api
-          image: ghcr.io/douglasdossantos/mba-aluno-api:stg-00000000
+          image: ghcr.io/douglasdossantos/mba-aluno-api:stg-232d6d1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
