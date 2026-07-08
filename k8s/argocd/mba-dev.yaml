@@ -1,0 +1,23 @@
+# Argo CD Application — ambiente DEV publicado (GitOps pull-based).
+# Observa k8s/dev/ na branch develop e mantém o namespace mba-modulo4-dev sincronizado.
+# Aplicar uma vez com: kubectl apply -f k8s/argocd/mba-dev.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mba-dev
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Douglasdossantos/MBA.Modulo4.git
+    targetRevision: develop
+    path: k8s/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mba-modulo4-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
