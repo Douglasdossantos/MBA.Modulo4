@@ -114,14 +114,22 @@ merge na develop ──► GitHub Actions
                                           ▼
                             namespace mba-modulo4-dev (ambiente DEV)
 
-merge na master ──► mesmo fluxo com tags stg-<sha> em k8s/staging/ E k8s/prd/
-                    └──► ambientes Staging e Produção (produção promove a MESMA
-                         imagem validada no staging — sem rebuild)
+merge na master ──► mesmo fluxo com tags stg-<sha> e k8s/staging/ ──► ambiente Staging
+                                          │
+                                          ▼
+                        ⏸  GATE DE PRODUÇÃO (aprovação manual)
+                        revisor humano valida o Staging publicado
+                                          │  botão "Review deployments" ► Approve
+                                          ▼
+                      bump de k8s/prd/ ──► ambiente Produção
+                      (promove a MESMA imagem validada no staging — sem rebuild)
 ```
 
 - **O GitHub nunca acessa o cluster**: o Argo CD observa o repositório e **puxa** as mudanças (GitOps pull-based). Nenhuma credencial de cluster existe fora dele.
 - As imagens são publicadas no **GitHub Container Registry** usando apenas o `GITHUB_TOKEN` nativo do Actions (zero secrets manuais na esteira) e puxadas pelo cluster via `imagePullSecret`.
 - Sync automático com `prune` e `selfHeal`: o estado do cluster converge sempre para o que está no git. **Rollback = `git revert`**.
+- **Gate de produção com aprovação manual**: o job `promote-prd` é vinculado ao GitHub Environment `producao`, protegido por *required reviewers*. O Staging publica automaticamente a cada merge na master; a Produção só é promovida depois que um revisor valida o Staging no ar e aprova o deploy (**Actions → Review deployments**). A aba *Environments* do repositório registra o histórico de quem aprovou cada promoção.
+- **Política de aprovação**: seis membros do time são revisores do environment `producao` e basta a aprovação de **um** deles para promover; com *prevent self-review* habilitado, quem disparou o deploy não pode aprovar a si mesmo — garantindo sempre um segundo par de olhos entre o merge e a produção.
 
 ### 4.4. Infraestrutura e segurança de rede
 
