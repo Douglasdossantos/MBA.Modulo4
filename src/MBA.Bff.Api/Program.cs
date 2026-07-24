@@ -25,8 +25,8 @@ builder.Services.AddDefaultHealthChecks();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-// Swagger LIGADO em todos os ambientes; para ocultar, definir SWAGGER_ENABLED=false e reiniciar o serviço.
-if (app.Configuration["SWAGGER_ENABLED"] != "false")
+// Swagger seguro por padrao: ligado em Development ou com SWAGGER_ENABLED=true; desligado em ambiente publicado sem o flag.
+if (app.Environment.IsDevelopment() || app.Configuration["SWAGGER_ENABLED"] == "true")
 {
     app.UseSwaggerConfiguration();
 }

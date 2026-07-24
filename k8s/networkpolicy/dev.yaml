@@ -1,0 +1,48 @@
+# NetworkPolicy — isolamento de namespace (DEV, para validacao antes de promover).
+# Fecha o gap do feedback ("qualquer Pod alcanca qualquer outro, inclusive SQL/RabbitMQ").
+# Nega ingress por padrao e libera: (a) trafego DENTRO do proprio namespace (apps entre si
+# + RabbitMQ), (b) o namespace do cloudflared (tunnel). Egress NAO e restringido.
+#
+# >>> VALIDACAO OBRIGATORIA (nao aplique em prod direto) <<<
+#   kubectl apply -f k8s/networkpolicy/dev.yaml
+#   kubectl get pods -n mba-modulo4-dev -w
+# Se algum pod ficar NotReady, o CNI esta bloqueando o probe do kubelet:
+#   kubectl delete -f k8s/networkpolicy/dev.yaml
+# So promova (mesma politica, trocando namespace) depois de confirmar dev saudavel.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: mba-modulo4-dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-same-namespace
+  namespace: mba-modulo4-dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-cloudflared
+  namespace: mba-modulo4-dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare

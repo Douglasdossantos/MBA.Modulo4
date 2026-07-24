@@ -1,0 +1,77 @@
+# bff-api (base Kustomize) — namespace, tag da imagem e replicas vem dos overlays.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-api
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+  labels:
+    app: bff-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bff-api
+  template:
+    metadata:
+      labels:
+        app: bff-api
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: bff-api
+          image: ghcr.io/douglasdossantos/mba-bff-api:0.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mba-config
+            - secretRef:
+                name: mba-secrets
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "192Mi"
+              cpu: "100m"
+              ephemeral-storage: "100Mi"
+            limits:
+              cpu: "500m"
+              memory: "384Mi"
+              ephemeral-storage: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-api
+spec:
+  selector:
+    app: bff-api
+  ports:
+    - port: 8080
+      targetPort: 8080

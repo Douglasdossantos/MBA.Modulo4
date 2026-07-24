@@ -1,0 +1,87 @@
+# Analise estatica (SonarCloud) — item obrigatorio do escopo "Lint e analise estatica de codigo".
+# Porta o sonar-scan.ps1 (que era manual e apontava para localhost:9000) para a esteira,
+# consumindo a mesma cobertura de testes gerada no ci.yml.
+#
+# SETUP (uma vez):
+#   1. Crie a organizacao/projeto no https://sonarcloud.io
+#   2. Repo > Settings > Secrets and variables > Actions:
+#        - Secret  SONAR_TOKEN  = token do projeto no SonarCloud
+#   3. Ajuste SONAR_ORGANIZATION e SONAR_PROJECT_KEY abaixo para os do seu SonarCloud.
+# Enquanto o SONAR_TOKEN nao existir, o job roda mas se auto-pula (CI continua verde).
+name: SonarCloud
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  sonarcloud:
+    name: Analise estatica (SonarCloud)
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_ORGANIZATION: "PREENCHER-sua-org-sonarcloud"
+      SONAR_PROJECT_KEY: "mba-modulo4"
+    steps:
+      - name: Verificar SONAR_TOKEN
+        id: guard
+        run: |
+          if [ -z "${SONAR_TOKEN}" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SONAR_TOKEN nao configurado — analise pulada. Configure o secret para ativar."
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.guard.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java 17
+        if: steps.guard.outputs.run == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup .NET 8
+        if: steps.guard.outputs.run == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Instalar sonarscanner + dotnet-coverage
+        if: steps.guard.outputs.run == 'true'
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global dotnet-coverage
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Sonar Begin
+        if: steps.guard.outputs.run == 'true'
+        run: >
+          dotnet sonarscanner begin
+          /k:"${SONAR_PROJECT_KEY}"
+          /o:"${SONAR_ORGANIZATION}"
+          /d:sonar.host.url="https://sonarcloud.io"
+          /d:sonar.token="${SONAR_TOKEN}"
+          /d:sonar.scm.disabled=true
+          /d:sonar.exclusions="**/bin/**,**/obj/**,**/.publish/**,**/wwwroot/lib/**,**/wwwroot/assets/**,**/wwwroot/css/**,**/Migrations/**,**/*.Designer.cs,**/GlobalUsings.cs,**/appsettings.Testing.json"
+          /d:sonar.cs.vscoveragexml.reportsPaths="coverage.xml"
+          /d:sonar.sourceEncoding=UTF-8
+
+      - name: Build (Release)
+        if: steps.guard.outputs.run == 'true'
+        run: dotnet build MBA.Modulo4.sln --configuration Release --no-incremental
+
+      - name: Testes + cobertura
+        if: steps.guard.outputs.run == 'true'
+        run: dotnet-coverage collect "dotnet test MBA.Modulo4.sln --configuration Release --no-build" -f xml -o coverage.xml
+
+      - name: Sonar End
+        if: steps.guard.outputs.run == 'true'
+        run: dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"

@@ -1,5 +1,5 @@
 # Argo CD Application — ambiente Staging (GitOps pull-based).
-# Observa k8s/staging/ na branch master e mantém o namespace mba-modulo4 sincronizado.
+# Observa k8s/kustomize/overlays/staging na branch master e mantém o namespace mba-modulo4 sincronizado.
 # Aplicar uma vez com: kubectl apply -f k8s/argocd/mba-staging.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/Douglasdossantos/MBA.Modulo4.git
     targetRevision: master
-    path: k8s/staging
+    path: k8s/kustomize/overlays/staging
   destination:
     server: https://kubernetes.default.svc
     namespace: mba-modulo4
@@ -21,3 +21,8 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

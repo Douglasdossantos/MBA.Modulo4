@@ -382,3 +382,5 @@ FodyWeavers.xsd
 !README.md
 !*FEEDBACK*.md
 !k8s/README.md
+
+coveragereport/

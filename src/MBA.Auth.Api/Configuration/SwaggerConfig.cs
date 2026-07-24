@@ -13,11 +13,11 @@ public static class SwaggerConfig
 				Title = "DevStore Enterprise Identity API",
 				Description =
 					"AVISO IMPORTANTE — SWAGGER EXPOSTO DE PROPÓSITO: Esta é uma aplicação acadêmica " +
-					"(MBA DevXpert, Módulo 4) avaliada por professores, e TODOS os ambientes (inclusive produção) " +
+					"(MBA DevXpert, Módulo 5) avaliada por professores, e TODOS os ambientes (inclusive produção) " +
 					"expõem esta documentação para facilitar a consulta e a correção do trabalho. A equipe SABE que " +
 					"em uma aplicação real o Swagger NÃO deve ficar público em produção. Para ocultá-lo, basta definir " +
-					"a variável de ambiente SWAGGER_ENABLED=false e reiniciar o serviço.\n\n" +
-					"essa API pertence ao Modulo 4 do MBA DEVXPERT FULL STACK .NET, Plataforma Educacional Distribuída com Microsserviços REST",
+					"a variável SWAGGER_ENABLED=true para exibi-lo (oculto por padrao em ambiente publicado).\n\n" +
+					"essa API pertence ao Modulo 5 do MBA DEVXPERT FULL STACK .NET, Plataforma Educacional Distribuída com Microsserviços REST",
 				Contact = new OpenApiContact { Name = "Douglas dos santos", Email = "douglasalgustocosta@gmail.com" },
 				License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://opensource.org/Licenses/MIT") }
 			});
@@ -51,9 +51,9 @@ public static class SwaggerConfig
 
 	public static WebApplication UseSwaggerConfiguration(this WebApplication app)
 	{
-		// Swagger fica LIGADO em todos os ambientes por padrão (aplicação acadêmica avaliada por professores).
-		// Só é ocultado quando a env var/config SWAGGER_ENABLED for exatamente "false".
-		if (app.Configuration["SWAGGER_ENABLED"] == "false")
+		// Swagger seguro por padrao: ligado em Development ou com SWAGGER_ENABLED=true; desligado em ambiente publicado sem o flag.
+		// Exposto em Development ou quando SWAGGER_ENABLED=true; oculto por padrao em ambiente publicado.
+		if (!app.Environment.IsDevelopment() && app.Configuration["SWAGGER_ENABLED"] != "true")
 			return app;
 
 		app.UseSwagger();
