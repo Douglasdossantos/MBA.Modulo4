@@ -1,4 +1,4 @@
-# Plataforma Educacional Distribuída — MBA FullStack Módulo 4
+# Plataforma Educacional Distribuída — MBA FullStack Módulo 5
 
 ## Grupo de Alunos:
 
@@ -13,7 +13,7 @@
 
 ## 1. Visão Geral
 
-Este repositório contém a entrega do **Módulo 4 do MBA DevXpert Full Stack .NET**, que propõe a evolução de uma aplicação monolítica para uma **plataforma educacional distribuída** baseada em microsserviços, bounded contexts bem definidos, comunicação síncrona via HTTP e assíncrona via broker.
+Este repositório contém a entrega do **Módulo 5 do MBA DevXpert Full Stack .NET**, que propõe a evolução de uma aplicação monolítica para uma **plataforma educacional distribuída** baseada em microsserviços, bounded contexts bem definidos, comunicação síncrona via HTTP e assíncrona via broker.
 
 A solução modela o ciclo de vida completo de um aluno em uma plataforma de cursos online: **cadastro, matrícula, pagamento, acompanhamento de progresso em aulas e conclusão do curso**. Cada responsabilidade vive em um contexto isolado (Auth, Aluno, Conteúdo, Pagamentos) e um **BFF (Backend for Frontend)** orquestra a experiência do usuário final.
 
@@ -39,6 +39,23 @@ Projetos de suporte:
 - `src/MBA.<Contexto>.Application` / `.Data` / `.Domain` — camadas internas por bounded context (Command/Query handlers, DbContext, entidades e regras de domínio).
 
 ## 3. Fluxo de Comunicação
+
+```mermaid
+flowchart TD
+    MVC["WebApp.MVC (front-end)"] --> BFF["BFF API<br/>Refit + Polly (retry + circuit breaker)"]
+    BFF --> AUTH["Auth API"]
+    BFF --> ALU["Aluno API"]
+    BFF --> CON["Conteudo API"]
+    BFF --> PAG["Pagamentos API"]
+    ALU -->|"HTTP sync: valida curso ativo"| CON
+    PAG -->|"HTTP sync: valida pagamento"| ALU
+    PAG -->|"publish PagamentoConfirmado/Recusado"| MQ[("RabbitMQ")]
+    MQ -->|"subscribe: ativa matricula"| ALU
+    AUTH --- DBA[("SQL Server<br/>auth")]
+    ALU --- DBL[("SQL Server<br/>aluno")]
+    CON --- DBC[("SQL Server<br/>conteudo")]
+    PAG --- DBP[("SQL Server<br/>pagamentos")]
+```
 
 ```
                           +----------------------+
@@ -92,18 +109,19 @@ Além do ambiente local de desenvolvimento, a plataforma roda **publicada e 100%
 
 Cada ambiente vive num namespace próprio do cluster (`mba-modulo4-dev`, `mba-modulo4` e `mba-modulo4-prd`), com RabbitMQ dedicado e bancos SQL Server isolados por serviço e por ambiente (`mba-{serviço}-{dev|staging|prd}`).
 
-### 4.2. Segredos com Infisical (zero segredo no repositório)
+### 4.2. Segredos com Infisical (segredos reais fora do repositório)
 
 - Chave JWT, credenciais do RabbitMQ e connection strings **não existem mais no código nem no histórico de configuração**: vivem num cofre **Infisical self-hosted** (`infisical.dots.dev.br`), separadas por ambiente.
 - No cluster, o **Infisical Secrets Operator** sincroniza o cofre para Secrets do Kubernetes e dispara **rolling restart automático** dos Deployments quando um segredo muda (annotation `secrets.infisical.com/auto-reload`).
 - Cada API valida os segredos obrigatórios no startup (**fail-fast**): sem eles, a aplicação nem sobe e explica exatamente o que falta e como configurar.
 - No desenvolvimento local, o profile `Infisical (dev)` injeta os segredos no F5 via Infisical CLI (ver seção 5).
+- **Ressalva de transparência:** os manifestos de *bootstrap* local — `docker-compose.yml` e `k8s/base/secret.yaml` (trilha local com kind, fora da esteira Argo) — usam valores de **exemplo** (JWT de dev, senha do SA local), **não** os segredos reais dos ambientes publicados. A afirmação de "sem segredos" vale para dev/staging/prd via Infisical.
 
 ### 4.3. Esteira CI/CD (GitOps pull-based)
 
 ```
 merge na develop ──► GitHub Actions
-                      ├─ CI: build + testes (.NET 8)
+                      ├─ CI: build + testes + cobertura (gate) + lint + scan de vulneráveis (.NET 8)
                       └─ CD: builda as 6 imagens ──► GHCR (ghcr.io, imagens privadas)
                             └─ atualiza k8s/dev/ com a nova tag [skip ci]
                                           │
@@ -128,6 +146,7 @@ merge na master ──► mesmo fluxo com tags stg-<sha> e k8s/staging/ ──�
 - **O GitHub nunca acessa o cluster**: o Argo CD observa o repositório e **puxa** as mudanças (GitOps pull-based). Nenhuma credencial de cluster existe fora dele.
 - As imagens são publicadas no **GitHub Container Registry** usando apenas o `GITHUB_TOKEN` nativo do Actions (zero secrets manuais na esteira) e puxadas pelo cluster via `imagePullSecret`.
 - Sync automático com `prune` e `selfHeal`: o estado do cluster converge sempre para o que está no git. **Rollback = `git revert`**.
+- **Portões de qualidade no CI:** cada push/PR roda testes com **cobertura** (`XPlat Code Coverage` + ReportGenerator) e um **gate** de cobertura mínima, além de **lint** (`dotnet format`) e varredura de **dependências vulneráveis** (`dotnet list package --vulnerable`). O `.github/dependabot.yml` abre PRs semanais de atualização (NuGet, Docker e GitHub Actions). A **análise estática** roda no workflow `sonarcloud.yml` (SonarCloud), consumindo a cobertura de testes — requer o secret `SONAR_TOKEN` (o job se auto-pula enquanto o token não estiver configurado).
 - **Gate de produção com aprovação manual**: o job `promote-prd` é vinculado ao GitHub Environment `producao`, protegido por *required reviewers*. O Staging publica automaticamente a cada merge na master; a Produção só é promovida depois que um revisor valida o Staging no ar e aprova o deploy (**Actions → Review deployments**). A aba *Environments* do repositório registra o histórico de quem aprovou cada promoção.
 - **Política de aprovação**: seis membros do time são revisores do environment `producao` e basta a aprovação de **um** deles para promover; com *prevent self-review* habilitado, quem disparou o deploy não pode aprovar a si mesmo — garantindo sempre um segundo par de olhos entre o merge e a produção.
 
@@ -142,7 +161,15 @@ merge na master ──► mesmo fluxo com tags stg-<sha> e k8s/staging/ ──�
 
 ### 4.5. Swagger aberto de propósito
 
-**Todos os ambientes (inclusive produção) expõem o Swagger** para facilitar a consulta e a correção deste trabalho acadêmico. A equipe sabe que documentação interativa não deve ficar pública em uma aplicação real — por isso cada Swagger carrega um aviso explicando a decisão, e ocultá-lo é uma única variável de ambiente: `SWAGGER_ENABLED=false`.
+Para facilitar a consulta e a correção deste trabalho acadêmico, **o Swagger é exposto em dev, staging e produção** — habilitado explicitamente por `SWAGGER_ENABLED=true` nos ConfigMaps dos três ambientes. O **default do código é seguro**: o Swagger só é servido em `Development` ou quando `SWAGGER_ENABLED=true`; em qualquer ambiente publicado **sem** o flag, fica desligado. Cada Swagger carrega um aviso explicando a decisão acadêmica de mantê-lo aberto aqui.
+
+### 4.6. Escalabilidade, resiliencia e hardening
+
+- **Escalabilidade:** os servicos de aplicacao rodam com `replicas: 2` em Staging e Producao e um **HorizontalPodAutoscaler** por servico (CPU alvo ~70%, minimo 2 / maximo 4). `resources.requests`/`limits` de CPU e memoria estao definidos em todos os Deployments — pre-requisito do HPA e protecao contra um servico consumir todo o node.
+- **Resiliencia:** o BFF e as chamadas sincronas entre servicos (Pagamentos -> Aluno, Aluno -> Conteudo) usam **retry com backoff + circuit breaker** (Polly), evitando falha em cascata quando um servico degrada.
+- **Startup seguro:** cada Deployment tem `startupProbe` (alem de liveness/readiness) para tolerar a migracao/seed inicial sem cair em loop de reinicio em banco frio.
+- **Hardening:** todos os Pods tem `securityContext` (`runAsNonRoot`, `allowPrivilegeEscalation: false`, `capabilities: drop [ALL]`, seccomp `RuntimeDefault`) e `automountServiceAccountToken: false` — o cluster impoe o nao-root, nao apenas o Dockerfile.
+- **Observabilidade:** logs estruturados em JSON e metricas Prometheus em `/metrics` nos seis servicos.
 
 ## 5. Pré-requisitos
 
@@ -269,7 +296,7 @@ O script termina com os blocos `RELATORIO` (PASS/FAIL/WARN por passo) e `FINDING
 (divergências detectadas em runtime); exit 0 indica fluxo íntegro. As URLs dos serviços
 podem ser sobrescritas pelas variáveis `SMOKE_AUTH_URL`, `SMOKE_CONTEUDO_URL`,
 `SMOKE_ALUNO_URL`, `SMOKE_PAGAMENTOS_URL` e `SMOKE_BFF_URL`. No GitHub Actions, o
-workflow `smoke-test.yml` executa o mesmo fluxo sob demanda (workflow_dispatch).
+workflow `smoke-test.yml` executa o mesmo fluxo sob demanda (workflow_dispatch). **Importante:** os gatilhos automáticos de `push`/`pull_request` estão desativados nesse workflow, então o smoke E2E **não** faz parte da validação automática da esteira hoje — rode-o manualmente (Actions -> Smoke Test -> Run workflow) antes de promoções relevantes.
 
 ## 9. Fluxos Principais
 
@@ -333,4 +360,4 @@ src/
 
 ## 12. Licença e Créditos
 
-Projeto acadêmico do **MBA DevXpert Full Stack .NET — Módulo 4**. Não aceita contribuições externas. Dúvidas ou feedbacks pelo recurso de *Issues*. O arquivo `FEEDBACK.md` é de uso exclusivo do instrutor.
+Projeto acadêmico do **MBA DevXpert Full Stack .NET — Módulo 5**. Não aceita contribuições externas. Dúvidas ou feedbacks pelo recurso de *Issues*. O arquivo `FEEDBACK.md` é de uso exclusivo do instrutor.

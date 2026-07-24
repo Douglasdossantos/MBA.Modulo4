@@ -6,8 +6,8 @@ public static class AmbienteConfiguration
 {
 	public static WebApplication ExecutarConfiguracaoAmbiente(this WebApplication app)
 	{
-		// Swagger exposto em TODOS os ambientes (aplicação acadêmica), salvo quando SWAGGER_ENABLED == "false".
-		if (app.Configuration["SWAGGER_ENABLED"] != "false")
+		// Swagger seguro por padrao: ligado em Development ou com SWAGGER_ENABLED=true; desligado em ambiente publicado sem o flag.
+		if (app.Environment.IsDevelopment() || app.Configuration["SWAGGER_ENABLED"] == "true")
 		{
 			app.UseSwagger();
 			app.UseSwaggerUI();

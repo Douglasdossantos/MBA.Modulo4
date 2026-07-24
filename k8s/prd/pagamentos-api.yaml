@@ -10,7 +10,7 @@ metadata:
   labels:
     app: pagamentos-api
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: pagamentos-api
@@ -38,6 +38,20 @@ spec:
               value: "MBA.Modulo4"
             - name: AppSettings__JwtSettings__Audience
               value: "http://bff-api:8080"
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /health/live
@@ -56,6 +70,7 @@ spec:
               cpu: "100m"
               ephemeral-storage: "100Mi"
             limits:
+              cpu: "500m"
               memory: "384Mi"
               ephemeral-storage: "512Mi"
 ---

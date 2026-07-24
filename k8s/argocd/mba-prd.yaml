@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/Douglasdossantos/MBA.Modulo4.git
     targetRevision: master
-    path: k8s/prd
+    path: k8s/kustomize/overlays/prd
   destination:
     server: https://kubernetes.default.svc
     namespace: mba-modulo4-prd
@@ -22,3 +22,8 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

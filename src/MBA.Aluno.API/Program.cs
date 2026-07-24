@@ -50,14 +50,17 @@ builder.Services.AddDefaultHealthChecks()
 
 var app = builder.Build();
 
-// Swagger LIGADO em todos os ambientes por decisão acadêmica (ver banner em SwaggerConfig).
-// Único gate: ocultar apenas quando SWAGGER_ENABLED estiver definido exatamente como "false".
-if (app.Configuration["SWAGGER_ENABLED"] != "false")
+// Swagger seguro por padrao: ligado em Development ou com SWAGGER_ENABLED=true; desligado em ambiente publicado sem o flag.
+// Para expor em ambiente publicado, defina SWAGGER_ENABLED=true no ConfigMap do ambiente.
+if (app.Environment.IsDevelopment() || app.Configuration["SWAGGER_ENABLED"] == "true")
 {
 	app.UseSwaggerConfiguration();
 }
 
 app.UseApiConfiguration(app.Environment);
+
+// Migração + seed de forma assíncrona (sem .Wait() — evita bloqueio síncrono/deadlock no startup).
+await DbMigrationHelpers.EnsureSeedData(app);
 
 app.MapDefaultHealthChecks();
 

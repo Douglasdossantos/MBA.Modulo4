@@ -54,6 +54,7 @@ public static class DependencyInjectionConfig
 			client.Timeout = TimeSpan.FromSeconds(10);
 		})
 		.AddHttpMessageHandler<AuthorizationForwardingHandler>()
-		.AddPolicyHandler(PollyExtensions.EsperarTentar());
+		.AddPolicyHandler(PollyExtensions.EsperarTentar())
+		.AddPolicyHandler(PollyExtensions.CircuitBreaker());
 	}
 }

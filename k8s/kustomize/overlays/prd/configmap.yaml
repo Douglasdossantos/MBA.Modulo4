@@ -1,0 +1,33 @@
+# Produção no k3s (Hetzner) — config compartilhada NÃO-secreta.
+# Segredos (JWT, RabbitMQ, connection strings SQL Server) NÃO ficam aqui: são injetados
+# pelo Infisical Secrets Operator no Secret gerenciado "mba-secrets" (ver infisical-secret.yaml).
+# O provider de banco é decidido pelo ASPNETCORE_ENVIRONMENT (Production => SQL Server).
+# ATENÇÃO: Production NÃO cria schema nem seed (por design). O schema dos bancos mba-*-prd
+# foi criado uma única vez com override temporário ASPNETCORE_ENVIRONMENT=Staging por deployment.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mba-config
+  namespace: mba-modulo4-prd
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_URLS: "http://+:8080"
+  # Swagger exposto de propósito (trabalho de MBA avaliado); "false" oculta.
+  SWAGGER_ENABLED: "true"
+
+  # JWT (partes não-secretas, comuns aos serviços que usam AppSettings__*)
+  AppSettings__ExpiracaoHoras: "2"
+  AppSettings__Emissor: "MBA.Modulo4"
+  AppSettings__ValidoEm: "http://bff-api:8080"
+
+  # URLs internas (Services do cluster) — usadas pelo BFF e pelo MVC
+  AppServicesSettings__AutenticacaoUrl: "http://auth-api:8080"
+  AppServicesSettings__AlunoUrl: "http://aluno-api:8080"
+  AppServicesSettings__ConteudoUrl: "http://conteudo-api:8080"
+  AppServicesSettings__PagamentoUrl: "http://pagamentos-api:8080"
+  AppServicesSettings__FaturamentoUrl: "http://pagamentos-api:8080"
+  AppSettings__AutenticacaoUrl: "http://auth-api:8080"
+  AppSettings__AlunosUrl: "http://aluno-api:8080"
+  AppSettings__ConteudoUrl: "http://conteudo-api:8080"
+  AppSettings__PagamentosUrl: "http://pagamentos-api:8080"
+  AppSettings__BFF: "http://bff-api:8080"

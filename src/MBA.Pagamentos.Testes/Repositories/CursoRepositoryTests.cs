@@ -81,7 +81,7 @@ public class FaturamentoRepositoryTests
 
 		var encontrado = await repo.ObterPorMatriculaIdAsync(pagamento.MatriculaId);
 		encontrado.Should().NotBeNull();
-		encontrado.Id.Should().Be(pagamento.Id);
+		encontrado!.Id.Should().Be(pagamento.Id);
 	}
 
 	[Fact]

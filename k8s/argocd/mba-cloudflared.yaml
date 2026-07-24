@@ -1,0 +1,23 @@
+# Argo CD Application — cloudflared (tunnel) no namespace cloudflare.
+# Separado dos apps de aplicacao porque vive em outro namespace; aplique-o
+# ANTES de trocar o app de staging para o overlay (senao o prune apagaria o tunnel).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mba-cloudflared
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Douglasdossantos/MBA.Modulo4.git
+    targetRevision: master
+    path: k8s/cloudflared
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflare
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

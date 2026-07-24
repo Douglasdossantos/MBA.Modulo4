@@ -1,27 +1,44 @@
-# SQL Server (prod) — Deployment + Service + PVC. Atende o requisito do PDF (SQL Server em prod).
-# ⚠️ Pesado: o mssql pede ~2GB de RAM. Em Kind/Minigube com pouco recurso, o pod pode reiniciar.
-# Por padrão os serviços rodam em SQLite (mba-config: DATABASE_PROVIDER=Sqlite); para usá-lo, troque
-# DATABASE_PROVIDER=SqlServer e aponte as connection strings dos serviços para "sqlserver:1433".
+# SQL Server (trilha local/kind) — StatefulSet + Service headless + Service de acesso.
+# StatefulSet (em vez de Deployment) e o correto para carga stateful: identidade de rede
+# estavel e volume por replica via volumeClaimTemplates (PVC: data-sqlserver-0).
+# Pesado: ~2GB de RAM. Local usa SQLite por padrao (DATABASE_PROVIDER=Sqlite); para usar
+# SQL Server, troque para SqlServer e aponte as connection strings para "sqlserver:1433".
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: Service
 metadata:
-  name: sqlserver-data
+  name: sqlserver-headless
+  namespace: mba
+  labels:
+    app: sqlserver
+spec:
+  clusterIP: None
+  selector:
+    app: sqlserver
+  ports:
+    - port: 1433
+      targetPort: 1433
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sqlserver
   namespace: mba
 spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
+  selector:
+    app: sqlserver
+  ports:
+    - port: 1433
+      targetPort: 1433
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: sqlserver
   namespace: mba
   labels:
     app: sqlserver
 spec:
+  serviceName: sqlserver-headless
   replicas: 1
   selector:
     matchLabels:
@@ -64,19 +81,12 @@ spec:
             limits:
               memory: "3Gi"
               ephemeral-storage: "1Gi"
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: sqlserver-data
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: sqlserver
-  namespace: mba
-spec:
-  selector:
-    app: sqlserver
-  ports:
-    - port: 1433
-      targetPort: 1433
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi

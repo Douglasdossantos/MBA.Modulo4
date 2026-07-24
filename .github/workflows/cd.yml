@@ -69,6 +69,17 @@ jobs:
           tags: |
             ghcr.io/douglasdossantos/${{ matrix.image }}:${{ steps.tag.outputs.value }}
 
+      # Scan de vulnerabilidades da imagem publicada (item de seguranca do escopo).
+      # ADVISORY: exit-code '0' nao quebra a esteira. Troque para '1' para bloquear em CVE High/Critical.
+      - name: Trivy - scan de vulnerabilidades (${{ matrix.image }})
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ghcr.io/douglasdossantos/${{ matrix.image }}:${{ steps.tag.outputs.value }}
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '0'
+
   bump-manifests:
     name: Atualizar manifests (GitOps)
     runs-on: ubuntu-latest
@@ -85,13 +96,12 @@ jobs:
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
           if [ "${GITHUB_REF_NAME}" = "develop" ]; then
-            TAG="dev-${SHORT_SHA}"; DIR="k8s/dev"
+            TAG="dev-${SHORT_SHA}"; DIR="k8s/kustomize/overlays/dev"
           else
-            TAG="stg-${SHORT_SHA}"; DIR="k8s/staging"
+            TAG="stg-${SHORT_SHA}"; DIR="k8s/kustomize/overlays/staging"
           fi
-          for IMG in mba-auth-api mba-aluno-api mba-conteudo-api mba-pagamentos-api mba-bff-api mba-webapp-mvc; do
-            sed -i "s|image: ghcr.io/douglasdossantos/${IMG}:.*|image: ghcr.io/douglasdossantos/${IMG}:${TAG}|" ${DIR}/*.yaml
-          done
+          # Atualiza as 6 tags de imagem no kustomization.yaml do overlay do ambiente.
+          sed -i "s|^    newTag: .*|    newTag: ${TAG}|" ${DIR}/kustomization.yaml
           git diff --stat
 
       - name: Commit e push do bump
@@ -124,16 +134,14 @@ jobs:
       - name: Promover a imagem validada no staging para k8s/prd
         run: |
           TAG="stg-${GITHUB_SHA::7}"
-          for IMG in mba-auth-api mba-aluno-api mba-conteudo-api mba-pagamentos-api mba-bff-api mba-webapp-mvc; do
-            sed -i "s|image: ghcr.io/douglasdossantos/${IMG}:.*|image: ghcr.io/douglasdossantos/${IMG}:${TAG}|" k8s/prd/*.yaml
-          done
+          sed -i "s|^    newTag: .*|    newTag: ${TAG}|" k8s/kustomize/overlays/prd/kustomization.yaml
           git diff --stat
 
       - name: Commit e push da promoção
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add k8s/prd/
+          git add k8s/kustomize/overlays/prd/
           git diff --cached --quiet && { echo "Produção já está em ${GITHUB_SHA::7}"; exit 0; }
           git commit -m "chore(cd): Promovendo Produção para ${GITHUB_SHA::7} [skip ci]"
           git push
