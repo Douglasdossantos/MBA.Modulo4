@@ -72,7 +72,7 @@ jobs:
       # Scan de vulnerabilidades da imagem publicada (item de seguranca do escopo).
       # ADVISORY: exit-code '0' nao quebra a esteira. Troque para '1' para bloquear em CVE High/Critical.
       - name: Trivy - scan de vulnerabilidades (${{ matrix.image }})
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ghcr.io/douglasdossantos/${{ matrix.image }}:${{ steps.tag.outputs.value }}
           format: table
