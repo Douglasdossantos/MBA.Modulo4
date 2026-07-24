@@ -9,17 +9,17 @@ resources:
   - hpa.yaml
 images:
   - name: ghcr.io/douglasdossantos/mba-auth-api
-    newTag: stg-fd9097d
+    newTag: stg-e467b70
   - name: ghcr.io/douglasdossantos/mba-aluno-api
-    newTag: stg-fd9097d
+    newTag: stg-e467b70
   - name: ghcr.io/douglasdossantos/mba-bff-api
-    newTag: stg-fd9097d
+    newTag: stg-e467b70
   - name: ghcr.io/douglasdossantos/mba-conteudo-api
-    newTag: stg-fd9097d
+    newTag: stg-e467b70
   - name: ghcr.io/douglasdossantos/mba-pagamentos-api
-    newTag: stg-fd9097d
+    newTag: stg-e467b70
   - name: ghcr.io/douglasdossantos/mba-webapp-mvc
-    newTag: stg-fd9097d
+    newTag: stg-e467b70
 patches:
   - target:
       kind: Deployment
