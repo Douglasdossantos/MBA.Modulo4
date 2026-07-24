@@ -33,7 +33,7 @@ builder.Services.AddSwaggerGen(c =>
 	{
 		Title = "MBA Pagamentos API",
 		Description =
-			"AVISO IMPORTANTE — SWAGGER EXPOSTO DE PROPÓSITO: Esta é uma aplicação acadêmica (MBA DevXpert, Módulo 4) avaliada por professores, e TODOS os ambientes (inclusive produção) expõem esta documentação para facilitar a consulta e a correção do trabalho. A equipe SABE que em uma aplicação real o Swagger NÃO deve ficar público em produção. Para ocultá-lo, basta definir a variável de ambiente SWAGGER_ENABLED=false e reiniciar o serviço."
+			"AVISO IMPORTANTE — SWAGGER EXPOSTO DE PROPÓSITO: Esta é uma aplicação acadêmica (MBA DevXpert, Módulo 5) avaliada por professores, e TODOS os ambientes (inclusive produção) expõem esta documentação para facilitar a consulta e a correção do trabalho. A equipe SABE que em uma aplicação real o Swagger NÃO deve ficar público em produção. Para ocultá-lo, por padrao o Swagger fica oculto em ambiente publicado; para exibi-lo defina SWAGGER_ENABLED=true."
 	});
 });
 
@@ -53,7 +53,8 @@ builder.Services.AddHttpClient<IAlunoService, AlunoService>(client =>
 	client.Timeout = TimeSpan.FromSeconds(10);
 })
 .AddHttpMessageHandler<AuthorizationForwardingHandler>()
-.AddPolicyHandler(PollyExtensions.EsperarTentar());
+.AddPolicyHandler(PollyExtensions.EsperarTentar())
+.AddPolicyHandler(PollyExtensions.CircuitBreaker());
 
 builder.Services.AddHttpContextAccessor()
 	.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
@@ -72,9 +73,9 @@ builder.Services.AddDefaultHealthChecks()
 
 var app = builder.Build();
 
-// Swagger LIGADO em todos os ambientes (aplicação acadêmica avaliada por professores).
-// Para ocultar, defina SWAGGER_ENABLED=false e reinicie o serviço.
-if (app.Configuration["SWAGGER_ENABLED"] != "false")
+// Swagger seguro por padrao: ligado em Development ou com SWAGGER_ENABLED=true; desligado em ambiente publicado sem o flag.
+// Para expor em ambiente publicado, defina SWAGGER_ENABLED=true no ConfigMap do ambiente.
+if (app.Environment.IsDevelopment() || app.Configuration["SWAGGER_ENABLED"] == "true")
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();

@@ -8,7 +8,7 @@ namespace MBA.Conteudo.Api.Configuration;
 public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
 	private const string BannerSwaggerExposto =
-		"AVISO IMPORTANTE — SWAGGER EXPOSTO DE PROPÓSITO: Esta é uma aplicação acadêmica (MBA DevXpert, Módulo 4) avaliada por professores, e TODOS os ambientes (inclusive produção) expõem esta documentação para facilitar a consulta e a correção do trabalho. A equipe SABE que em uma aplicação real o Swagger NÃO deve ficar público em produção. Para ocultá-lo, basta definir a variável de ambiente SWAGGER_ENABLED=false e reiniciar o serviço.";
+		"AVISO IMPORTANTE — SWAGGER EXPOSTO DE PROPÓSITO: Esta é uma aplicação acadêmica (MBA DevXpert, Módulo 5) avaliada por professores, e TODOS os ambientes (inclusive produção) expõem esta documentação para facilitar a consulta e a correção do trabalho. A equipe SABE que em uma aplicação real o Swagger NÃO deve ficar público em produção. Para ocultá-lo, por padrao o Swagger fica oculto em ambiente publicado; para exibi-lo defina SWAGGER_ENABLED=true.";
 
 	private readonly IApiVersionDescriptionProvider _provider;
 

@@ -1,6 +1,5 @@
-# CI — build + testes em cada push/PR na master (Módulo 5 DevXpert).
-# Roda no runner Linux (ubuntu-latest): é justamente o ambiente onde o alinhamento de pacotes do T-01
-# importou — pacotes .NET 10 em projetos net8.0 quebrariam aqui.
+# CI — build + testes + cobertura + lint em cada push/PR na master/develop (Modulo 5 DevXpert).
+# Roda no runner Linux (ubuntu-latest): mesmo ambiente da esteira, com .NET 8 via setup-dotnet.
 name: CI
 
 on:
@@ -11,7 +10,7 @@ on:
 
 jobs:
   build-test:
-    name: Build & Test (.NET 8)
+    name: Build, Test & Coverage (.NET 8)
     runs-on: ubuntu-latest
 
     steps:
@@ -26,8 +25,70 @@ jobs:
       - name: Restore
         run: dotnet restore MBA.Modulo4.sln
 
+      # Lint / analise estatica de formatacao (item obrigatorio do escopo).
+      # ADVISORY por enquanto (continue-on-error): rode `dotnet format MBA.Modulo4.sln`
+      # uma vez para normalizar a base e depois REMOVA o continue-on-error para tornar
+      # o gate bloqueante.
+      - name: Lint (dotnet format --verify-no-changes)
+        run: dotnet format MBA.Modulo4.sln --verify-no-changes --severity warn --no-restore
+        continue-on-error: true
+
       - name: Build (Release)
         run: dotnet build MBA.Modulo4.sln --configuration Release --no-restore
 
-      - name: Test (Release)
-        run: dotnet test MBA.Modulo4.sln --configuration Release --no-build --verbosity normal
+      - name: Test (Release) + Cobertura
+        run: >
+          dotnet test MBA.Modulo4.sln --configuration Release --no-build
+          --settings coverlet.runsettings
+          --collect:"XPlat Code Coverage"
+          --results-directory ./TestResults
+          --verbosity normal
+
+      - name: Gerar relatorio de cobertura
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:coveragereport \
+            -reporttypes:"Cobertura;MarkdownSummaryGithub;TextSummary"
+          echo "## Cobertura de testes" >> "$GITHUB_STEP_SUMMARY"
+          cat coveragereport/Summary.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publicar artefato de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coveragereport
+
+      # Gate de cobertura. Piso inicial ATINGIVEL hoje (branch ~30%) para o CI ficar verde.
+      # Suba MIN_BRANCH a cada onda de testes ate 80 (criterio do escopo).
+      - name: Gate de cobertura (branch minimo)
+        env:
+          MIN_BRANCH: '35'
+        run: |
+          RATE=$(grep -oP 'branch-rate="\K[0-9.]+' coveragereport/Cobertura.xml | head -1)
+          PCT=$(awk "BEGIN{printf \"%.1f\", ${RATE:-0}*100}")
+          echo "Branch coverage: ${PCT}% (minimo ${MIN_BRANCH}%)"
+          awk "BEGIN{exit !(${PCT}+0 >= ${MIN_BRANCH}+0)}" || { echo "::error::Cobertura de branch ${PCT}% abaixo do minimo ${MIN_BRANCH}%"; exit 1; }
+
+  vulnerable-packages:
+    name: Dependencias vulneraveis (advisory)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore MBA.Modulo4.sln
+
+      # Lista pacotes com CVE conhecido. ADVISORY por enquanto; torne bloqueante
+      # (trate a saida / remova continue-on-error) quando a base estiver limpa.
+      - name: dotnet list package --vulnerable
+        run: dotnet list MBA.Modulo4.sln package --vulnerable --include-transitive
+        continue-on-error: true

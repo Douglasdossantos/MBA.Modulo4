@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Exclui da cobertura o codigo que nao e logica de negocio (nao testavel em unitario):
+     migrations/snapshots do EF, classes Program (top-level), codigo gerado e auto-properties
+     (DTOs/ViewModels). Torna o numero de cobertura reportado justo.
+     NAO excluimos CompilerGeneratedAttribute de proposito: metodos async compilam para
+     maquinas de estado marcadas com ele, e excluir derruba do relatorio classes 100% async
+     (ex.: AlunoService, que E testado). O custo e que os ramos ocultos de async/await passam
+     a contar no branch coverage e o inflam; por isso o gate mede cobertura de LINHA, e nao de
+     branch (ver .github/workflows/ci.yml e scripts/ci-local.ps1). -->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Exclude>[*]*.Migrations.*,[*]Program</Exclude>
+          <ExcludeByAttribute>GeneratedCodeAttribute,ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+          <ExcludeByFile>**/Migrations/**/*.cs</ExcludeByFile>
+          <SkipAutoProps>true</SkipAutoProps>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

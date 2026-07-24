@@ -1,0 +1,7 @@
+root = true
+
+# O codigo-fonte deste repositorio usa TAB para indentacao; declarar aqui faz o
+# `dotnet format --verify-no-changes` respeitar a convencao existente (sem reformatar tudo).
+[*.cs]
+indent_style = tab
+end_of_line = crlf
