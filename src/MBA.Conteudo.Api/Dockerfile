@@ -2,7 +2,7 @@
 #   docker build -f src/MBA.Conteudo.Api/Dockerfile -t mba-conteudo-api:1.0.0 ./src
 # Equivalente ao src/Dockerfile parametrizado, com o projeto fixo neste serviço.
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
 # curl: healthcheck do compose. /app/data: pasta do SQLite.
