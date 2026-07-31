@@ -10,11 +10,12 @@
     <PackageReference Include="EasyNetQ" Version="8.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.29" />
     <!-- Alinha a familia Wilson na v8 (evita o mismatch Jwt 7.1.2 vs Tokens 8.14 em runtime). -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.18" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.29" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.29" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.29" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.29" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.18" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.18" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.18" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.29" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.29" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.29">
