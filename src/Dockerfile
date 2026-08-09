@@ -18,7 +18,7 @@ RUN apt-get update \
     && chown -R app:app /app/data
 
 # --- Build stage ---
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG PROJECT_NAME
 WORKDIR /src
 
